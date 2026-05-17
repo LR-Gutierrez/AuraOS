@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <style name="Theme.AuraOS" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+        <item name="colorPrimary">#0A84FF</item>
+        <item name="colorPrimaryVariant">#131315</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
+        <item name="colorSecondary">#5E5E61</item>
+        <item name="colorOnSecondary">#000000</item>
+        <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
+
+        <item name="appLogoCustom">@drawable/ic_logo_midnight_dark</item>
+        <item name="loginBackgroundCustom">@drawable/login_background_dark</item>
+        <item name="glassCardBackgroundCustom">@drawable/bg_glass_card_dark</item>
+        <item name="textPrimaryCustom">#FFFFFF</item>
+        <item name="textSecondaryCustom">#A1A1A5</item>
+        <item name="dividerColorCustom">#33FFFFFF</item>
+    </style>
+
+    <style name="Theme.AuraOS.NoActionBar" parent="Theme.AuraOS">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+
+    <style name="Theme.AuraOS.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+    <style name="Theme.AuraOS.PopupOverlay" parent="ThemeOverlay.AppCompat.Dark" />
+</resources>
