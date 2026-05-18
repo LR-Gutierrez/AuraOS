@@ -7,5 +7,15 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="ic_crystal_background">#FFFFFF</color>
+    <color name="ic_crystal_background">#FFFFFFFF</color>
+
+    <color name="home_screen_background">#F8F9FA</color>
+    <color name="home_surface">#FFFFFFFF</color>
+    <color name="video_feed_background">#232F3E</color>
+    <color name="live_badge_background">#40000000</color>
+    <color name="live_badge_text">#FF4D4D</color>
+    <color name="status_info">#2F80ED</color>
+    <color name="home_outline">#E2E2E4</color>
+    <color name="photo_placeholder_tint">#B5B5B5</color>
+    <color name="bottom_nav_item_color">#5E5E61</color>
 </resources>

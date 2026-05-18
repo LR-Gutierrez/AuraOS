@@ -1,8 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Default screen margins, per the Android Design guidelines. -->
-    <dimen name="activity_horizontal_margin">16dp</dimen>
-    <dimen name="activity_vertical_margin">16dp</dimen>
-    <dimen name="app_bar_height">180dp</dimen>
-    <dimen name="fab_margin">16dp</dimen>
-    <dimen name="text_margin">16dp</dimen>
+    <dimen name="spacing_xsmall">4dp</dimen>
+    <dimen name="spacing_small">8dp</dimen>
+    <dimen name="spacing_small_plus">12dp</dimen>
+    <dimen name="spacing_medium">12dp</dimen>
+    <dimen name="spacing_large">16dp</dimen>
+    <dimen name="spacing_xlarge">20dp</dimen>
+    <dimen name="spacing_xxlarge">24dp</dimen>
+
+    <dimen name="stroke_none">0dp</dimen>
+    <dimen name="stroke_thin">1dp</dimen>
+
+    <dimen name="elevation_none">0dp</dimen>
+    <dimen name="elevation_small">2dp</dimen>
+    <dimen name="elevation_large">8dp</dimen>
+
+    <dimen name="home_header_height">64dp</dimen>
+    <dimen name="bottom_nav_height">64dp</dimen>
+    <dimen name="avatar_size">40dp</dimen>
+    <dimen name="icon_size_medium">24dp</dimen>
+    <dimen name="video_feed_height">180dp</dimen>
+    <dimen name="toggle_height">54dp</dimen>
+    <dimen name="photo_grid_height">180dp</dimen>
+    <dimen name="primary_button_height">58dp</dimen>
+
+    <dimen name="card_corner_radius_small">12dp</dimen>
+    <dimen name="card_corner_radius_large">24dp</dimen>
+    <dimen name="button_corner_radius_large">20dp</dimen>
+    <dimen name="button_corner_radius_xlarge">24dp</dimen>
+    <dimen name="grid_item_margin">4dp</dimen>
+
+    <dimen name="text_size_overline">11sp</dimen>
+    <dimen name="text_size_caption">12sp</dimen>
+    <dimen name="text_size_body">14sp</dimen>
+    <dimen name="text_size_button">16sp</dimen>
+    <dimen name="text_size_title">20sp</dimen>
+    <dimen name="text_size_plate">44sp</dimen>
 </resources>
