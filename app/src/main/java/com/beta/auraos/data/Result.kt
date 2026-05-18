@@ -1,8 +1,13 @@
 package com.beta.auraos.data
 
 /**
- * A generic class that holds a value with its loading status.
- * @param <T>
+ * Wrapper for async operation outcomes throughout the data layer.
+ *
+ * Eliminates try-catch boilerplate by modeling success and failure as
+ * explicit types. The ViewModel pattern-matches on these to derive
+ * the corresponding UI state.
+ *
+ * @param T The type of the successful value.
  */
 sealed class Result<out T : Any> {
 

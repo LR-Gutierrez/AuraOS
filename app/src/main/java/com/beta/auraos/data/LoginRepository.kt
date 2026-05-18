@@ -1,15 +1,26 @@
 package com.beta.auraos.data
 
+import com.beta.auraos.data.local.SessionManager
 import com.beta.auraos.data.model.LoggedInUser
 
 /**
- * Class that requests authentication and user information from the remote data source and
- * maintains an in-memory cache of login status and user credentials information.
+ * Single source of truth for authentication state in the app.
+ *
+ * Mediates between the remote [LoginDataSource] and the local
+ * [SessionManager]. After a successful login the result is cached
+ * in-memory via [user] so other layers can check `isLoggedIn`
+ * without a disk read.
+ *
+ ## Why a Repository?
+ * - Keeps the ViewModel unaware of where data comes from (API vs. local).
+ * - Centralises side-effects such as saving the JWT token and clearing
+ *   session state on logout.
  */
+class LoginRepository(
+    val dataSource: LoginDataSource,
+    private val sessionManager: SessionManager
+) {
 
-class LoginRepository(val dataSource: LoginDataSource) {
-
-    // in-memory cache of the loggedInUser object
     var user: LoggedInUser? = null
         private set
 
@@ -17,19 +28,11 @@ class LoginRepository(val dataSource: LoginDataSource) {
         get() = user != null
 
     init {
-        // If user credentials will be cached in local storage, it is recommended it be encrypted
-        // @see https://developer.android.com/training/articles/keystore
         user = null
     }
 
-    fun logout() {
-        user = null
-        dataSource.logout()
-    }
-
-    fun login(username: String, password: String): Result<LoggedInUser> {
-        // handle login
-        val result = dataSource.login(username, password)
+    suspend fun login(email: String, password: String): Result<LoggedInUser> {
+        val result = dataSource.login(email, password)
 
         if (result is Result.Success) {
             setLoggedInUser(result.data)
@@ -38,9 +41,52 @@ class LoginRepository(val dataSource: LoginDataSource) {
         return result
     }
 
+    fun hasBiometricCredentials(): Boolean {
+        return sessionManager.hasSavedCredentials()
+    }
+
+    fun enableBiometric(email: String, password: String) {
+        sessionManager.saveCredentials(email, password)
+    }
+
+    fun disableBiometric() {
+        sessionManager.clearCredentials()
+    }
+
+    fun getStoredEmail(): String? = sessionManager.getEmail()
+
+    fun getStoredPassword(): String? = sessionManager.getPassword()
+
+    suspend fun biometricEnroll(token: String, userId: String, publicKey: String): Result<Unit> {
+        return dataSource.biometricEnroll(token, userId, publicKey)
+    }
+
+    suspend fun biometricLogin(userId: String, challenge: String, signature: String): Result<LoggedInUser> {
+        val result = dataSource.biometricLogin(userId, challenge, signature)
+        if (result is Result.Success) {
+            setLoggedInUser(result.data)
+        }
+        return result
+    }
+
+    fun isBiometricEnrolled(): Boolean = sessionManager.isBiometricEnrolled()
+
+    fun setBiometricEnrolled(enrolled: Boolean) {
+        sessionManager.setBiometricEnrolled(enrolled)
+    }
+
+    fun saveUserId(userId: String) {
+        sessionManager.saveUserId(userId)
+    }
+
+    fun getUserId(): String? = sessionManager.getUserId()
+
+    fun logout() {
+        user = null
+        dataSource.logout()
+    }
+
     private fun setLoggedInUser(loggedInUser: LoggedInUser) {
         this.user = loggedInUser
-        // If user credentials will be cached in local storage, it is recommended it be encrypted
-        // @see https://developer.android.com/training/articles/keystore
     }
 }

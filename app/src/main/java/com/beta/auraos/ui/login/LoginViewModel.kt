@@ -3,12 +3,30 @@ package com.beta.auraos.ui.login
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import android.util.Patterns
 import com.beta.auraos.data.LoginRepository
 import com.beta.auraos.data.Result
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 import com.beta.auraos.R
 
+/**
+ * Drives the login screen state via [LiveData] consumed by [LoginActivity].
+ *
+ * ## Concurrency guard
+ * The private [isLoading] flag prevents duplicate requests while a login
+ * call is in-flight. Both [login] and [loginWithBiometric] check this
+ * flag and return early if `true`.
+ *
+ * ## Biometric availability
+ * `hasBiometricAvailable()` requires **two** conditions:
+ * 1. The user has completed biometric enrollment (`isBiometricEnrolled`).
+ * 2. Encrypted credentials exist (`hasSavedCredentials`) — these are saved
+ *    at enrollment time and removed if the user disables biometrics.
+ */
 class LoginViewModel(private val loginRepository: LoginRepository) : ViewModel() {
 
     private val _loginForm = MutableLiveData<LoginFormState>()
@@ -17,17 +35,75 @@ class LoginViewModel(private val loginRepository: LoginRepository) : ViewModel()
     private val _loginResult = MutableLiveData<LoginResult>()
     val loginResult: LiveData<LoginResult> = _loginResult
 
-    fun login(username: String, password: String) {
-        // can be launched in a separate asynchronous job
-        val result = loginRepository.login(username, password)
+    private val _isLoading = MutableLiveData(false)
+    val isLoading: LiveData<Boolean> = _isLoading
 
-        if (result is Result.Success) {
-            _loginResult.value =
-                LoginResult(success = LoggedInUserView(displayName = result.data.displayName))
-        } else {
-            _loginResult.value = LoginResult(error = R.string.login_failed)
+    fun login(email: String, password: String) {
+        if (_isLoading.value == true) return
+
+        _isLoading.value = true
+
+        viewModelScope.launch {
+            val result = withContext(Dispatchers.IO) {
+                loginRepository.login(email, password)
+            }
+
+            _isLoading.value = false
+
+            if (result is Result.Success) {
+                loginRepository.saveUserId(result.data.userId)
+                _loginResult.value = LoginResult(
+                    success = LoggedInUserView(
+                        displayName = result.data.displayName,
+                        email = result.data.email,
+                        userId = result.data.userId
+                    )
+                )
+            } else {
+                val message = when (val error = result) {
+                    is Result.Error -> error.exception.localizedMessage ?: "Error de inicio de sesión"
+                    else -> "Error de inicio de sesión"
+                }
+                _loginResult.value = LoginResult(errorMessage = message)
+            }
         }
     }
+
+    fun loginWithBiometric(userId: String, challenge: String, signature: String) {
+        if (_isLoading.value == true) return
+
+        _isLoading.value = true
+
+        viewModelScope.launch {
+            val result = withContext(Dispatchers.IO) {
+                loginRepository.biometricLogin(userId, challenge, signature)
+            }
+
+            _isLoading.value = false
+
+            if (result is Result.Success) {
+                _loginResult.value = LoginResult(
+                    success = LoggedInUserView(
+                        displayName = result.data.displayName,
+                        email = result.data.email,
+                        userId = result.data.userId
+                    )
+                )
+            } else {
+                val message = when (val error = result) {
+                    is Result.Error -> error.exception.localizedMessage ?: "Error biométrico"
+                    else -> "Error biométrico"
+                }
+                _loginResult.value = LoginResult(errorMessage = message)
+            }
+        }
+    }
+
+    fun hasBiometricAvailable(): Boolean {
+        return loginRepository.isBiometricEnrolled() && loginRepository.hasBiometricCredentials()
+    }
+
+    fun getUserId(): String? = loginRepository.getUserId()
 
     fun loginDataChanged(username: String, password: String) {
         if (!isUserNameValid(username)) {
@@ -39,7 +115,6 @@ class LoginViewModel(private val loginRepository: LoginRepository) : ViewModel()
         }
     }
 
-    // A placeholder username validation check
     private fun isUserNameValid(username: String): Boolean {
         return if (username.contains('@')) {
             Patterns.EMAIL_ADDRESS.matcher(username).matches()
@@ -48,7 +123,6 @@ class LoginViewModel(private val loginRepository: LoginRepository) : ViewModel()
         }
     }
 
-    // A placeholder password validation check
     private fun isPasswordValid(password: String): Boolean {
         return password.length > 5
     }

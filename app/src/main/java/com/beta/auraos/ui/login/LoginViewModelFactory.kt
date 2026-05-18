@@ -1,24 +1,28 @@
 package com.beta.auraos.ui.login
 
+import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.beta.auraos.data.LoginDataSource
 import com.beta.auraos.data.LoginRepository
+import com.beta.auraos.data.local.SessionManager
 
 /**
- * ViewModel provider factory to instantiate LoginViewModel.
- * Required given LoginViewModel has a non-empty constructor
+ * Manual dependency injection for [LoginViewModel].
+ *
+ * Wires the full object graph: `SessionManager → LoginDataSource →
+ * LoginRepository → LoginViewModel`. Manual DI keeps the project lean;
+ * if dependencies grow consider migrating to Hilt.
  */
-class LoginViewModelFactory : ViewModelProvider.Factory {
+class LoginViewModelFactory(private val application: Application) : ViewModelProvider.Factory {
 
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(LoginViewModel::class.java)) {
-            return LoginViewModel(
-                loginRepository = LoginRepository(
-                    dataSource = LoginDataSource()
-                )
-            ) as T
+            val sessionManager = SessionManager(application)
+            val dataSource = LoginDataSource(sessionManager)
+            val repository = LoginRepository(dataSource, sessionManager)
+            return LoginViewModel(repository) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }
