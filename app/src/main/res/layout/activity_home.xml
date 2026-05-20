@@ -8,7 +8,7 @@
     android:background="?attr/homeSurfaceBackground"
     tools:context=".HomeActivity">
 
-    <!-- Top App Bar -->
+    <!-- Top App Bar Glass -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/header_bar"
         android:layout_width="match_parent"
@@ -32,7 +32,8 @@
             android:id="@+id/tv_app_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/spacing_medium"
+            android:layout_marginStart="@dimen/spacing_small"
+            android:fontFamily="sans-serif-black"
             android:text="@string/home_app_title"
             android:textColor="?attr/textPrimaryCustom"
             android:textSize="@dimen/text_size_title"
@@ -47,43 +48,37 @@
             android:layout_height="@dimen/icon_size_medium"
             android:contentDescription="@string/network_status"
             android:src="@android:drawable/stat_sys_upload"
-            app:tint="?attr/colorSecondary"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="?attr/textSecondaryCustom" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <!-- Borde inferior de la Top App Bar -->
-    <View
-        android:id="@+id/top_bar_border"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="?attr/navbarBorderColor"
-        app:layout_constraintTop_toBottomOf="@id/header_bar" />
 
     <!-- ScrollView principal -->
     <ScrollView
         android:id="@+id/homeScrollView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:clipToPadding="false"
         android:fillViewport="true"
         android:scrollbars="none"
-        android:clipToPadding="false"
-        app:layout_constraintBottom_toTopOf="@id/bottom_nav_border"
-        app:layout_constraintTop_toBottomOf="@id/top_bar_border">
+        app:layout_constraintBottom_toTopOf="@id/bottom_navigation"
+        app:layout_constraintTop_toBottomOf="@id/header_bar">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingHorizontal="@dimen/spacing_large"
+            android:paddingHorizontal="@dimen/container_padding"
             android:paddingTop="@dimen/spacing_large"
-            android:paddingBottom="@dimen/spacing_large">
+            android:paddingBottom="@dimen/spacing_xxlarge">
 
+            <!-- Video Feed Card -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/card_video_feed"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/video_feed_height"
+                android:backgroundTint="?attr/videoFeedBackgroundCustom"
                 app:cardCornerRadius="@dimen/card_corner_radius_large"
                 app:cardElevation="@dimen/elevation_none"
                 app:layout_constraintTop_toTopOf="parent"
@@ -91,46 +86,44 @@
 
                 <FrameLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:background="@color/video_feed_background">
+                    android:layout_height="match_parent">
 
                     <TextView
                         android:id="@+id/tv_live_feed_label"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_margin="@dimen/spacing_small_plus"
-                        android:background="@color/live_badge_background"
+                        android:background="?attr/liveBadgeBackgroundCustom"
                         android:paddingHorizontal="@dimen/spacing_small"
                         android:paddingVertical="@dimen/spacing_xsmall"
                         android:text="@string/live_feed_label"
-                        android:textColor="@color/live_badge_text"
+                        android:textColor="?attr/liveBadgeTextCustom"
                         android:textSize="@dimen/text_size_caption"
                         android:textStyle="bold" />
 
                 </FrameLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <com.google.android.material.card.MaterialCardView
+            <!-- OCR Data Glass Card -->
+            <FrameLayout
                 android:id="@+id/container_ocr_data"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/spacing_large"
                 android:background="?attr/glassCardBackgroundCustom"
-                app:cardCornerRadius="@dimen/card_corner_radius_large"
-                app:cardElevation="0dp"
-                app:strokeColor="@color/home_outline"
-                app:strokeWidth="0dp"
+                android:padding="@dimen/spacing_large"
                 app:layout_constraintTop_toBottomOf="@id/card_video_feed">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="@dimen/spacing_large">
+                    android:layout_height="wrap_content">
 
                     <TextView
                         android:id="@+id/lbl_ocr"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:fontFamily="sans-serif-medium"
+                        android:letterSpacing="0.06"
                         android:text="@string/ocr_status_label"
                         android:textColor="?attr/textSecondaryCustom"
                         android:textSize="@dimen/text_size_overline"
@@ -143,6 +136,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/spacing_small"
+                        android:fontFamily="sans-serif-black"
                         android:text="@string/sample_plate_number"
                         android:textColor="?attr/textPrimaryCustom"
                         android:textSize="@dimen/text_size_plate"
@@ -155,6 +149,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/spacing_xsmall"
+                        android:fontFamily="sans-serif"
                         android:text="@string/plate_validation_status"
                         android:textColor="?attr/colorPrimary"
                         android:textSize="@dimen/text_size_body"
@@ -166,6 +161,8 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/spacing_large"
+                        android:fontFamily="sans-serif-medium"
+                        android:letterSpacing="0.06"
                         android:text="@string/vehicle_category_label"
                         android:textColor="?attr/textSecondaryCustom"
                         android:textSize="@dimen/text_size_overline"
@@ -194,6 +191,7 @@
                             android:text="@string/vehicle_type_light"
                             android:textAllCaps="false"
                             android:textColor="@drawable/btn_vehicle_text_selector"
+                            app:cornerRadius="@dimen/button_corner_radius_large"
                             app:rippleColor="@android:color/transparent" />
 
                         <com.google.android.material.button.MaterialButton
@@ -208,34 +206,33 @@
                             android:text="@string/vehicle_type_heavy"
                             android:textAllCaps="false"
                             android:textColor="@drawable/btn_vehicle_text_selector"
+                            app:cornerRadius="@dimen/button_corner_radius_large"
                             app:rippleColor="@android:color/transparent" />
                     </LinearLayout>
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
+            </FrameLayout>
 
-            </com.google.android.material.card.MaterialCardView>
-
-            <com.google.android.material.card.MaterialCardView
+            <!-- Bodywork Data Glass Card -->
+            <FrameLayout
                 android:id="@+id/container_bodywork_data"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/spacing_large"
                 android:background="?attr/glassCardBackgroundCustom"
-                app:cardCornerRadius="@dimen/card_corner_radius_large"
-                app:cardElevation="0dp"
-                app:strokeColor="@color/home_outline"
-                app:strokeWidth="0dp"
+                android:padding="@dimen/spacing_large"
                 app:layout_constraintTop_toBottomOf="@id/container_ocr_data">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="@dimen/spacing_large">
+                    android:layout_height="wrap_content">
 
                     <TextView
                         android:id="@+id/lbl_bodywork"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:fontFamily="sans-serif-medium"
+                        android:letterSpacing="0.06"
                         android:text="@string/bodywork_status_label"
                         android:textColor="?attr/textSecondaryCustom"
                         android:textSize="@dimen/text_size_overline"
@@ -252,16 +249,13 @@
                         android:rowCount="2"
                         app:layout_constraintTop_toBottomOf="@id/lbl_bodywork">
 
-                        <com.google.android.material.card.MaterialCardView
+                        <FrameLayout
                             android:layout_width="0dp"
                             android:layout_height="0dp"
                             android:layout_columnWeight="1"
                             android:layout_margin="@dimen/grid_item_margin"
                             android:layout_rowWeight="1"
-                            app:cardCornerRadius="@dimen/card_corner_radius_small"
-                            app:cardElevation="@dimen/elevation_none"
-                            app:strokeColor="@color/home_outline"
-                            app:strokeWidth="@dimen/stroke_thin">
+                            android:background="?attr/glassCardBackgroundCustom">
 
                             <ImageView
                                 android:layout_width="match_parent"
@@ -269,19 +263,16 @@
                                 android:contentDescription="@string/cd_photo_front"
                                 android:scaleType="centerCrop"
                                 android:src="@android:drawable/ic_menu_camera"
-                                app:tint="@color/photo_placeholder_tint" />
-                        </com.google.android.material.card.MaterialCardView>
+                                app:tint="?attr/photoPlaceholderTintCustom" />
+                        </FrameLayout>
 
-                        <com.google.android.material.card.MaterialCardView
+                        <FrameLayout
                             android:layout_width="0dp"
                             android:layout_height="0dp"
                             android:layout_columnWeight="1"
                             android:layout_margin="@dimen/grid_item_margin"
                             android:layout_rowWeight="1"
-                            app:cardCornerRadius="@dimen/card_corner_radius_small"
-                            app:cardElevation="@dimen/elevation_none"
-                            app:strokeColor="@color/home_outline"
-                            app:strokeWidth="@dimen/stroke_thin">
+                            android:background="?attr/glassCardBackgroundCustom">
 
                             <ImageView
                                 android:layout_width="match_parent"
@@ -289,19 +280,16 @@
                                 android:contentDescription="@string/cd_photo_rear"
                                 android:scaleType="centerCrop"
                                 android:src="@android:drawable/ic_menu_camera"
-                                app:tint="@color/photo_placeholder_tint" />
-                        </com.google.android.material.card.MaterialCardView>
+                                app:tint="?attr/photoPlaceholderTintCustom" />
+                        </FrameLayout>
 
-                        <com.google.android.material.card.MaterialCardView
+                        <FrameLayout
                             android:layout_width="0dp"
                             android:layout_height="0dp"
                             android:layout_columnWeight="1"
                             android:layout_margin="@dimen/grid_item_margin"
                             android:layout_rowWeight="1"
-                            app:cardCornerRadius="@dimen/card_corner_radius_small"
-                            app:cardElevation="@dimen/elevation_none"
-                            app:strokeColor="@color/home_outline"
-                            app:strokeWidth="@dimen/stroke_thin">
+                            android:background="?attr/glassCardBackgroundCustom">
 
                             <ImageView
                                 android:layout_width="match_parent"
@@ -309,19 +297,16 @@
                                 android:contentDescription="@string/cd_photo_left"
                                 android:scaleType="centerCrop"
                                 android:src="@android:drawable/ic_menu_camera"
-                                app:tint="@color/photo_placeholder_tint" />
-                        </com.google.android.material.card.MaterialCardView>
+                                app:tint="?attr/photoPlaceholderTintCustom" />
+                        </FrameLayout>
 
-                        <com.google.android.material.card.MaterialCardView
+                        <FrameLayout
                             android:layout_width="0dp"
                             android:layout_height="0dp"
                             android:layout_columnWeight="1"
                             android:layout_margin="@dimen/grid_item_margin"
                             android:layout_rowWeight="1"
-                            app:cardCornerRadius="@dimen/card_corner_radius_small"
-                            app:cardElevation="@dimen/elevation_none"
-                            app:strokeColor="@color/home_outline"
-                            app:strokeWidth="@dimen/stroke_thin">
+                            android:background="?attr/glassCardBackgroundCustom">
 
                             <ImageView
                                 android:layout_width="match_parent"
@@ -329,14 +314,14 @@
                                 android:contentDescription="@string/cd_photo_right"
                                 android:scaleType="centerCrop"
                                 android:src="@android:drawable/ic_menu_camera"
-                                app:tint="@color/photo_placeholder_tint" />
-                        </com.google.android.material.card.MaterialCardView>
+                                app:tint="?attr/photoPlaceholderTintCustom" />
+                        </FrameLayout>
                     </GridLayout>
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
+            </FrameLayout>
 
-            </com.google.android.material.card.MaterialCardView>
-
+            <!-- Confirm Entry Button -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_confirm_entry"
                 style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
@@ -348,21 +333,13 @@
                 android:textAllCaps="false"
                 android:textSize="@dimen/text_size_button"
                 android:textStyle="bold"
-                app:backgroundTint="@color/status_info"
-                app:cornerRadius="@dimen/button_corner_radius_xlarge"
+                app:backgroundTint="?attr/colorPrimary"
+                app:cornerRadius="@dimen/button_corner_radius_full"
                 app:layout_constraintTop_toBottomOf="@id/container_bodywork_data" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </ScrollView>
-
-    <!-- Borde superior del Bottom Navigation -->
-    <View
-        android:id="@+id/bottom_nav_border"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="?attr/bottomNavbarBorderColor"
-        app:layout_constraintBottom_toTopOf="@id/bottom_navigation" />
 
     <!-- Bottom Navigation Bar -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
@@ -370,9 +347,9 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/bottom_nav_height"
         android:background="?attr/bottomNavbarBackground"
-        app:elevation="0dp"
-        app:itemIconTint="@color/bottom_nav_item_color"
-        app:itemTextColor="@color/bottom_nav_item_color"
+        app:elevation="@dimen/elevation_none"
+        app:itemIconTint="?attr/bottomNavItemColorCustom"
+        app:itemTextColor="?attr/bottomNavItemColorCustom"
         app:labelVisibilityMode="labeled"
         app:layout_constraintBottom_toBottomOf="parent"
         app:menu="@menu/home_bottom_menu" />

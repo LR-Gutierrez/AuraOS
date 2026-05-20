@@ -1,28 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
 
+    <!--
+        Midnight Edition (Dark)
+        DESIGN.md tokens applied:
+          surface:     #121317
+          on-surface:  #e3e2e7
+          primary:     #aac7ff
+          background:  #121317
+        Glass: black 20% fill, white 15% border
+    -->
     <style name="Theme.AuraOS" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
-        <item name="colorPrimary">#0A84FF</item>
-        <item name="colorPrimaryVariant">#131315</item>
-        <item name="colorOnPrimary">#FFFFFF</item>
-        <item name="colorSecondary">#5E5E61</item>
-        <item name="colorOnSecondary">#000000</item>
-        <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
+        <!-- Material color roles -->
+        <item name="colorPrimary">@color/midnight_primary</item>
+        <item name="colorOnPrimary">@color/midnight_on_primary</item>
+        <item name="colorPrimaryContainer">@color/midnight_primary_container</item>
+        <item name="colorOnPrimaryContainer">@color/midnight_on_primary_container</item>
+        <item name="colorSecondary">@color/midnight_secondary</item>
+        <item name="colorOnSecondary">@color/midnight_on_secondary</item>
+        <item name="colorSecondaryContainer">@color/midnight_secondary_container</item>
+        <item name="colorOnSecondaryContainer">@color/midnight_on_secondary_container</item>
+        <item name="colorSurface">@color/midnight_surface</item>
+        <item name="colorOnSurface">@color/midnight_on_surface</item>
+        <item name="colorOnSurfaceVariant">@color/midnight_on_surface_variant</item>
+        <item name="colorOutline">@color/midnight_outline</item>
+        <item name="colorOutlineVariant">@color/midnight_outline_variant</item>
+        <item name="colorBackground">@color/midnight_background</item>
+        <item name="colorOnBackground">@color/midnight_on_background</item>
+        <item name="colorError">@color/midnight_error</item>
+        <item name="colorOnError">@color/midnight_on_error</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
 
+        <!-- Custom attrs -->
         <item name="appLogoCustom">@drawable/ic_logo_midnight_dark</item>
         <item name="loginBackgroundCustom">@drawable/login_background_dark</item>
-        <!-- AHORA USA EL DRAWABLE CON EFECTO GLASS DARK -->
         <item name="glassCardBackgroundCustom">@drawable/bg_glass_card_dark</item>
         <item name="status_info">@color/status_info</item>
-        <item name="textPrimaryCustom">#FFFFFF</item>
-        <item name="textSecondaryCustom">#A1A1A5</item>
-        <item name="dividerColorCustom">#33FFFFFF</item>
+        <item name="textPrimaryCustom">@color/midnight_on_surface</item>
+        <item name="textSecondaryCustom">@color/midnight_on_surface_variant</item>
+        <item name="dividerColorCustom">@color/glass_border_dark</item>
 
-        <item name="homeSurfaceBackground">@color/true_black_custom</item>
+        <!-- Home attrs -->
+        <item name="homeSurfaceBackground">@color/midnight_surface_dim</item>
         <item name="navbarBackground">@drawable/bg_top_app_bar_blur_dark</item>
-        <item name="navbarBorderColor">@color/glass_border_dark</item>
+        <item name="navbarBorderColor">@color/midnight_outline_variant</item>
         <item name="bottomNavbarBackground">@drawable/bg_bottom_nav_blur_dark</item>
-        <item name="bottomNavbarBorderColor">@color/glass_border_light_dark</item>
+        <item name="bottomNavbarBorderColor">@color/midnight_outline_variant</item>
+
+        <!-- Input & Button drawables -->
+        <item name="hollowInputBackground">@drawable/bg_hollow_input_dark</item>
+        <item name="primaryButtonBackground">@drawable/bg_primary_button_dark</item>
+
+        <!-- Home card outlines -->
+        <item name="homeOutlineCustom">@color/midnight_surface_variant</item>
+        <item name="bottomNavItemColorCustom">@color/midnight_on_surface_variant</item>
+        <item name="photoPlaceholderTintCustom">@color/midnight_outline</item>
+        <item name="videoFeedBackgroundCustom">@color/midnight_surface_container_high</item>
+        <item name="liveBadgeBackgroundCustom">#40000000</item>
+        <item name="liveBadgeTextCustom">@color/midnight_error</item>
     </style>
 
     <style name="Theme.AuraOS.NoActionBar" parent="Theme.AuraOS">

@@ -1,15 +1,56 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Branding -->
     <attr name="appLogoCustom" format="reference" />
     <attr name="loginBackgroundCustom" format="reference" />
+
+    <!-- Glass card -->
     <attr name="glassCardBackgroundCustom" format="reference" />
+
+    <!-- Text -->
     <attr name="textPrimaryCustom" format="color" />
     <attr name="textSecondaryCustom" format="color" />
+
+    <!-- Dividers -->
     <attr name="dividerColorCustom" format="color" />
+
+    <!-- Home surface -->
     <attr name="homeSurfaceBackground" format="color" />
+
+    <!-- Status info accent -->
     <attr name="status_info" format="color" />
+
+    <!-- Nav bars -->
     <attr name="navbarBackground" format="reference" />
-    <attr name="navbarBorderColor" format="color"/>
+    <attr name="navbarBorderColor" format="color" />
     <attr name="bottomNavbarBackground" format="reference" />
     <attr name="bottomNavbarBorderColor" format="color" />
+
+    <!-- Input fields -->
+    <attr name="hollowInputBackground" format="reference" />
+
+    <!-- Primary button -->
+    <attr name="primaryButtonBackground" format="reference" />
+
+    <!-- Home card outlines -->
+    <attr name="homeOutlineCustom" format="color" />
+
+    <!-- Bottom nav icon/text tint -->
+    <attr name="bottomNavItemColorCustom" format="color" />
+
+    <!-- Photo placeholder tint -->
+    <attr name="photoPlaceholderTintCustom" format="color" />
+
+    <!-- Video feed background -->
+    <attr name="videoFeedBackgroundCustom" format="color" />
+
+    <!-- Material Components theme attributes used via inheritance -->
+    <attr name="colorBackground" format="color" />
+    <attr name="colorOnSurfaceVariant" format="color" />
+    <attr name="colorOutline" format="color" />
+    <attr name="colorOutlineVariant" format="color" />
+
+    <!-- Live badge -->
+    <attr name="liveBadgeBackgroundCustom" format="color" />
+    <attr name="liveBadgeTextCustom" format="color" />
 </resources>

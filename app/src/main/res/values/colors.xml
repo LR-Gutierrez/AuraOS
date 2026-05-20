@@ -1,14 +1,94 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="purple_200">#FFBB86FC</color>
-    <color name="purple_500">#FF6200EE</color>
-    <color name="purple_700">#FF3700B3</color>
-    <color name="teal_200">#FF03DAC5</color>
-    <color name="teal_700">#FF018786</color>
+
+    <!-- Crystal Edition (Light) - DESIGN.md tokens -->
+    <color name="crystal_surface">#f9f9fb</color>
+    <color name="crystal_surface_dim">#d9dadc</color>
+    <color name="crystal_surface_bright">#f9f9fb</color>
+    <color name="crystal_surface_container_lowest">#ffffff</color>
+    <color name="crystal_surface_container_low">#f3f3f5</color>
+    <color name="crystal_surface_container">#eeeef0</color>
+    <color name="crystal_surface_container_high">#e8e8ea</color>
+    <color name="crystal_surface_container_highest">#e2e2e4</color>
+    <color name="crystal_on_surface">#1a1c1d</color>
+    <color name="crystal_on_surface_variant">#4c4546</color>
+    <color name="crystal_inverse_surface">#2f3132</color>
+    <color name="crystal_inverse_on_surface">#f0f0f2</color>
+    <color name="crystal_outline">#7e7576</color>
+    <color name="crystal_outline_variant">#cfc4c5</color>
+    <color name="crystal_surface_tint">#5e5e5e</color>
+    <color name="crystal_primary">#000000</color>
+    <color name="crystal_on_primary">#ffffff</color>
+    <color name="crystal_primary_container">#1b1b1b</color>
+    <color name="crystal_on_primary_container">#848484</color>
+    <color name="crystal_inverse_primary">#c6c6c6</color>
+    <color name="crystal_secondary">#5e5e61</color>
+    <color name="crystal_on_secondary">#ffffff</color>
+    <color name="crystal_secondary_container">#e1dfe2</color>
+    <color name="crystal_on_secondary_container">#626265</color>
+    <color name="crystal_background">#f9f9fb</color>
+    <color name="crystal_on_background">#1a1c1d</color>
+    <color name="crystal_surface_variant">#e2e2e4</color>
+    <color name="crystal_error">#ba1a1a</color>
+    <color name="crystal_on_error">#ffffff</color>
+    <color name="crystal_error_container">#ffdad6</color>
+    <color name="crystal_on_error_container">#93000a</color>
+
+    <!-- Midnight Edition (Dark) - DESIGN.md tokens -->
+    <color name="midnight_surface">#121317</color>
+    <color name="midnight_surface_dim">#121317</color>
+    <color name="midnight_surface_bright">#38393d</color>
+    <color name="midnight_surface_container_lowest">#0d0e12</color>
+    <color name="midnight_surface_container_low">#1a1b1f</color>
+    <color name="midnight_surface_container">#1e1f23</color>
+    <color name="midnight_surface_container_high">#292a2e</color>
+    <color name="midnight_surface_container_highest">#343539</color>
+    <color name="midnight_on_surface">#e3e2e7</color>
+    <color name="midnight_on_surface_variant">#c0c6d6</color>
+    <color name="midnight_inverse_surface">#e3e2e7</color>
+    <color name="midnight_inverse_on_surface">#2f3034</color>
+    <color name="midnight_outline">#8b91a0</color>
+    <color name="midnight_outline_variant">#414754</color>
+    <color name="midnight_surface_tint">#aac7ff</color>
+    <color name="midnight_primary">#aac7ff</color>
+    <color name="midnight_on_primary">#003064</color>
+    <color name="midnight_primary_container">#3e90ff</color>
+    <color name="midnight_on_primary_container">#002957</color>
+    <color name="midnight_inverse_primary">#005db8</color>
+    <color name="midnight_secondary">#c8c6c8</color>
+    <color name="midnight_on_secondary">#303032</color>
+    <color name="midnight_secondary_container">#474649</color>
+    <color name="midnight_on_secondary_container">#b6b4b7</color>
+    <color name="midnight_background">#121317</color>
+    <color name="midnight_on_background">#e3e2e7</color>
+    <color name="midnight_surface_variant">#343539</color>
+    <color name="midnight_error">#ffb4ab</color>
+    <color name="midnight_on_error">#690005</color>
+    <color name="midnight_error_container">#93000a</color>
+    <color name="midnight_on_error_container">#ffdad6</color>
+
+    <!-- Glass / Utility colors -->
+    <color name="glass_fill_light">#26FFFFFF</color>
+    <color name="glass_stroke_light">#1A000000</color>
+    <color name="glass_fill_dark">#33000000</color>
+    <color name="glass_stroke_dark">#26FFFFFF</color>
+    <color name="crystal_hollow_fill">#1A000000</color>
+    <color name="crystal_hollow_stroke">#4D000000</color>
+    <color name="midnight_hollow_fill">#1AFFFFFF</color>
+    <color name="midnight_hollow_stroke">#4DFFFFFF</color>
+    <color name="crystal_background_radial">#FFFFFF</color>
+    <color name="crystal_border">#1A000000</color>
+    <color name="crystal_shadow">#0A000000</color>
+    <color name="true_black_custom">#131315</color>
+    <color name="glass_border_dark">#26FFFFFF</color>
+    <color name="glass_border_light_dark">#1AFFFFFF</color>
+
+    <!-- Home screen specific -->
+    <color name="ic_crystal_background">#FFFFFFFF</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="ic_crystal_background">#FFFFFFFF</color>
 
+    <!-- Deprecated - kept for reference, replaced by theme attrs -->
     <color name="home_screen_background">#F8F9FA</color>
     <color name="home_surface">#FFFFFFFF</color>
     <color name="video_feed_background">#232F3E</color>
@@ -18,17 +98,9 @@
     <color name="home_outline">#E2E2E4</color>
     <color name="photo_placeholder_tint">#B5B5B5</color>
     <color name="bottom_nav_item_color">#636366</color>
-
-    <color name="true_black_custom">#131315</color>
     <color name="top_app_bar_bg_dark">#99131315</color>
     <color name="bottom_nav_bg_dark">#660E0E10</color>
-    <color name="glass_border_dark">#26FFFFFF</color>
-    <color name="glass_border_light_dark">#1AFFFFFF</color>
-
-    <color name="crystal_background">#F5F5F7</color>
-    <color name="crystal_background_radial">#FFFFFF</color>
     <color name="top_app_bar_bg_light">#CCFFFFFF</color>
     <color name="bottom_nav_bg_light">#CCFFFFFF</color>
-    <color name="crystal_border">#1A000000</color>
-    <color name="crystal_shadow">#0A000000</color>
+
 </resources>

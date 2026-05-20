@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Crystal Edition: glass hueco with dark tint -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="rectangle">
-    <solid android:color="#1AFFFFFF" />
+    <solid android:color="@color/crystal_hollow_fill" />
     <stroke
         android:width="1.5dp"
-        android:color="#4DFFFFFF" />
-    <corners android:radius="9999dp" />
+        android:color="@color/crystal_hollow_stroke" />
+    <corners android:radius="@dimen/radius_full" />
 </shape>
