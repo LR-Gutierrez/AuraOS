@@ -1,13 +1,10 @@
 package com.beta.auraos
 
 import android.content.Intent
-import android.graphics.Color
-import android.content.res.ColorStateList
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.graphics.toColorInt
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
@@ -36,36 +33,14 @@ class HomeActivity : AppCompatActivity() {
         sessionManager = SessionManager(this)
         biometricKeyManager = BiometricKeyManager(this)
 
-        // SOLUCIÓN COMPLETA A LOS UNRESOLVED REFERENCES: Usamos View Binding correctamente
         binding = ActivityHomeBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         // Forzar por defecto la pestaña "Security" activa según tu mock
         binding.bottomNavigation.selectedItemId = R.id.nav_security
 
-        // Optimizaciones KTX sugeridas por tu IDE para parsear colores hex de forma segura
-        val colorBlack = Color.BLACK
-        val colorWhite = Color.WHITE
-        val colorGray = "#5E5E61".toColorInt()
-        val colorOutline = "#E2E2E4".toColorInt()
-
-        // Listener para alternar entre categorías de vehículo usando la jerarquía de Binding
-        binding.btnLightVehicle.setOnClickListener {
-            binding.btnLightVehicle.setBackgroundColor(colorBlack)
-            binding.btnLightVehicle.setTextColor(colorWhite)
-
-            binding.btnHeavyVehicle.setBackgroundColor(Color.TRANSPARENT)
-            binding.btnHeavyVehicle.strokeColor = ColorStateList.valueOf(colorOutline)
-            binding.btnHeavyVehicle.setTextColor(colorGray)
-        }
-
-        binding.btnHeavyVehicle.setOnClickListener {
-            binding.btnHeavyVehicle.setBackgroundColor(colorBlack)
-            binding.btnHeavyVehicle.setTextColor(colorWhite)
-
-            binding.btnLightVehicle.setBackgroundColor(Color.TRANSPARENT)
-            binding.btnLightVehicle.setTextColor(colorGray)
-        }
+        // Configurar el estado inicial de los botones
+        setupVehicleButtons()
 
         // Acción al confirmar ingreso
         binding.btnConfirmEntry.setOnClickListener {
@@ -90,7 +65,7 @@ class HomeActivity : AppCompatActivity() {
             promptBiometricEnrollment(email, userId)
         }
 
-        // SOLUCIÓN DEFINITIVA AL APARTADO INMERSIVO: Expandir la altura usando la vista del Binding
+        // Ajuste del header para la barra de estado (inmersivo)
         var originalHeaderHeight = 0
         ViewCompat.setOnApplyWindowInsetsListener(binding.headerBar) { view, insets ->
             val statusBarInsets = insets.getInsets(WindowInsetsCompat.Type.statusBars())
@@ -114,8 +89,24 @@ class HomeActivity : AppCompatActivity() {
         }
     }
 
+    private fun setupVehicleButtons() {
+        // Estado inicial: Light Vehicle seleccionado
+        binding.btnLightVehicle.isSelected = true
+        binding.btnHeavyVehicle.isSelected = false
+
+        // Listeners
+        binding.btnLightVehicle.setOnClickListener {
+            binding.btnLightVehicle.isSelected = true
+            binding.btnHeavyVehicle.isSelected = false
+        }
+
+        binding.btnHeavyVehicle.setOnClickListener {
+            binding.btnLightVehicle.isSelected = false
+            binding.btnHeavyVehicle.isSelected = true
+        }
+    }
+
     private fun promptBiometricEnrollment(email: String, userId: String) {
-        // Reducción if-null usando operador elvis '?:' sugerido por tu IDE
         val password = intent.getStringExtra(EXTRA_PASSWORD) ?: return
 
         AlertDialog.Builder(this)
@@ -133,7 +124,6 @@ class HomeActivity : AppCompatActivity() {
             val result = withContext(Dispatchers.IO) {
                 try {
                     biometricKeyManager.generateKeyPair()
-                    // Uso del operador elvis '?:' estructural para colapsar flujos if-null
                     val publicKey = biometricKeyManager.getPublicKey()
                         ?: return@withContext Result.Error(java.io.IOException("No se pudo generar la llave biométrica"))
 
@@ -162,14 +152,6 @@ class HomeActivity : AppCompatActivity() {
                 }
             }
         }
-    }
-
-    // Método auxiliar por si necesitas cerrar sesión y volver de forma segura
-    private fun navigateToLogin() {
-        val intent = Intent(this, LoginActivity::class.java)
-        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        startActivity(intent)
-        finish()
     }
 
     companion object {

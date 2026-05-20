@@ -11,10 +11,18 @@
 
         <item name="appLogoCustom">@drawable/ic_logo_midnight_dark</item>
         <item name="loginBackgroundCustom">@drawable/login_background_dark</item>
+        <!-- AHORA USA EL DRAWABLE CON EFECTO GLASS DARK -->
         <item name="glassCardBackgroundCustom">@drawable/bg_glass_card_dark</item>
+        <item name="status_info">@color/status_info</item>
         <item name="textPrimaryCustom">#FFFFFF</item>
         <item name="textSecondaryCustom">#A1A1A5</item>
         <item name="dividerColorCustom">#33FFFFFF</item>
+
+        <item name="homeSurfaceBackground">@color/true_black_custom</item>
+        <item name="navbarBackground">@drawable/bg_top_app_bar_blur_dark</item>
+        <item name="navbarBorderColor">@color/glass_border_dark</item>
+        <item name="bottomNavbarBackground">@drawable/bg_bottom_nav_blur_dark</item>
+        <item name="bottomNavbarBorderColor">@color/glass_border_light_dark</item>
     </style>
 
     <style name="Theme.AuraOS.NoActionBar" parent="Theme.AuraOS">

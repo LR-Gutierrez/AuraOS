@@ -14,8 +14,21 @@
     <color name="video_feed_background">#232F3E</color>
     <color name="live_badge_background">#40000000</color>
     <color name="live_badge_text">#FF4D4D</color>
-    <color name="status_info">#2F80ED</color>
+    <color name="status_info">#007AFF</color>
     <color name="home_outline">#E2E2E4</color>
     <color name="photo_placeholder_tint">#B5B5B5</color>
-    <color name="bottom_nav_item_color">#5E5E61</color>
+    <color name="bottom_nav_item_color">#636366</color>
+
+    <color name="true_black_custom">#131315</color>
+    <color name="top_app_bar_bg_dark">#99131315</color>
+    <color name="bottom_nav_bg_dark">#660E0E10</color>
+    <color name="glass_border_dark">#26FFFFFF</color>
+    <color name="glass_border_light_dark">#1AFFFFFF</color>
+
+    <color name="crystal_background">#F5F5F7</color>
+    <color name="crystal_background_radial">#FFFFFF</color>
+    <color name="top_app_bar_bg_light">#CCFFFFFF</color>
+    <color name="bottom_nav_bg_light">#CCFFFFFF</color>
+    <color name="crystal_border">#1A000000</color>
+    <color name="crystal_shadow">#0A000000</color>
 </resources>

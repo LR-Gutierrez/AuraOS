@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Frosted Glass Effect for Crystal Edition -->
+    <item>
+        <shape>
+            <solid android:color="@color/top_app_bar_bg_light" /> <!-- 15% white opacity -->
+        </shape>
+    </item>
+    <!-- Bottom border -->
+    <item android:gravity="bottom">
+        <shape>
+            <solid android:color="@color/crystal_border" /> <!-- 30% white border -->
+            <size android:height="1dp" />
+        </shape>
+    </item>
+    <!-- Subtle shadow for elevation -->
+    <item android:gravity="bottom">
+        <shape>
+            <solid android:color="@color/crystal_shadow" /> <!-- 4% black shadow -->
+            <size android:height="4dp" />
+        </shape>
+    </item>
+</layer-list>

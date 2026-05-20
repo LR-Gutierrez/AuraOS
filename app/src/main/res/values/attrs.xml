@@ -1,10 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <attr name="appLogoCustom" format="reference" />
-
     <attr name="loginBackgroundCustom" format="reference" />
     <attr name="glassCardBackgroundCustom" format="reference" />
     <attr name="textPrimaryCustom" format="color" />
     <attr name="textSecondaryCustom" format="color" />
     <attr name="dividerColorCustom" format="color" />
+    <attr name="homeSurfaceBackground" format="color" />
+    <attr name="status_info" format="color" />
+    <attr name="navbarBackground" format="reference" />
+    <attr name="navbarBorderColor" format="color"/>
+    <attr name="bottomNavbarBackground" format="reference" />
+    <attr name="bottomNavbarBorderColor" format="color" />
 </resources>
