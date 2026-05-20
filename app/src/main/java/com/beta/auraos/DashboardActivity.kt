@@ -14,6 +14,7 @@ import com.beta.auraos.data.Result
 import com.beta.auraos.data.local.BiometricKeyManager
 import com.beta.auraos.data.local.SessionManager
 import com.beta.auraos.databinding.ActivityDashboardBinding
+import com.beta.auraos.util.BottomNavIndicator
 import com.beta.auraos.util.TabNavigator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -37,10 +38,28 @@ class DashboardActivity : AppCompatActivity() {
 
         binding.bottomNavigation.selectedItemId = R.id.nav_dashboard
 
+        BottomNavIndicator.attach(
+            bottomNav = binding.bottomNavigation,
+            indicator = binding.bottomNavIndicator,
+            initialItemId = R.id.nav_dashboard,
+        )
+
         binding.bottomNavigation.setOnItemSelectedListener { item ->
             when (item.itemId) {
-                R.id.nav_dashboard -> true
+                R.id.nav_dashboard -> {
+                    BottomNavIndicator.animateTo(
+                        bottomNav = binding.bottomNavigation,
+                        indicator = binding.bottomNavIndicator,
+                        itemId = R.id.nav_dashboard,
+                    )
+                    true
+                }
                 else -> {
+                    BottomNavIndicator.animateTo(
+                        bottomNav = binding.bottomNavigation,
+                        indicator = binding.bottomNavIndicator,
+                        itemId = item.itemId,
+                    )
                     TabNavigator.navigate(this, item.itemId)
                     true
                 }

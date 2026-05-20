@@ -8,6 +8,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
 import com.beta.auraos.databinding.ActivityHomeBinding
+import com.beta.auraos.util.BottomNavIndicator
 import com.beta.auraos.util.TabNavigator
 
 class HomeActivity : AppCompatActivity() {
@@ -23,6 +24,12 @@ class HomeActivity : AppCompatActivity() {
 
         binding.bottomNavigation.selectedItemId = R.id.nav_register
 
+        BottomNavIndicator.attach(
+            bottomNav = binding.bottomNavigation,
+            indicator = binding.bottomNavIndicator,
+            initialItemId = R.id.nav_register,
+        )
+
         setupVehicleButtons()
 
         binding.btnConfirmEntry.setOnClickListener {
@@ -31,8 +38,20 @@ class HomeActivity : AppCompatActivity() {
 
         binding.bottomNavigation.setOnItemSelectedListener { item ->
             when (item.itemId) {
-                R.id.nav_register -> true
+                R.id.nav_register -> {
+                    BottomNavIndicator.animateTo(
+                        bottomNav = binding.bottomNavigation,
+                        indicator = binding.bottomNavIndicator,
+                        itemId = R.id.nav_register,
+                    )
+                    true
+                }
                 else -> {
+                    BottomNavIndicator.animateTo(
+                        bottomNav = binding.bottomNavigation,
+                        indicator = binding.bottomNavIndicator,
+                        itemId = item.itemId,
+                    )
                     TabNavigator.navigate(this, item.itemId)
                     true
                 }

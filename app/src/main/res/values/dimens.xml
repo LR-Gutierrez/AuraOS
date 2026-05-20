@@ -57,6 +57,7 @@
     <!-- Home specific -->
     <dimen name="home_header_height">90dp</dimen>
     <dimen name="bottom_nav_height">64dp</dimen>
+    <dimen name="bottom_nav_indicator_width">40dp</dimen>
     <dimen name="avatar_size">40dp</dimen>
     <dimen name="icon_size_small">16dp</dimen>
     <dimen name="icon_size_medium">24dp</dimen>

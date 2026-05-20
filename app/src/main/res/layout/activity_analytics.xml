@@ -72,16 +72,31 @@
 
     </androidx.core.widget.NestedScrollView>
 
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/bottom_navigation"
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="@dimen/bottom_nav_height"
-        android:layout_gravity="bottom"
-        android:background="?attr/homeSurfaceBackground"
-        app:elevation="@dimen/elevation_none"
-        app:itemIconTint="?attr/bottomNavItemColorCustom"
-        app:itemBackground="@drawable/bg_bottom_nav_item"
-        app:labelVisibilityMode="unlabeled"
-        app:menu="@menu/home_bottom_menu" />
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom">
+
+        <com.google.android.material.bottomnavigation.BottomNavigationView
+            android:id="@+id/bottom_navigation"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/bottom_nav_height"
+            android:background="?attr/homeSurfaceBackground"
+            app:elevation="@dimen/elevation_none"
+            app:itemIconTint="?attr/bottomNavItemColorCustom"
+            app:itemBackground="@drawable/bg_bottom_nav_item"
+            app:labelVisibilityMode="unlabeled"
+            app:menu="@menu/home_bottom_menu" />
+
+        <View
+            android:id="@+id/bottom_nav_indicator"
+            android:layout_width="@dimen/bottom_nav_indicator_width"
+            android:layout_height="3dp"
+            android:layout_gravity="top"
+            android:background="@drawable/bg_bottom_nav_indicator"
+            android:backgroundTint="?attr/bottomNavItemColorCustom"
+            android:visibility="invisible" />
+
+    </FrameLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
