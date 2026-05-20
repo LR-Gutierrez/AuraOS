@@ -20,11 +20,11 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import android.widget.EditText
 import android.widget.Toast
-import com.beta.auraos.HomeActivity
-import com.beta.auraos.data.local.BiometricKeyManager
-import com.beta.auraos.databinding.ActivityLoginBinding
-
+import com.beta.auraos.DashboardActivity
 import com.beta.auraos.R
+import com.beta.auraos.data.local.BiometricKeyManager
+import com.beta.auraos.util.TabNavigator
+import com.beta.auraos.databinding.ActivityLoginBinding
 import java.security.Signature
 import java.util.concurrent.Executor
 
@@ -236,11 +236,12 @@ class LoginActivity : AppCompatActivity() {
             Toast.LENGTH_LONG
         ).show()
 
-        val intent = Intent(this, HomeActivity::class.java).apply {
-            putExtra(HomeActivity.EXTRA_EMAIL, model.email)
-            putExtra(HomeActivity.EXTRA_DISPLAY_NAME, model.displayName)
-            putExtra(HomeActivity.EXTRA_PASSWORD, lastPassword)
-            putExtra(HomeActivity.EXTRA_USER_ID, model.userId)
+        val intent = Intent(this, DashboardActivity::class.java).apply {
+            putExtra(TabNavigator.EXTRA_TAB_ID, R.id.nav_dashboard)
+            putExtra(DashboardActivity.EXTRA_EMAIL, model.email)
+            putExtra(DashboardActivity.EXTRA_DISPLAY_NAME, model.displayName)
+            putExtra(DashboardActivity.EXTRA_PASSWORD, lastPassword)
+            putExtra(DashboardActivity.EXTRA_USER_ID, model.userId)
         }
         startActivity(intent)
         finish()

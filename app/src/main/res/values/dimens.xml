@@ -55,7 +55,7 @@
     <dimen name="login_biometric_button_size">56dp</dimen>
 
     <!-- Home specific -->
-    <dimen name="home_header_height">64dp</dimen>
+    <dimen name="home_header_height">90dp</dimen>
     <dimen name="bottom_nav_height">64dp</dimen>
     <dimen name="avatar_size">40dp</dimen>
     <dimen name="icon_size_small">16dp</dimen>

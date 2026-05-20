@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
+<androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -8,63 +8,46 @@
     android:background="?attr/homeSurfaceBackground"
     tools:context=".HomeActivity">
 
-    <!-- Top App Bar Glass -->
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/header_bar"
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/app_bar_layout"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/home_header_height"
-        android:background="?attr/navbarBackground"
-        android:paddingHorizontal="@dimen/spacing_large"
-        app:layout_constraintTop_toTopOf="parent">
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        app:elevation="@dimen/elevation_none">
 
-        <com.google.android.material.imageview.ShapeableImageView
-            android:id="@+id/iv_user_profile"
-            android:layout_width="@dimen/avatar_size"
-            android:layout_height="@dimen/avatar_size"
-            android:contentDescription="@string/cd_user_profile"
-            android:src="@drawable/ic_profile_circle"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:shapeAppearanceOverlay="@style/ShapeAppearance.MaterialComponents.SmallComponent" />
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/header_bar"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/home_header_height"
+            android:background="?attr/navbarBackground"
+            android:paddingHorizontal="@dimen/spacing_large"
+            app:layout_scrollFlags="scroll|enterAlways">
 
-        <TextView
-            android:id="@+id/tv_app_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/spacing_small"
-            android:fontFamily="sans-serif-black"
-            android:text="@string/home_app_title"
-            android:textColor="?attr/textPrimaryCustom"
-            android:textSize="@dimen/text_size_title"
-            android:textStyle="bold"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="@id/iv_user_profile"
-            app:layout_constraintTop_toTopOf="parent" />
+            <TextView
+                android:id="@+id/tv_app_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-black"
+                android:text="@string/title_activity_home"
+                android:textColor="?attr/textPrimaryCustom"
+                android:textSize="@dimen/text_size_title"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-        <ImageView
-            android:id="@+id/iv_cloud_status"
-            android:layout_width="@dimen/icon_size_medium"
-            android:layout_height="@dimen/icon_size_medium"
-            android:contentDescription="@string/network_status"
-            android:src="@android:drawable/stat_sys_upload"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:tint="?attr/textSecondaryCustom" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.google.android.material.appbar.AppBarLayout>
 
-    <!-- ScrollView principal -->
-    <ScrollView
+    <androidx.core.widget.NestedScrollView
         android:id="@+id/homeScrollView"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:clipToPadding="false"
+        android:layout_height="match_parent"
+        android:clipToPadding="true"
         android:fillViewport="true"
         android:scrollbars="none"
-        app:layout_constraintBottom_toTopOf="@id/bottom_navigation"
-        app:layout_constraintTop_toBottomOf="@id/header_bar">
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -73,7 +56,6 @@
             android:paddingTop="@dimen/spacing_large"
             android:paddingBottom="@dimen/spacing_xxlarge">
 
-            <!-- Video Feed Card -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/card_video_feed"
                 android:layout_width="match_parent"
@@ -104,7 +86,6 @@
                 </FrameLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- OCR Data Glass Card -->
             <FrameLayout
                 android:id="@+id/container_ocr_data"
                 android:layout_width="match_parent"
@@ -213,7 +194,6 @@
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </FrameLayout>
 
-            <!-- Bodywork Data Glass Card -->
             <FrameLayout
                 android:id="@+id/container_bodywork_data"
                 android:layout_width="match_parent"
@@ -321,7 +301,6 @@
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </FrameLayout>
 
-            <!-- Confirm Entry Button -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_confirm_entry"
                 style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
@@ -339,19 +318,18 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-    </ScrollView>
+    </androidx.core.widget.NestedScrollView>
 
-    <!-- Bottom Navigation Bar -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigation"
         android:layout_width="match_parent"
         android:layout_height="@dimen/bottom_nav_height"
-        android:background="?attr/bottomNavbarBackground"
+        android:layout_gravity="bottom"
+        android:background="?attr/homeSurfaceBackground"
         app:elevation="@dimen/elevation_none"
         app:itemIconTint="?attr/bottomNavItemColorCustom"
-        app:itemTextColor="?attr/bottomNavItemColorCustom"
-        app:labelVisibilityMode="labeled"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:itemBackground="@drawable/bg_bottom_nav_item"
+        app:labelVisibilityMode="unlabeled"
         app:menu="@menu/home_bottom_menu" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
