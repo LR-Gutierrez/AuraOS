@@ -52,6 +52,10 @@
         <item name="hollowInputBackground">@drawable/bg_hollow_input</item>
         <item name="primaryButtonBackground">@drawable/bg_primary_button</item>
 
+        <!-- Dashboard semantic colors -->
+        <item name="cardGlassFillColorCustom">@color/glass_fill_light</item>
+        <item name="semanticSuccessCustom">#2E7D32</item>
+
         <!-- Home card outlines -->
         <item name="homeOutlineCustom">@color/crystal_surface_variant</item>
         <item name="bottomNavItemColorCustom">@color/crystal_secondary</item>

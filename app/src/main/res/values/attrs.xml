@@ -50,6 +50,10 @@
     <attr name="colorOutline" format="color" />
     <attr name="colorOutlineVariant" format="color" />
 
+    <!-- Dashboard semantic colors -->
+    <attr name="cardGlassFillColorCustom" format="color" />
+    <attr name="semanticSuccessCustom" format="color" />
+
     <!-- Live badge -->
     <attr name="liveBadgeBackgroundCustom" format="color" />
     <attr name="liveBadgeTextCustom" format="color" />

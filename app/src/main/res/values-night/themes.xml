@@ -52,6 +52,10 @@
         <item name="hollowInputBackground">@drawable/bg_hollow_input_dark</item>
         <item name="primaryButtonBackground">@drawable/bg_primary_button_dark</item>
 
+        <!-- Dashboard semantic colors -->
+        <item name="cardGlassFillColorCustom">@color/glass_fill_dark</item>
+        <item name="semanticSuccessCustom">#53e16f</item>
+
         <!-- Home card outlines -->
         <item name="homeOutlineCustom">@color/midnight_surface_variant</item>
         <item name="bottomNavItemColorCustom">@color/midnight_on_surface_variant</item>

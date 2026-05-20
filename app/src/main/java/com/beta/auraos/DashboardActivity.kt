@@ -1,6 +1,7 @@
 package com.beta.auraos
 
 import android.os.Bundle
+import android.view.View
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
@@ -9,6 +10,8 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
 import androidx.lifecycle.lifecycleScope
+import com.beta.auraos.util.BorderGlowDrawable
+import com.google.android.material.color.MaterialColors
 import com.beta.auraos.data.LoginDataSource
 import com.beta.auraos.data.Result
 import com.beta.auraos.data.local.BiometricKeyManager
@@ -90,6 +93,26 @@ class DashboardActivity : AppCompatActivity() {
             view.updatePadding(bottom = bottomNavH + navBarInsets.bottom)
             insets
         }
+
+        val cornerRadiusPx = resources.getDimension(R.dimen.card_corner_radius_large)
+        val successColor = MaterialColors.getColor(binding.cardRevenue, R.attr.semanticSuccessCustom)
+        val primaryColor = MaterialColors.getColor(binding.cardMemberships, android.R.attr.colorPrimary)
+
+        startBorderGlow(binding.glowRevenue, successColor, cornerRadiusPx)
+        startBorderGlow(binding.glowMemberships, primaryColor, cornerRadiusPx)
+    }
+
+    private fun startBorderGlow(overlay: View, color: Int, cornerRadiusPx: Float) {
+        val drawable = BorderGlowDrawable(color, cornerRadiusPx)
+        overlay.background = drawable
+
+        val updater = object : Runnable {
+            override fun run() {
+                drawable.setPhase(System.nanoTime() / 3e9f)
+                overlay.postOnAnimation(this)
+            }
+        }
+        overlay.postOnAnimation(updater)
     }
 
     private fun promptBiometricEnrollment(email: String, userId: String) {
