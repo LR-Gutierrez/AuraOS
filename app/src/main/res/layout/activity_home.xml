@@ -228,15 +228,19 @@
                         app:layout_constraintTop_toBottomOf="@id/lbl_bodywork">
 
                         <FrameLayout
+                            android:id="@+id/container_front"
                             android:layout_width="0dp"
                             android:layout_height="0dp"
                             android:layout_columnWeight="1"
                             android:layout_margin="@dimen/grid_item_margin"
                             android:layout_rowWeight="1"
                             android:background="?attr/glassCardBackgroundCustom"
+                            android:clickable="true"
+                            android:focusable="true"
                             android:padding="6dp">
 
                             <ImageView
+                                android:id="@+id/iv_front"
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
                                 android:contentDescription="@string/cd_photo_front"
@@ -259,18 +263,51 @@
                                 android:textColor="?attr/textPrimaryCustom"
                                 android:textSize="@dimen/text_size_caption"
                                 android:textStyle="bold" />
+
+                            <ImageButton
+                                android:id="@+id/btn_retake_front"
+                                android:layout_width="@dimen/icon_size_large"
+                                android:layout_height="@dimen/icon_size_large"
+                                android:layout_gravity="top|end"
+                                android:layout_margin="4dp"
+                                android:background="?attr/glassCardBackgroundCustom"
+                                android:contentDescription="@string/action_retake"
+                                android:elevation="2dp"
+                                android:padding="4dp"
+                                android:src="@drawable/ic_retake"
+                                android:tint="?attr/textPrimaryCustom"
+                                android:visibility="gone" />
+
+                            <ImageButton
+                                android:id="@+id/btn_delete_front"
+                                android:layout_width="@dimen/icon_size_large"
+                                android:layout_height="@dimen/icon_size_large"
+                                android:layout_gravity="bottom|end"
+                                android:layout_margin="4dp"
+                                android:layout_marginBottom="44dp"
+                                android:background="?attr/glassCardBackgroundCustom"
+                                android:contentDescription="@string/action_delete"
+                                android:elevation="2dp"
+                                android:padding="4dp"
+                                android:src="@drawable/ic_delete"
+                                android:tint="?attr/textPrimaryCustom"
+                                android:visibility="gone" />
                         </FrameLayout>
 
                         <FrameLayout
+                            android:id="@+id/container_rear"
                             android:layout_width="0dp"
                             android:layout_height="0dp"
                             android:layout_columnWeight="1"
                             android:layout_margin="@dimen/grid_item_margin"
                             android:layout_rowWeight="1"
                             android:background="?attr/glassCardBackgroundCustom"
+                            android:clickable="true"
+                            android:focusable="true"
                             android:padding="6dp">
 
                             <ImageView
+                                android:id="@+id/iv_rear"
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
                                 android:contentDescription="@string/cd_photo_rear"
@@ -293,18 +330,51 @@
                                 android:textColor="?attr/textPrimaryCustom"
                                 android:textSize="@dimen/text_size_caption"
                                 android:textStyle="bold" />
+
+                            <ImageButton
+                                android:id="@+id/btn_retake_rear"
+                                android:layout_width="@dimen/icon_size_large"
+                                android:layout_height="@dimen/icon_size_large"
+                                android:layout_gravity="top|end"
+                                android:layout_margin="4dp"
+                                android:background="?attr/glassCardBackgroundCustom"
+                                android:contentDescription="@string/action_retake"
+                                android:elevation="2dp"
+                                android:padding="4dp"
+                                android:src="@drawable/ic_retake"
+                                android:tint="?attr/textPrimaryCustom"
+                                android:visibility="gone" />
+
+                            <ImageButton
+                                android:id="@+id/btn_delete_rear"
+                                android:layout_width="@dimen/icon_size_large"
+                                android:layout_height="@dimen/icon_size_large"
+                                android:layout_gravity="bottom|end"
+                                android:layout_margin="4dp"
+                                android:layout_marginBottom="44dp"
+                                android:background="?attr/glassCardBackgroundCustom"
+                                android:contentDescription="@string/action_delete"
+                                android:elevation="2dp"
+                                android:padding="4dp"
+                                android:src="@drawable/ic_delete"
+                                android:tint="?attr/textPrimaryCustom"
+                                android:visibility="gone" />
                         </FrameLayout>
 
                         <FrameLayout
+                            android:id="@+id/container_left"
                             android:layout_width="0dp"
                             android:layout_height="0dp"
                             android:layout_columnWeight="1"
                             android:layout_margin="@dimen/grid_item_margin"
                             android:layout_rowWeight="1"
                             android:background="?attr/glassCardBackgroundCustom"
+                            android:clickable="true"
+                            android:focusable="true"
                             android:padding="6dp">
 
                             <ImageView
+                                android:id="@+id/iv_left"
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
                                 android:contentDescription="@string/cd_photo_left"
@@ -327,18 +397,51 @@
                                 android:textColor="?attr/textPrimaryCustom"
                                 android:textSize="@dimen/text_size_caption"
                                 android:textStyle="bold" />
+
+                            <ImageButton
+                                android:id="@+id/btn_retake_left"
+                                android:layout_width="@dimen/icon_size_large"
+                                android:layout_height="@dimen/icon_size_large"
+                                android:layout_gravity="top|end"
+                                android:layout_margin="4dp"
+                                android:background="?attr/glassCardBackgroundCustom"
+                                android:contentDescription="@string/action_retake"
+                                android:elevation="2dp"
+                                android:padding="4dp"
+                                android:src="@drawable/ic_retake"
+                                android:tint="?attr/textPrimaryCustom"
+                                android:visibility="gone" />
+
+                            <ImageButton
+                                android:id="@+id/btn_delete_left"
+                                android:layout_width="@dimen/icon_size_large"
+                                android:layout_height="@dimen/icon_size_large"
+                                android:layout_gravity="bottom|end"
+                                android:layout_margin="4dp"
+                                android:layout_marginBottom="44dp"
+                                android:background="?attr/glassCardBackgroundCustom"
+                                android:contentDescription="@string/action_delete"
+                                android:elevation="2dp"
+                                android:padding="4dp"
+                                android:src="@drawable/ic_delete"
+                                android:tint="?attr/textPrimaryCustom"
+                                android:visibility="gone" />
                         </FrameLayout>
 
                         <FrameLayout
+                            android:id="@+id/container_right"
                             android:layout_width="0dp"
                             android:layout_height="0dp"
                             android:layout_columnWeight="1"
                             android:layout_margin="@dimen/grid_item_margin"
                             android:layout_rowWeight="1"
                             android:background="?attr/glassCardBackgroundCustom"
+                            android:clickable="true"
+                            android:focusable="true"
                             android:padding="6dp">
 
                             <ImageView
+                                android:id="@+id/iv_right"
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
                                 android:contentDescription="@string/cd_photo_right"
@@ -361,6 +464,35 @@
                                 android:textColor="?attr/textPrimaryCustom"
                                 android:textSize="@dimen/text_size_caption"
                                 android:textStyle="bold" />
+
+                            <ImageButton
+                                android:id="@+id/btn_retake_right"
+                                android:layout_width="@dimen/icon_size_large"
+                                android:layout_height="@dimen/icon_size_large"
+                                android:layout_gravity="top|end"
+                                android:layout_margin="4dp"
+                                android:background="?attr/glassCardBackgroundCustom"
+                                android:contentDescription="@string/action_retake"
+                                android:elevation="2dp"
+                                android:padding="4dp"
+                                android:src="@drawable/ic_retake"
+                                android:tint="?attr/textPrimaryCustom"
+                                android:visibility="gone" />
+
+                            <ImageButton
+                                android:id="@+id/btn_delete_right"
+                                android:layout_width="@dimen/icon_size_large"
+                                android:layout_height="@dimen/icon_size_large"
+                                android:layout_gravity="bottom|end"
+                                android:layout_margin="4dp"
+                                android:layout_marginBottom="44dp"
+                                android:background="?attr/glassCardBackgroundCustom"
+                                android:contentDescription="@string/action_delete"
+                                android:elevation="2dp"
+                                android:padding="4dp"
+                                android:src="@drawable/ic_delete"
+                                android:tint="?attr/textPrimaryCustom"
+                                android:visibility="gone" />
                         </FrameLayout>
                     </GridLayout>
 

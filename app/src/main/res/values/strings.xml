@@ -56,7 +56,13 @@
     <string name="photo_label_left">Left</string>
     <string name="photo_label_right">Right</string>
 
+    <string name="action_retake">Volver a tomar foto</string>
+    <string name="action_delete">Eliminar foto</string>
+
     <string name="action_confirm_entry">✓ Confirmar Ingreso</string>
+    <string name="confirm_entry_success">✅ Ingreso registrado correctamente</string>
+    <string name="confirm_entry_error">❌ Error al registrar ingreso: %1$s</string>
+    <string name="camera_permission_required">Se requiere permiso de cámara</string>
 
     <!-- Dashboard -->
     <string name="dashboard_capacity_label">REAL-TIME CAPACITY</string>
