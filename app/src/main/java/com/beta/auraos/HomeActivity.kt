@@ -1,23 +1,14 @@
 package com.beta.auraos
 
-import android.animation.ObjectAnimator
-import android.animation.ValueAnimator
 import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.view.View
-import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.camera.core.CameraSelector
-import androidx.camera.core.ImageAnalysis
-import androidx.camera.core.Preview
-import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.view.ViewCompat
@@ -36,37 +27,27 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.File
-import java.util.Random
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
 
 class HomeActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityHomeBinding
 
-    private var isHeavyVehicle = false
+    private var selectedVehicleType = "moto"
+    private var isSending = false
 
     private var frontPhotoUri: Uri? = null
     private var rearPhotoUri: Uri? = null
     private var leftPhotoUri: Uri? = null
     private var rightPhotoUri: Uri? = null
+    private var platePhotoUri: Uri? = null
 
     private var hasFrontPhoto = false
     private var hasRearPhoto = false
     private var hasLeftPhoto = false
     private var hasRightPhoto = false
+    private var hasPlatePhoto = false
 
     private var currentPhotoSlot: String? = null
-
-    private var cameraProvider: ProcessCameraProvider? = null
-    private var lensFacing = CameraSelector.LENS_FACING_BACK
-    private var cameraExecutor: ExecutorService = Executors.newSingleThreadExecutor()
-
-    private val simulatedPlates = listOf("ABC-1234", "XYZ-7890", "DEF-4567")
-    private var currentSimulatedIndex = 0
-    private val mainHandler = Handler(Looper.getMainLooper())
-    private var ocrRunnable: Runnable? = null
-    private var isOcrRunning = false
 
     private val takePictureLauncher = registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
         if (success) {
@@ -76,6 +57,7 @@ class HomeActivity : AppCompatActivity() {
                 "rear" -> rearPhotoUri
                 "left" -> leftPhotoUri
                 "right" -> rightPhotoUri
+                "plate" -> platePhotoUri
                 else -> null
             }
             if (slot != null && uri != null) {
@@ -87,19 +69,13 @@ class HomeActivity : AppCompatActivity() {
 
     private val cameraPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         if (granted) {
-            startCamera()
-            startOcrSimulation()
             if (currentPhotoSlot != null) {
                 openCamera()
             }
         } else {
-            isCameraEnabledForPreview = false
-            binding.previewView.visibility = View.GONE
             Toast.makeText(this, R.string.camera_permission_required, Toast.LENGTH_SHORT).show()
         }
     }
-
-    private var isCameraEnabledForPreview = true
 
     private val parkingApi: ParkingApi by lazy {
         ApiClient.createApi<ParkingApi>()
@@ -127,91 +103,10 @@ class HomeActivity : AppCompatActivity() {
         setupConfirmButton()
         setupBottomNav()
         setupWindowInsets()
-        startScanAnimation()
-
-        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            isCameraEnabledForPreview = false
-            cameraPermissionLauncher.launch(android.Manifest.permission.CAMERA)
-        }
-    }
-
-    override fun onResume() {
-        super.onResume()
-        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
-            isCameraEnabledForPreview = true
-            binding.previewView.visibility = View.VISIBLE
-            startCamera()
-            startOcrSimulation()
-        }
-    }
-
-    override fun onPause() {
-        super.onPause()
-        stopOcrSimulation()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        cameraExecutor.shutdown()
-        ocrRunnable?.let { mainHandler.removeCallbacks(it) }
-    }
-
-    private fun startCamera() {
-        val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
-        cameraProviderFuture.addListener({
-            cameraProvider = cameraProviderFuture.get()
-            bindCameraUseCases()
-        }, ContextCompat.getMainExecutor(this))
-    }
-
-    private fun bindCameraUseCases() {
-        val cameraProvider = cameraProvider ?: return
-
-        val preview = Preview.Builder()
-            .build()
-            .also { it.setSurfaceProvider(binding.previewView.surfaceProvider) }
-
-        val imageAnalysis = ImageAnalysis.Builder()
-            .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-            .build()
-
-        imageAnalysis.setAnalyzer(cameraExecutor) { imageProxy ->
-            imageProxy.close()
-        }
-
-        val cameraSelector = CameraSelector.Builder()
-            .requireLensFacing(lensFacing)
-            .build()
-
-        try {
-            cameraProvider.unbindAll()
-            cameraProvider.bindToLifecycle(this, cameraSelector, preview, imageAnalysis)
-        } catch (_: Exception) {
-        }
-    }
-
-    private fun startOcrSimulation() {
-        if (isOcrRunning || !isCameraEnabledForPreview) return
-        isOcrRunning = true
-
-        ocrRunnable = Runnable {
-            if (!isOcrRunning) return@Runnable
-
-            val plate = simulatedPlates[currentSimulatedIndex]
-            currentSimulatedIndex = (currentSimulatedIndex + 1) % simulatedPlates.size
-
-            binding.tvPlateNumber.text = plate
-            binding.tvDbStatus.text = getString(R.string.plate_validation_status)
-
-            val delay = (2000L + Random().nextInt(1001))
-            mainHandler.postDelayed(ocrRunnable!!, delay)
-        }
-        mainHandler.post(ocrRunnable!!)
-    }
-
-    private fun stopOcrSimulation() {
-        isOcrRunning = false
-        ocrRunnable?.let { mainHandler.removeCallbacks(it) }
     }
 
     private fun initPhotoUris() {
@@ -220,6 +115,7 @@ class HomeActivity : AppCompatActivity() {
         rearPhotoUri = FileProvider.getUriForFile(this, "${packageName}.fileprovider", File(photoDir, "rear.jpg"))
         leftPhotoUri = FileProvider.getUriForFile(this, "${packageName}.fileprovider", File(photoDir, "left.jpg"))
         rightPhotoUri = FileProvider.getUriForFile(this, "${packageName}.fileprovider", File(photoDir, "right.jpg"))
+        platePhotoUri = FileProvider.getUriForFile(this, "${packageName}.fileprovider", File(photoDir, "plate.jpg"))
     }
 
     private fun setupPhotoClickHandlers() {
@@ -227,6 +123,7 @@ class HomeActivity : AppCompatActivity() {
         binding.containerRear.setOnClickListener { requestCamera("rear") }
         binding.containerLeft.setOnClickListener { requestCamera("left") }
         binding.containerRight.setOnClickListener { requestCamera("right") }
+        binding.containerPlate.setOnClickListener { requestCamera("plate") }
     }
 
     private fun setupRetakeDeleteHandlers() {
@@ -234,11 +131,13 @@ class HomeActivity : AppCompatActivity() {
         binding.btnRetakeRear.setOnClickListener { requestCamera("rear") }
         binding.btnRetakeLeft.setOnClickListener { requestCamera("left") }
         binding.btnRetakeRight.setOnClickListener { requestCamera("right") }
+        binding.btnRetakePlate.setOnClickListener { requestCamera("plate") }
 
         binding.btnDeleteFront.setOnClickListener { deletePhoto("front") }
         binding.btnDeleteRear.setOnClickListener { deletePhoto("rear") }
         binding.btnDeleteLeft.setOnClickListener { deletePhoto("left") }
         binding.btnDeleteRight.setOnClickListener { deletePhoto("right") }
+        binding.btnDeletePlate.setOnClickListener { deletePhoto("plate") }
     }
 
     private fun requestCamera(slot: String) {
@@ -256,6 +155,7 @@ class HomeActivity : AppCompatActivity() {
             "rear" -> rearPhotoUri
             "left" -> leftPhotoUri
             "right" -> rightPhotoUri
+            "plate" -> platePhotoUri
             else -> null
         }
         uri?.let { takePictureLauncher.launch(it) }
@@ -267,6 +167,7 @@ class HomeActivity : AppCompatActivity() {
             "rear" -> binding.ivRear
             "left" -> binding.ivLeft
             "right" -> binding.ivRight
+            "plate" -> binding.ivPlate
             else -> return
         }
         lifecycleScope.launch {
@@ -292,6 +193,7 @@ class HomeActivity : AppCompatActivity() {
             "rear" -> binding.btnRetakeRear
             "left" -> binding.btnRetakeLeft
             "right" -> binding.btnRetakeRight
+            "plate" -> binding.btnRetakePlate
             else -> return
         }
         val deleteBtn = when (slot) {
@@ -299,6 +201,7 @@ class HomeActivity : AppCompatActivity() {
             "rear" -> binding.btnDeleteRear
             "left" -> binding.btnDeleteLeft
             "right" -> binding.btnDeleteRight
+            "plate" -> binding.btnDeletePlate
             else -> return
         }
         val visibility = if (hasPhoto) View.VISIBLE else View.GONE
@@ -310,50 +213,132 @@ class HomeActivity : AppCompatActivity() {
             "rear" -> hasRearPhoto = hasPhoto
             "left" -> hasLeftPhoto = hasPhoto
             "right" -> hasRightPhoto = hasPhoto
+            "plate" -> {
+                hasPlatePhoto = hasPhoto
+                if (hasPhoto) binding.tvPlateError.visibility = View.GONE
+            }
         }
     }
 
     private fun deletePhoto(slot: String) {
-        val iv = when (slot) {
+        when (slot) {
             "front" -> binding.ivFront.also { it.setImageResource(R.drawable.front) }
             "rear" -> binding.ivRear.also { it.setImageResource(R.drawable.rear) }
             "left" -> binding.ivLeft.also { it.setImageResource(R.drawable.left) }
             "right" -> binding.ivRight.also { it.setImageResource(R.drawable.right) }
+            "plate" -> binding.ivPlate.also { it.setImageResource(R.drawable.ic_scan_corners) }
             else -> return
         }
         setPhotoState(slot, false)
     }
 
-    private fun setupVehicleButtons() {
-        isHeavyVehicle = false
-        binding.btnLightVehicle.isSelected = true
-        binding.btnHeavyVehicle.isSelected = false
+    private fun sendPlateForOcr(uri: Uri) {
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                withContext(Dispatchers.Main) {
+                    binding.tvDbStatus.text = getString(R.string.plate_sending)
+                }
 
-        binding.btnLightVehicle.setOnClickListener {
-            binding.btnLightVehicle.isSelected = true
-            binding.btnHeavyVehicle.isSelected = false
-            isHeavyVehicle = false
+                val bytes = contentResolver.openInputStream(uri)?.use { it.readBytes() } ?: return@launch
+                val requestBody = bytes.toRequestBody("image/jpeg".toMediaTypeOrNull())
+                val imagePart = MultipartBody.Part.createFormData("image", "plate.jpg", requestBody)
+
+                val response = parkingApi.recognizePlate(imagePart)
+
+                withContext(Dispatchers.Main) {
+                    if (response.isSuccessful) {
+                        val body = response.body()
+                        if (body != null && body.success) {
+                            binding.etPlateNumber.setText(body.plate)
+                            binding.tvDbStatus.text = getString(R.string.plate_validation_status)
+                        } else {
+                            binding.tvDbStatus.text = body?.message ?: getString(R.string.plate_ocr_error)
+                        }
+                    } else {
+                        binding.tvDbStatus.text = getString(R.string.plate_ocr_error)
+                    }
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    binding.tvDbStatus.text = getString(R.string.plate_ocr_error)
+                }
+            }
         }
+    }
 
-        binding.btnHeavyVehicle.setOnClickListener {
-            binding.btnLightVehicle.isSelected = false
-            binding.btnHeavyVehicle.isSelected = true
-            isHeavyVehicle = true
+    private fun setupVehicleButtons() {
+        selectedVehicleType = "moto"
+        binding.btnMoto.isSelected = true
+
+        val buttons = listOf(
+            binding.btnMoto to "moto",
+            binding.btnAuto to "auto",
+            binding.btnCamioneta to "camioneta",
+            binding.btnCamion to "camion",
+        )
+
+        buttons.forEach { (button, type) ->
+            button.setOnClickListener {
+                buttons.forEach { (b, _) -> b.isSelected = false }
+                button.isSelected = true
+                selectedVehicleType = type
+            }
         }
     }
 
     private fun setupConfirmButton() {
-        binding.btnConfirmEntry.setOnClickListener { sendToApi() }
+        binding.etPlateNumber.setOnFocusChangeListener { _, _ ->
+            binding.etPlateNumber.error = null
+        }
+        binding.btnConfirmEntry.setOnClickListener { validateAndSend() }
+    }
+
+    private fun validateAndSend() {
+        var firstErrorView: View? = null
+
+        if (binding.etPlateNumber.text.isNullOrBlank()) {
+            binding.etPlateNumber.error = "Campo obligatorio"
+            if (firstErrorView == null) firstErrorView = binding.etPlateNumber
+        }
+
+        if (!hasPlatePhoto) {
+            binding.tvPlateError.visibility = View.VISIBLE
+            if (firstErrorView == null) firstErrorView = binding.cardPlateCapture
+        } else {
+            binding.tvPlateError.visibility = View.GONE
+        }
+
+        if (firstErrorView != null) {
+            scrollToView(firstErrorView)
+            return
+        }
+        sendToApi()
+    }
+
+    private fun scrollToView(view: View) {
+        binding.homeScrollView.post {
+            binding.homeScrollView.smoothScrollTo(0, 0)
+        }
     }
 
     private fun sendToApi() {
+        if (isSending) return
+        isSending = true
+
+        with(binding) {
+            btnConfirmEntry.isEnabled = false
+            btnConfirmEntry.text = getString(R.string.action_sending)
+            loadingOverlay.visibility = View.VISIBLE
+        }
+
         lifecycleScope.launch(Dispatchers.IO) {
             try {
-                val plate = binding.tvPlateNumber.text.toString()
+                val plate = binding.etPlateNumber.text.toString()
                     .toRequestBody("text/plain".toMediaTypeOrNull())
-                val vehicleType = (if (isHeavyVehicle) "heavy" else "light")
+                val vehicleType = selectedVehicleType
                     .toRequestBody("text/plain".toMediaTypeOrNull())
 
+                val platePhotoPart = platePhotoUri?.toMultipartPart("platePhoto")
                 val frontPart = frontPhotoUri?.toMultipartPart("front")
                 val rearPart = rearPhotoUri?.toMultipartPart("rear")
                 val leftPart = leftPhotoUri?.toMultipartPart("left")
@@ -362,6 +347,7 @@ class HomeActivity : AppCompatActivity() {
                 val response = parkingApi.registerEntry(
                     plate = plate,
                     vehicleType = vehicleType,
+                    platePhoto = platePhotoPart,
                     front = frontPart,
                     rear = rearPart,
                     left = leftPart,
@@ -370,6 +356,7 @@ class HomeActivity : AppCompatActivity() {
 
                 withContext(Dispatchers.Main) {
                     if (response.isSuccessful) {
+                        resetForm()
                         Toast.makeText(this@HomeActivity, R.string.confirm_entry_success, Toast.LENGTH_SHORT).show()
                     } else {
                         Toast.makeText(this@HomeActivity, getString(R.string.confirm_entry_error, "${response.code()}: ${response.message()}"), Toast.LENGTH_LONG).show()
@@ -379,8 +366,53 @@ class HomeActivity : AppCompatActivity() {
                 withContext(Dispatchers.Main) {
                     Toast.makeText(this@HomeActivity, getString(R.string.confirm_entry_error, e.message ?: "Unknown error"), Toast.LENGTH_LONG).show()
                 }
+            } finally {
+                withContext(Dispatchers.Main) {
+                    with(binding) {
+                        btnConfirmEntry.isEnabled = true
+                        btnConfirmEntry.text = getString(R.string.action_confirm_entry)
+                        loadingOverlay.visibility = View.GONE
+                    }
+                    isSending = false
+                }
             }
         }
+    }
+
+    private fun resetForm() {
+        binding.etPlateNumber.setText("")
+        binding.etPlateNumber.error = null
+        binding.tvDbStatus.text = getString(R.string.plate_validation_status)
+
+        binding.btnMoto.isSelected = true
+        binding.btnAuto.isSelected = false
+        binding.btnCamioneta.isSelected = false
+        binding.btnCamion.isSelected = false
+        selectedVehicleType = "moto"
+
+        binding.ivPlate.setImageResource(R.drawable.ic_scan_corners)
+        binding.ivFront.setImageResource(R.drawable.front)
+        binding.ivRear.setImageResource(R.drawable.rear)
+        binding.ivLeft.setImageResource(R.drawable.left)
+        binding.ivRight.setImageResource(R.drawable.right)
+
+        hasFrontPhoto = false
+        hasRearPhoto = false
+        hasLeftPhoto = false
+        hasRightPhoto = false
+        hasPlatePhoto = false
+
+        binding.btnRetakePlate.visibility = View.GONE
+        binding.btnDeletePlate.visibility = View.GONE
+        binding.tvPlateError.visibility = View.GONE
+        binding.btnRetakeFront.visibility = View.GONE
+        binding.btnDeleteFront.visibility = View.GONE
+        binding.btnRetakeRear.visibility = View.GONE
+        binding.btnDeleteRear.visibility = View.GONE
+        binding.btnRetakeLeft.visibility = View.GONE
+        binding.btnDeleteLeft.visibility = View.GONE
+        binding.btnRetakeRight.visibility = View.GONE
+        binding.btnDeleteRight.visibility = View.GONE
     }
 
     private fun Uri.toMultipartPart(fieldName: String): MultipartBody.Part? {
@@ -390,24 +422,6 @@ class HomeActivity : AppCompatActivity() {
             MultipartBody.Part.createFormData(fieldName, "${fieldName}.jpg", requestBody)
         } catch (_: Exception) {
             null
-        }
-    }
-
-    private fun startScanAnimation() {
-        binding.scanLine.post {
-            val parent = binding.scanLine.parent as View
-            val parentHeight = parent.height
-            val scanHeight = binding.scanLine.height
-            val endY = (parentHeight - scanHeight).toFloat()
-
-            ObjectAnimator.ofFloat(binding.scanLine, "translationY", 0f, endY).apply {
-                duration = 2500
-                repeatMode = ValueAnimator.REVERSE
-                repeatCount = ValueAnimator.INFINITE
-                interpolator = AccelerateDecelerateInterpolator()
-                start()
-            }
-            binding.scanLine.visibility = View.VISIBLE
         }
     }
 

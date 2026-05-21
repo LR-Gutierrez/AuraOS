@@ -40,17 +40,20 @@
     <string name="cd_user_profile">Foto de perfil del usuario</string>
     <string name="home_app_title">SmartPark OS</string>
     <string name="live_feed_label">● LIVE 4K FEED</string>
-    <string name="ocr_status_label">RECONOCIMIENTO OCR ACTIVO</string>
-    <string name="sample_plate_number">ABC-1234</string>
-    <string name="plate_validation_status">✓ Placa validada en base de datos local</string>
+    <string name="ocr_status_label">NÚMERO DE PLACA</string>
+    <string name="plate_input_hint">ABC-1234</string>
+    <string name="plate_validation_status">Ingrese la matrícula del vehículo</string>
     <string name="vehicle_category_label">CATEGORÍA DE VEHÍCULO</string>
-    <string name="vehicle_type_light">Light</string>
-    <string name="vehicle_type_heavy">Heavy</string>
+    <string name="vehicle_type_moto">Moto</string>
+    <string name="vehicle_type_auto">Auto</string>
+    <string name="vehicle_type_camioneta">Camioneta</string>
+    <string name="vehicle_type_camion">Camión</string>
     <string name="bodywork_status_label">ESTADO DE CARROCERÍA</string>
     <string name="cd_photo_front">Foto frontal</string>
     <string name="cd_photo_rear">Foto trasera</string>
     <string name="cd_photo_left">Foto izquierda</string>
     <string name="cd_photo_right">Foto derecha</string>
+    <string name="cd_plate_photo">Foto de placa</string>
     <string name="photo_label_front">Front</string>
     <string name="photo_label_rear">Rear</string>
     <string name="photo_label_left">Left</string>
@@ -60,9 +63,16 @@
     <string name="action_delete">Eliminar foto</string>
 
     <string name="action_confirm_entry">✓ Confirmar Ingreso</string>
+    <string name="action_sending">Enviando…</string>
     <string name="confirm_entry_success">✅ Ingreso registrado correctamente</string>
     <string name="confirm_entry_error">❌ Error al registrar ingreso: %1$s</string>
     <string name="camera_permission_required">Se requiere permiso de cámara</string>
+    <string name="plate_capture_hint">Toca para capturar placa</string>
+    <string name="required_field_error">Campo obligatorio</string>
+    <string name="plate_capturing">Capturando placa…</string>
+    <string name="plate_sending">Enviando para reconocimiento…</string>
+    <string name="plate_ocr_error">Error al reconocer placa</string>
+    <string name="camera_error">⚠ Error al inicializar la cámara</string>
 
     <!-- Dashboard -->
     <string name="dashboard_capacity_label">REAL-TIME CAPACITY</string>

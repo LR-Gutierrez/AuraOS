@@ -6,8 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="?attr/homeSurfaceBackground"
-    tools:context=".HomeActivity"
-    tools:ignore="MissingClass">
+    tools:context=".HomeActivity">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/app_bar_layout"
@@ -58,7 +57,7 @@
             android:paddingBottom="@dimen/spacing_xxlarge">
 
             <com.google.android.material.card.MaterialCardView
-                android:id="@+id/card_video_feed"
+                android:id="@+id/card_plate_capture"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/video_feed_height"
                 android:backgroundTint="?attr/videoFeedBackgroundCustom"
@@ -69,49 +68,83 @@
                 app:strokeWidth="@dimen/stroke_none">
 
                 <FrameLayout
+                    android:id="@+id/container_plate"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent">
-
-                    <androidx.camera.view.PreviewView
-                        android:id="@+id/preview_view"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        app:scaleType="fillCenter" />
+                    android:layout_height="match_parent"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:padding="6dp">
 
                     <ImageView
-                        android:id="@+id/iv_scan_target"
+                        android:id="@+id/iv_plate"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:layout_gravity="center"
-                        android:paddingVertical="50dp"
-                        android:paddingHorizontal="60dp"
-                        android:contentDescription="@null"
+                        android:contentDescription="@string/cd_plate_photo"
                         android:scaleType="fitCenter"
                         android:src="@drawable/ic_scan_corners" />
 
                     <View
-                        android:id="@+id/scan_line"
                         android:layout_width="match_parent"
-                        android:layout_height="3dp"
-                        android:background="@drawable/bg_scan_line"
-                        android:elevation="4dp"
-                        android:visibility="gone" />
+                        android:layout_height="40dp"
+                        android:layout_gravity="bottom"
+                        android:background="?attr/photoOverlayCustom" />
 
                     <TextView
-                        android:id="@+id/tv_live_feed_label"
+                        android:id="@+id/tv_plate_label"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_margin="@dimen/spacing_small_plus"
-                        android:background="?attr/liveBadgeBackgroundCustom"
-                        android:paddingHorizontal="@dimen/spacing_small"
-                        android:paddingVertical="@dimen/spacing_xsmall"
-                        android:text="@string/live_feed_label"
-                        android:textColor="?attr/liveBadgeTextCustom"
+                        android:layout_gravity="bottom|center_horizontal"
+                        android:layout_marginBottom="8dp"
+                        android:fontFamily="sans-serif-black"
+                        android:text="@string/plate_capture_hint"
+                        android:textColor="?attr/textPrimaryCustom"
                         android:textSize="@dimen/text_size_caption"
                         android:textStyle="bold" />
 
+                    <ImageButton
+                        android:id="@+id/btn_retake_plate"
+                        android:layout_width="@dimen/icon_size_large"
+                        android:layout_height="@dimen/icon_size_large"
+                        android:layout_gravity="top|end"
+                        android:layout_margin="4dp"
+                        android:background="?attr/glassCardBackgroundCustom"
+                        android:contentDescription="@string/action_retake"
+                        android:elevation="2dp"
+                        android:padding="4dp"
+                        android:src="@drawable/ic_retake"
+                        app:tint="?attr/textPrimaryCustom"
+                        android:visibility="gone" />
+
+                    <ImageButton
+                        android:id="@+id/btn_delete_plate"
+                        android:layout_width="@dimen/icon_size_large"
+                        android:layout_height="@dimen/icon_size_large"
+                        android:layout_gravity="top|start"
+                        android:layout_margin="4dp"
+                        android:background="?attr/glassCardBackgroundCustom"
+                        android:contentDescription="@string/action_delete"
+                        android:elevation="2dp"
+                        android:padding="4dp"
+                        android:src="@drawable/ic_delete"
+                        app:tint="?attr/textPrimaryCustom"
+                        android:visibility="gone" />
+
                 </FrameLayout>
             </com.google.android.material.card.MaterialCardView>
+
+            <TextView
+                android:id="@+id/tv_plate_error"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/spacing_small"
+                android:layout_marginTop="@dimen/spacing_xsmall"
+                android:fontFamily="sans-serif-medium"
+                android:text="@string/required_field_error"
+                android:textColor="@android:color/holo_red_dark"
+                android:textSize="@dimen/text_size_small"
+                android:visibility="gone"
+                app:layout_constraintStart_toStartOf="@id/card_plate_capture"
+                app:layout_constraintTop_toBottomOf="@id/card_plate_capture" />
 
             <FrameLayout
                 android:id="@+id/container_ocr_data"
@@ -120,7 +153,7 @@
                 android:layout_marginTop="@dimen/spacing_large"
                 android:background="?attr/glassCardBackgroundCustom"
                 android:padding="@dimen/spacing_large"
-                app:layout_constraintTop_toBottomOf="@id/card_video_feed">
+                app:layout_constraintTop_toBottomOf="@id/card_plate_capture">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
@@ -139,16 +172,23 @@
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
 
-                    <TextView
-                        android:id="@+id/tv_plate_number"
-                        android:layout_width="wrap_content"
+                    <EditText
+                        android:id="@+id/et_plate_number"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/spacing_small"
+                        android:background="@android:color/transparent"
                         android:fontFamily="sans-serif-black"
-                        android:text="@string/sample_plate_number"
+                        android:hint="@string/plate_input_hint"
+                        android:imeOptions="actionDone"
+                        android:inputType="text|textCapCharacters"
+                        android:maxLines="1"
+                        android:padding="0dp"
                         android:textColor="?attr/textPrimaryCustom"
+                        android:textColorHint="?attr/textSecondaryCustom"
                         android:textSize="@dimen/text_size_plate"
                         android:textStyle="bold"
+                        app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@id/lbl_ocr" />
 
@@ -162,7 +202,7 @@
                         android:textColor="?attr/colorPrimary"
                         android:textSize="@dimen/text_size_body"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/tv_plate_number" />
+                        app:layout_constraintTop_toBottomOf="@id/et_plate_number" />
 
                     <TextView
                         android:id="@+id/lbl_category"
@@ -181,39 +221,82 @@
                     <LinearLayout
                         android:id="@+id/layout_vehicle_toggle"
                         android:layout_width="match_parent"
-                        android:layout_height="@dimen/toggle_height"
+                        android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/spacing_small"
-                        android:orientation="horizontal"
+                        android:orientation="vertical"
                         app:layout_constraintTop_toBottomOf="@id/lbl_category">
 
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/btn_light_vehicle"
-                            android:layout_width="0dp"
-                            android:layout_height="match_parent"
-                            android:layout_marginEnd="@dimen/spacing_small"
-                            android:layout_weight="1"
-                            android:background="@drawable/btn_light_vehicle_selector"
-                            android:clickable="true"
-                            android:focusable="true"
-                            android:text="@string/vehicle_type_light"
-                            android:textAllCaps="false"
-                            android:textColor="@drawable/btn_vehicle_text_selector"
-                            app:cornerRadius="@dimen/button_corner_radius_large"
-                            app:rippleColor="@android:color/transparent" />
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="@dimen/toggle_height"
+                            android:orientation="horizontal">
 
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/btn_heavy_vehicle"
-                            android:layout_width="0dp"
-                            android:layout_height="match_parent"
-                            android:layout_weight="1"
-                            android:background="@drawable/btn_heavy_vehicle_selector"
-                            android:clickable="true"
-                            android:focusable="true"
-                            android:text="@string/vehicle_type_heavy"
-                            android:textAllCaps="false"
-                            android:textColor="@drawable/btn_vehicle_text_selector"
-                            app:cornerRadius="@dimen/button_corner_radius_large"
-                            app:rippleColor="@android:color/transparent" />
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btn_moto"
+                                android:layout_width="0dp"
+                                android:layout_height="match_parent"
+                                android:layout_marginEnd="@dimen/spacing_small"
+                                android:layout_weight="1"
+                                android:background="@drawable/btn_vehicle_selector"
+                                android:clickable="true"
+                                android:focusable="true"
+                                android:text="@string/vehicle_type_moto"
+                                android:textAllCaps="false"
+                                android:textColor="@drawable/btn_vehicle_text_selector"
+                                app:cornerRadius="@dimen/button_corner_radius_large"
+                                app:rippleColor="@android:color/transparent" />
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btn_auto"
+                                android:layout_width="0dp"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                android:background="@drawable/btn_vehicle_selector"
+                                android:clickable="true"
+                                android:focusable="true"
+                                android:text="@string/vehicle_type_auto"
+                                android:textAllCaps="false"
+                                android:textColor="@drawable/btn_vehicle_text_selector"
+                                app:cornerRadius="@dimen/button_corner_radius_large"
+                                app:rippleColor="@android:color/transparent" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="@dimen/toggle_height"
+                            android:layout_marginTop="@dimen/spacing_small"
+                            android:orientation="horizontal">
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btn_camioneta"
+                                android:layout_width="0dp"
+                                android:layout_height="match_parent"
+                                android:layout_marginEnd="@dimen/spacing_small"
+                                android:layout_weight="1"
+                                android:background="@drawable/btn_vehicle_selector"
+                                android:clickable="true"
+                                android:focusable="true"
+                                android:text="@string/vehicle_type_camioneta"
+                                android:textAllCaps="false"
+                                android:textColor="@drawable/btn_vehicle_text_selector"
+                                app:cornerRadius="@dimen/button_corner_radius_large"
+                                app:rippleColor="@android:color/transparent" />
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btn_camion"
+                                android:layout_width="0dp"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                android:background="@drawable/btn_vehicle_selector"
+                                android:clickable="true"
+                                android:focusable="true"
+                                android:text="@string/vehicle_type_camion"
+                                android:textAllCaps="false"
+                                android:textColor="@drawable/btn_vehicle_text_selector"
+                                app:cornerRadius="@dimen/button_corner_radius_large"
+                                app:rippleColor="@android:color/transparent" />
+                        </LinearLayout>
+
                     </LinearLayout>
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
@@ -569,6 +652,26 @@
             android:background="@drawable/bg_bottom_nav_indicator"
             android:backgroundTint="?attr/bottomNavItemColorCustom"
             android:visibility="invisible" />
+
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/loading_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#99000000"
+        android:clickable="true"
+        android:focusable="true"
+        android:visibility="gone">
+
+        <com.google.android.material.progressindicator.CircularProgressIndicator
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:indeterminate="true"
+            app:indicatorColor="?attr/colorPrimary"
+            app:indicatorSize="48dp"
+            app:trackThickness="4dp" />
 
     </FrameLayout>
 
