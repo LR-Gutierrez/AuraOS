@@ -6,7 +6,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="?attr/homeSurfaceBackground"
-    tools:context=".HomeActivity">
+    tools:context=".HomeActivity"
+    tools:ignore="MissingClass">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/app_bar_layout"
@@ -61,6 +62,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/video_feed_height"
                 android:backgroundTint="?attr/videoFeedBackgroundCustom"
+                android:clipToOutline="true"
                 app:cardCornerRadius="@dimen/card_corner_radius_large"
                 app:cardElevation="@dimen/elevation_none"
                 app:layout_constraintTop_toTopOf="parent"
@@ -69,6 +71,31 @@
                 <FrameLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent">
+
+                    <androidx.camera.view.PreviewView
+                        android:id="@+id/preview_view"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        app:scaleType="fillCenter" />
+
+                    <ImageView
+                        android:id="@+id/iv_scan_target"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center"
+                        android:paddingVertical="50dp"
+                        android:paddingHorizontal="60dp"
+                        android:contentDescription="@null"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/ic_scan_corners" />
+
+                    <View
+                        android:id="@+id/scan_line"
+                        android:layout_width="match_parent"
+                        android:layout_height="3dp"
+                        android:background="@drawable/bg_scan_line"
+                        android:elevation="4dp"
+                        android:visibility="gone" />
 
                     <TextView
                         android:id="@+id/tv_live_feed_label"
@@ -275,7 +302,7 @@
                                 android:elevation="2dp"
                                 android:padding="4dp"
                                 android:src="@drawable/ic_retake"
-                                android:tint="?attr/textPrimaryCustom"
+                                app:tint="?attr/textPrimaryCustom"
                                 android:visibility="gone" />
 
                             <ImageButton
@@ -290,7 +317,7 @@
                                 android:elevation="2dp"
                                 android:padding="4dp"
                                 android:src="@drawable/ic_delete"
-                                android:tint="?attr/textPrimaryCustom"
+                                app:tint="?attr/textPrimaryCustom"
                                 android:visibility="gone" />
                         </FrameLayout>
 
@@ -342,7 +369,7 @@
                                 android:elevation="2dp"
                                 android:padding="4dp"
                                 android:src="@drawable/ic_retake"
-                                android:tint="?attr/textPrimaryCustom"
+                                app:tint="?attr/textPrimaryCustom"
                                 android:visibility="gone" />
 
                             <ImageButton
@@ -357,7 +384,7 @@
                                 android:elevation="2dp"
                                 android:padding="4dp"
                                 android:src="@drawable/ic_delete"
-                                android:tint="?attr/textPrimaryCustom"
+                                app:tint="?attr/textPrimaryCustom"
                                 android:visibility="gone" />
                         </FrameLayout>
 
@@ -409,7 +436,7 @@
                                 android:elevation="2dp"
                                 android:padding="4dp"
                                 android:src="@drawable/ic_retake"
-                                android:tint="?attr/textPrimaryCustom"
+                                app:tint="?attr/textPrimaryCustom"
                                 android:visibility="gone" />
 
                             <ImageButton
@@ -424,7 +451,7 @@
                                 android:elevation="2dp"
                                 android:padding="4dp"
                                 android:src="@drawable/ic_delete"
-                                android:tint="?attr/textPrimaryCustom"
+                                app:tint="?attr/textPrimaryCustom"
                                 android:visibility="gone" />
                         </FrameLayout>
 
@@ -476,7 +503,7 @@
                                 android:elevation="2dp"
                                 android:padding="4dp"
                                 android:src="@drawable/ic_retake"
-                                android:tint="?attr/textPrimaryCustom"
+                                app:tint="?attr/textPrimaryCustom"
                                 android:visibility="gone" />
 
                             <ImageButton
@@ -491,7 +518,7 @@
                                 android:elevation="2dp"
                                 android:padding="4dp"
                                 android:src="@drawable/ic_delete"
-                                android:tint="?attr/textPrimaryCustom"
+                                app:tint="?attr/textPrimaryCustom"
                                 android:visibility="gone" />
                         </FrameLayout>
                     </GridLayout>

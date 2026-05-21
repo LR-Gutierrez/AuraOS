@@ -1,25 +1,34 @@
 package com.beta.auraos
 
+import android.animation.ObjectAnimator
+import android.animation.ValueAnimator
 import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.View
+import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.camera.core.CameraSelector
+import androidx.camera.core.ImageAnalysis
+import androidx.camera.core.Preview
+import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
 import androidx.lifecycle.lifecycleScope
+import com.beta.auraos.data.remote.ApiClient
+import com.beta.auraos.data.remote.ParkingApi
 import com.beta.auraos.databinding.ActivityHomeBinding
 import com.beta.auraos.util.BottomNavIndicator
 import com.beta.auraos.util.TabNavigator
-import com.beta.auraos.data.remote.ApiClient
-import com.beta.auraos.data.remote.ParkingApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -27,6 +36,9 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.File
+import java.util.Random
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 
 class HomeActivity : AppCompatActivity() {
 
@@ -45,6 +57,16 @@ class HomeActivity : AppCompatActivity() {
     private var hasRightPhoto = false
 
     private var currentPhotoSlot: String? = null
+
+    private var cameraProvider: ProcessCameraProvider? = null
+    private var lensFacing = CameraSelector.LENS_FACING_BACK
+    private var cameraExecutor: ExecutorService = Executors.newSingleThreadExecutor()
+
+    private val simulatedPlates = listOf("ABC-1234", "XYZ-7890", "DEF-4567")
+    private var currentSimulatedIndex = 0
+    private val mainHandler = Handler(Looper.getMainLooper())
+    private var ocrRunnable: Runnable? = null
+    private var isOcrRunning = false
 
     private val takePictureLauncher = registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
         if (success) {
@@ -65,11 +87,19 @@ class HomeActivity : AppCompatActivity() {
 
     private val cameraPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         if (granted) {
-            openCamera()
+            startCamera()
+            startOcrSimulation()
+            if (currentPhotoSlot != null) {
+                openCamera()
+            }
         } else {
+            isCameraEnabledForPreview = false
+            binding.previewView.visibility = View.GONE
             Toast.makeText(this, R.string.camera_permission_required, Toast.LENGTH_SHORT).show()
         }
     }
+
+    private var isCameraEnabledForPreview = true
 
     private val parkingApi: ParkingApi by lazy {
         ApiClient.createApi<ParkingApi>()
@@ -97,6 +127,91 @@ class HomeActivity : AppCompatActivity() {
         setupConfirmButton()
         setupBottomNav()
         setupWindowInsets()
+        startScanAnimation()
+
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            isCameraEnabledForPreview = false
+            cameraPermissionLauncher.launch(android.Manifest.permission.CAMERA)
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+            isCameraEnabledForPreview = true
+            binding.previewView.visibility = View.VISIBLE
+            startCamera()
+            startOcrSimulation()
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        stopOcrSimulation()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        cameraExecutor.shutdown()
+        ocrRunnable?.let { mainHandler.removeCallbacks(it) }
+    }
+
+    private fun startCamera() {
+        val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
+        cameraProviderFuture.addListener({
+            cameraProvider = cameraProviderFuture.get()
+            bindCameraUseCases()
+        }, ContextCompat.getMainExecutor(this))
+    }
+
+    private fun bindCameraUseCases() {
+        val cameraProvider = cameraProvider ?: return
+
+        val preview = Preview.Builder()
+            .build()
+            .also { it.setSurfaceProvider(binding.previewView.surfaceProvider) }
+
+        val imageAnalysis = ImageAnalysis.Builder()
+            .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+            .build()
+
+        imageAnalysis.setAnalyzer(cameraExecutor) { imageProxy ->
+            imageProxy.close()
+        }
+
+        val cameraSelector = CameraSelector.Builder()
+            .requireLensFacing(lensFacing)
+            .build()
+
+        try {
+            cameraProvider.unbindAll()
+            cameraProvider.bindToLifecycle(this, cameraSelector, preview, imageAnalysis)
+        } catch (_: Exception) {
+        }
+    }
+
+    private fun startOcrSimulation() {
+        if (isOcrRunning || !isCameraEnabledForPreview) return
+        isOcrRunning = true
+
+        ocrRunnable = Runnable {
+            if (!isOcrRunning) return@Runnable
+
+            val plate = simulatedPlates[currentSimulatedIndex]
+            currentSimulatedIndex = (currentSimulatedIndex + 1) % simulatedPlates.size
+
+            binding.tvPlateNumber.text = plate
+            binding.tvDbStatus.text = getString(R.string.plate_validation_status)
+
+            val delay = (2000L + Random().nextInt(1001))
+            mainHandler.postDelayed(ocrRunnable!!, delay)
+        }
+        mainHandler.post(ocrRunnable!!)
+    }
+
+    private fun stopOcrSimulation() {
+        isOcrRunning = false
+        ocrRunnable?.let { mainHandler.removeCallbacks(it) }
     }
 
     private fun initPhotoUris() {
@@ -275,6 +390,24 @@ class HomeActivity : AppCompatActivity() {
             MultipartBody.Part.createFormData(fieldName, "${fieldName}.jpg", requestBody)
         } catch (_: Exception) {
             null
+        }
+    }
+
+    private fun startScanAnimation() {
+        binding.scanLine.post {
+            val parent = binding.scanLine.parent as View
+            val parentHeight = parent.height
+            val scanHeight = binding.scanLine.height
+            val endY = (parentHeight - scanHeight).toFloat()
+
+            ObjectAnimator.ofFloat(binding.scanLine, "translationY", 0f, endY).apply {
+                duration = 2500
+                repeatMode = ValueAnimator.REVERSE
+                repeatCount = ValueAnimator.INFINITE
+                interpolator = AccelerateDecelerateInterpolator()
+                start()
+            }
+            binding.scanLine.visibility = View.VISIBLE
         }
     }
 
