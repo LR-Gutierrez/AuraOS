@@ -63,6 +63,8 @@
         <item name="videoFeedBackgroundCustom">@color/crystal_surface_container_high</item>
         <item name="liveBadgeBackgroundCustom">#40000000</item>
         <item name="liveBadgeTextCustom">@color/crystal_error</item>
+
+        <item name="photoOverlayCustom">@drawable/bg_glass_photo_overlay</item>
     </style>
 
     <style name="Theme.AuraOS.NoActionBar" parent="Theme.AuraOS">

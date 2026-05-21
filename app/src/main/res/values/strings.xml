@@ -51,6 +51,11 @@
     <string name="cd_photo_rear">Foto trasera</string>
     <string name="cd_photo_left">Foto izquierda</string>
     <string name="cd_photo_right">Foto derecha</string>
+    <string name="photo_label_front">Front</string>
+    <string name="photo_label_rear">Rear</string>
+    <string name="photo_label_left">Left</string>
+    <string name="photo_label_right">Right</string>
+
     <string name="action_confirm_entry">✓ Confirmar Ingreso</string>
 
     <!-- Dashboard -->

@@ -168,7 +168,6 @@
                             android:background="@drawable/btn_light_vehicle_selector"
                             android:clickable="true"
                             android:focusable="true"
-                            android:paddingVertical="@dimen/spacing_small"
                             android:text="@string/vehicle_type_light"
                             android:textAllCaps="false"
                             android:textColor="@drawable/btn_vehicle_text_selector"
@@ -183,7 +182,6 @@
                             android:background="@drawable/btn_heavy_vehicle_selector"
                             android:clickable="true"
                             android:focusable="true"
-                            android:paddingVertical="@dimen/spacing_small"
                             android:text="@string/vehicle_type_heavy"
                             android:textAllCaps="false"
                             android:textColor="@drawable/btn_vehicle_text_selector"
@@ -235,15 +233,32 @@
                             android:layout_columnWeight="1"
                             android:layout_margin="@dimen/grid_item_margin"
                             android:layout_rowWeight="1"
-                            android:background="?attr/glassCardBackgroundCustom">
+                            android:background="?attr/glassCardBackgroundCustom"
+                            android:padding="6dp">
 
                             <ImageView
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
                                 android:contentDescription="@string/cd_photo_front"
-                                android:scaleType="centerCrop"
-                                android:src="@android:drawable/ic_menu_camera"
-                                app:tint="?attr/photoPlaceholderTintCustom" />
+                                android:scaleType="fitCenter"
+                                android:src="@drawable/front" />
+
+                            <View
+                                android:layout_width="match_parent"
+                                android:layout_height="40dp"
+                                android:layout_gravity="bottom"
+                                android:background="?attr/photoOverlayCustom" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="bottom|center_horizontal"
+                                android:layout_marginBottom="8dp"
+                                android:fontFamily="sans-serif-black"
+                                android:text="@string/photo_label_front"
+                                android:textColor="?attr/textPrimaryCustom"
+                                android:textSize="@dimen/text_size_caption"
+                                android:textStyle="bold" />
                         </FrameLayout>
 
                         <FrameLayout
@@ -252,15 +267,32 @@
                             android:layout_columnWeight="1"
                             android:layout_margin="@dimen/grid_item_margin"
                             android:layout_rowWeight="1"
-                            android:background="?attr/glassCardBackgroundCustom">
+                            android:background="?attr/glassCardBackgroundCustom"
+                            android:padding="6dp">
 
                             <ImageView
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
                                 android:contentDescription="@string/cd_photo_rear"
-                                android:scaleType="centerCrop"
-                                android:src="@android:drawable/ic_menu_camera"
-                                app:tint="?attr/photoPlaceholderTintCustom" />
+                                android:scaleType="fitCenter"
+                                android:src="@drawable/rear" />
+
+                            <View
+                                android:layout_width="match_parent"
+                                android:layout_height="40dp"
+                                android:layout_gravity="bottom"
+                                android:background="?attr/photoOverlayCustom" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="bottom|center_horizontal"
+                                android:layout_marginBottom="8dp"
+                                android:fontFamily="sans-serif-black"
+                                android:text="@string/photo_label_rear"
+                                android:textColor="?attr/textPrimaryCustom"
+                                android:textSize="@dimen/text_size_caption"
+                                android:textStyle="bold" />
                         </FrameLayout>
 
                         <FrameLayout
@@ -269,15 +301,32 @@
                             android:layout_columnWeight="1"
                             android:layout_margin="@dimen/grid_item_margin"
                             android:layout_rowWeight="1"
-                            android:background="?attr/glassCardBackgroundCustom">
+                            android:background="?attr/glassCardBackgroundCustom"
+                            android:padding="6dp">
 
                             <ImageView
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
                                 android:contentDescription="@string/cd_photo_left"
-                                android:scaleType="centerCrop"
-                                android:src="@android:drawable/ic_menu_camera"
-                                app:tint="?attr/photoPlaceholderTintCustom" />
+                                android:scaleType="fitCenter"
+                                android:src="@drawable/left" />
+
+                            <View
+                                android:layout_width="match_parent"
+                                android:layout_height="40dp"
+                                android:layout_gravity="bottom"
+                                android:background="?attr/photoOverlayCustom" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="bottom|center_horizontal"
+                                android:layout_marginBottom="8dp"
+                                android:fontFamily="sans-serif-black"
+                                android:text="@string/photo_label_left"
+                                android:textColor="?attr/textPrimaryCustom"
+                                android:textSize="@dimen/text_size_caption"
+                                android:textStyle="bold" />
                         </FrameLayout>
 
                         <FrameLayout
@@ -286,15 +335,32 @@
                             android:layout_columnWeight="1"
                             android:layout_margin="@dimen/grid_item_margin"
                             android:layout_rowWeight="1"
-                            android:background="?attr/glassCardBackgroundCustom">
+                            android:background="?attr/glassCardBackgroundCustom"
+                            android:padding="6dp">
 
                             <ImageView
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
                                 android:contentDescription="@string/cd_photo_right"
-                                android:scaleType="centerCrop"
-                                android:src="@android:drawable/ic_menu_camera"
-                                app:tint="?attr/photoPlaceholderTintCustom" />
+                                android:scaleType="fitCenter"
+                                android:src="@drawable/right" />
+
+                            <View
+                                android:layout_width="match_parent"
+                                android:layout_height="40dp"
+                                android:layout_gravity="bottom"
+                                android:background="?attr/photoOverlayCustom" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="bottom|center_horizontal"
+                                android:layout_marginBottom="8dp"
+                                android:fontFamily="sans-serif-black"
+                                android:text="@string/photo_label_right"
+                                android:textColor="?attr/textPrimaryCustom"
+                                android:textSize="@dimen/text_size_caption"
+                                android:textStyle="bold" />
                         </FrameLayout>
                     </GridLayout>
 

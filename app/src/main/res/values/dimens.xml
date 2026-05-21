@@ -63,8 +63,8 @@
     <dimen name="icon_size_medium">24dp</dimen>
     <dimen name="icon_size_large">32dp</dimen>
     <dimen name="video_feed_height">180dp</dimen>
-    <dimen name="toggle_height">54dp</dimen>
-    <dimen name="photo_grid_height">180dp</dimen>
+    <dimen name="toggle_height">40dp</dimen>
+    <dimen name="photo_grid_height">220dp</dimen>
     <dimen name="primary_button_height">56dp</dimen>
     <dimen name="dashboard_scroll_padding_bottom">120dp</dimen>
     <dimen name="grid_item_margin">4dp</dimen>

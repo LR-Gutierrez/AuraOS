@@ -57,4 +57,7 @@
     <!-- Live badge -->
     <attr name="liveBadgeBackgroundCustom" format="color" />
     <attr name="liveBadgeTextCustom" format="color" />
+
+    <!-- Photo overlay (glassmorphism gradient) -->
+    <attr name="photoOverlayCustom" format="reference" />
 </resources>
