@@ -89,12 +89,23 @@ class SessionManager(context: Context) {
         prefs.edit().putBoolean(KEY_BIOMETRIC_ENROLLED, enrolled).apply()
     }
 
+    fun saveSelectedBranchId(branchId: String) {
+        prefs.edit().putString(KEY_SELECTED_BRANCH_ID, branchId).apply()
+    }
+
+    fun getSelectedBranchId(): String? = prefs.getString(KEY_SELECTED_BRANCH_ID, null)
+
+    fun clearSelectedBranchId() {
+        prefs.edit().remove(KEY_SELECTED_BRANCH_ID).apply()
+    }
+
     fun clearSession() {
         clearToken()
         clearCredentials()
         prefs.edit()
             .remove(KEY_USER_ID)
             .remove(KEY_BIOMETRIC_ENROLLED)
+            .remove(KEY_SELECTED_BRANCH_ID)
             .apply()
     }
 
@@ -106,5 +117,6 @@ class SessionManager(context: Context) {
         private const val KEY_PASSWORD = "biometric_password"
         private const val KEY_USER_ID = "user_id"
         private const val KEY_BIOMETRIC_ENROLLED = "biometric_enrolled"
+        private const val KEY_SELECTED_BRANCH_ID = "selected_branch_id"
     }
 }

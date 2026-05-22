@@ -32,8 +32,49 @@
                 android:textColor="?attr/textPrimaryCustom"
                 android:textSize="@dimen/text_size_title"
                 android:textStyle="bold"
-                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintBottom_toTopOf="@id/tv_branch_name"
                 app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/tv_branch_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif"
+                android:text="@string/branch_registering_at"
+                android:textColor="?attr/textSecondaryCustom"
+                android:textSize="10sp"
+                app:layout_constraintBottom_toTopOf="@id/tv_branch_name"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tv_app_title" />
+
+            <TextView
+                android:id="@+id/tv_branch_name"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/spacing_small"
+                android:clickable="true"
+                android:focusable="true"
+                android:fontFamily="sans-serif-black"
+                android:text="@string/branch_no_branch"
+                android:textColor="?attr/colorPrimary"
+                android:textSize="@dimen/text_size_body"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/btn_branch_selector"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tv_branch_label" />
+
+            <ImageButton
+                android:id="@+id/btn_branch_selector"
+                android:layout_width="@dimen/icon_size_large"
+                android:layout_height="@dimen/icon_size_large"
+                android:background="?attr/glassCardBackgroundCustom"
+                android:contentDescription="@string/branch_select_hint"
+                android:src="@android:drawable/arrow_down_float"
+                app:tint="?attr/textPrimaryCustom"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>

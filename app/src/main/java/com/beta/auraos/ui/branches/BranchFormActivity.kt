@@ -1,0 +1,176 @@
+package com.beta.auraos.ui.branches
+
+import android.content.Context
+import android.content.Intent
+import android.os.Bundle
+import android.view.View
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
+import android.widget.Toast
+import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
+import androidx.lifecycle.ViewModelProvider
+import com.beta.auraos.R
+import com.beta.auraos.data.model.CreateBranchInput
+import com.beta.auraos.data.model.UpdateBranchInput
+import com.beta.auraos.databinding.ActivityBranchFormBinding
+
+class BranchFormActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivityBranchFormBinding
+    private lateinit var viewModel: BranchViewModel
+
+    private var branchId: String? = null
+    private var isEditMode = false
+
+    companion object {
+        private const val EXTRA_BRANCH_ID = "extra_branch_id"
+
+        fun open(context: Context, branchId: String?) {
+            val intent = Intent(context, BranchFormActivity::class.java)
+            if (branchId != null) {
+                intent.putExtra(EXTRA_BRANCH_ID, branchId)
+            }
+            context.startActivity(intent)
+        }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+
+        binding = ActivityBranchFormBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        branchId = intent.getStringExtra(EXTRA_BRANCH_ID)
+        isEditMode = branchId != null
+
+        viewModel = ViewModelProvider(this, BranchViewModelFactory())[BranchViewModel::class.java]
+
+        setupViews()
+        setupObservers()
+        setupWindowInsets()
+
+        if (isEditMode) {
+            binding.tvAppTitle.text = "Editar sucursal"
+            binding.btnSave.text = "Actualizar sucursal"
+            viewModel.loadBranch(branchId!!)
+        }
+    }
+
+    private fun setupViews() {
+        binding.btnBack.setOnClickListener { finish() }
+
+        val currencies = arrayOf("USD", "MXN", "GTQ")
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, currencies)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        binding.spinnerCurrency.adapter = adapter
+
+        binding.btnSave.setOnClickListener { validateAndSave() }
+    }
+
+    private fun setupObservers() {
+        viewModel.selectedBranch.observe(this) { branch ->
+            if (branch != null && isEditMode) {
+                populateForm(branch)
+            }
+        }
+
+        viewModel.isLoading.observe(this) { loading ->
+            binding.loadingOverlay.visibility = if (loading) View.VISIBLE else View.GONE
+        }
+
+        viewModel.operationResult.observe(this) { result ->
+            if (result != null) {
+                Toast.makeText(this, result.message, if (result.success) Toast.LENGTH_SHORT else Toast.LENGTH_LONG).show()
+                viewModel.clearOperationResult()
+                if (result.success) {
+                    finish()
+                }
+            }
+        }
+
+        viewModel.error.observe(this) { error ->
+            if (error != null) {
+                Toast.makeText(this, error, Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
+    private fun populateForm(branch: com.beta.auraos.data.model.Branch) {
+        binding.etName.setText(branch.name)
+        if (branch.address != null) binding.etAddress.setText(branch.address)
+        binding.etMotoCapacity.setText(branch.motorcycleCapacity.toString())
+        binding.etLightCapacity.setText(branch.lightVehicleCapacity.toString())
+        binding.etHeavyCapacity.setText(branch.heavyVehicleCapacity.toString())
+        binding.etMotoRate.setText(branch.motorcycleRate.toString())
+        binding.etLightRate.setText(branch.lightVehicleRate.toString())
+        binding.etHeavyRate.setText(branch.heavyVehicleRate.toString())
+
+        val currencies = arrayOf("USD", "MXN", "GTQ")
+        val currencyIndex = currencies.indexOf(branch.currency)
+        if (currencyIndex >= 0) {
+            binding.spinnerCurrency.setSelection(currencyIndex)
+        }
+    }
+
+    private fun validateAndSave() {
+        val name = binding.etName.text.toString().trim()
+        if (name.isEmpty()) {
+            binding.etName.error = "Campo obligatorio"
+            binding.etName.requestFocus()
+            return
+        }
+
+        val address = binding.etAddress.text.toString().trim().ifEmpty { null }
+
+        val motoCapacity = binding.etMotoCapacity.text.toString().toIntOrNull() ?: 0
+        val lightCapacity = binding.etLightCapacity.text.toString().toIntOrNull() ?: 0
+        val heavyCapacity = binding.etHeavyCapacity.text.toString().toIntOrNull() ?: 0
+
+        val motoRate = binding.etMotoRate.text.toString().toDoubleOrNull() ?: 0.0
+        val lightRate = binding.etLightRate.text.toString().toDoubleOrNull() ?: 0.0
+        val heavyRate = binding.etHeavyRate.text.toString().toDoubleOrNull() ?: 0.0
+
+        val currency = binding.spinnerCurrency.selectedItem.toString()
+
+        if (isEditMode) {
+            val input = UpdateBranchInput(
+                name = name,
+                address = address,
+                motorcycleCapacity = motoCapacity,
+                lightVehicleCapacity = lightCapacity,
+                heavyVehicleCapacity = heavyCapacity,
+                motorcycleRate = motoRate,
+                lightVehicleRate = lightRate,
+                heavyVehicleRate = heavyRate,
+                currency = currency
+            )
+            viewModel.updateBranch(branchId!!, input)
+        } else {
+            val input = CreateBranchInput(
+                name = name,
+                address = address,
+                motorcycleCapacity = motoCapacity,
+                lightVehicleCapacity = lightCapacity,
+                heavyVehicleCapacity = heavyCapacity,
+                motorcycleRate = motoRate,
+                lightVehicleRate = lightRate,
+                heavyVehicleRate = heavyRate,
+                currency = currency
+            )
+            viewModel.createBranch(input)
+        }
+    }
+
+    private fun setupWindowInsets() {
+        ViewCompat.setOnApplyWindowInsetsListener(binding.headerBar) { view, insets ->
+            val statusBarInsets = insets.getInsets(WindowInsetsCompat.Type.statusBars())
+            view.updatePadding(top = statusBarInsets.top)
+            insets
+        }
+    }
+}

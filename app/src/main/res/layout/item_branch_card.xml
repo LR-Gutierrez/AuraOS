@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="@dimen/spacing_small"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?attr/selectableItemBackground"
+    app:cardCornerRadius="@dimen/card_corner_radius_large"
+    app:cardBackgroundColor="?attr/cardGlassFillColorCustom"
+    app:strokeColor="?attr/dividerColorCustom"
+    app:strokeWidth="@dimen/stroke_thin">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/spacing_medium">
+
+        <TextView
+            android:id="@+id/tv_branch_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-black"
+            android:textColor="?attr/textPrimaryCustom"
+            android:textSize="@dimen/text_size_body"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/layout_actions" />
+
+        <TextView
+            android:id="@+id/tv_branch_address"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_xsmall"
+            android:fontFamily="sans-serif"
+            android:textColor="?attr/textSecondaryCustom"
+            android:textSize="@dimen/text_size_small"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tv_branch_name"
+            app:layout_constraintEnd_toStartOf="@id/layout_actions" />
+
+        <TextView
+            android:id="@+id/tv_branch_capacity"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_small"
+            android:fontFamily="sans-serif-mono"
+            android:textColor="?attr/textSecondaryCustom"
+            android:textSize="@dimen/text_size_caption"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tv_branch_address"
+            app:layout_constraintEnd_toStartOf="@id/layout_actions" />
+
+        <TextView
+            android:id="@+id/tv_branch_rates"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_xsmall"
+            android:fontFamily="sans-serif-mono"
+            android:textColor="?attr/colorPrimary"
+            android:textSize="@dimen/text_size_caption"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tv_branch_capacity"
+            app:layout_constraintEnd_toStartOf="@id/layout_actions" />
+
+        <LinearLayout
+            android:id="@+id/layout_actions"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageButton
+                android:id="@+id/btn_edit_branch"
+                android:layout_width="@dimen/icon_size_large"
+                android:layout_height="@dimen/icon_size_large"
+                android:background="?attr/glassCardBackgroundCustom"
+                android:contentDescription="Editar"
+                android:src="@android:drawable/ic_menu_edit"
+                app:tint="?attr/textPrimaryCustom" />
+
+            <ImageButton
+                android:id="@+id/btn_delete_branch"
+                android:layout_width="@dimen/icon_size_large"
+                android:layout_height="@dimen/icon_size_large"
+                android:layout_marginStart="@dimen/spacing_small"
+                android:background="?attr/glassCardBackgroundCustom"
+                android:contentDescription="Eliminar"
+                android:src="@android:drawable/ic_menu_delete"
+                app:tint="?attr/colorError" />
+
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</com.google.android.material.card.MaterialCardView>

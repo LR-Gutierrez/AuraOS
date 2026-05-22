@@ -21,6 +21,7 @@ interface ParkingApi {
     suspend fun registerEntry(
         @Part("plate") plate: RequestBody,
         @Part("vehicleType") vehicleType: RequestBody,
+        @Part("branchId") branchId: RequestBody,
         @Part platePhoto: MultipartBody.Part?,
         @Part front: MultipartBody.Part?,
         @Part rear: MultipartBody.Part?,

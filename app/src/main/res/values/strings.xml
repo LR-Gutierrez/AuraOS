@@ -89,4 +89,40 @@
     <string name="dashboard_alert_membership_subtitle">$50 Elite Tier • 14m left</string>
     <string name="dashboard_alert_vip_title">VIP Arrival</string>
     <string name="dashboard_alert_vip_subtitle">Lobby Valet • Slot A-12</string>
+
+    <!-- Branches -->
+    <string name="branch_list_title">Sucursales</string>
+    <string name="branch_new_title">Nueva sucursal</string>
+    <string name="branch_edit_title">Editar sucursal</string>
+    <string name="branch_new_action">Nueva sucursal</string>
+    <string name="branch_save_action">Guardar sucursal</string>
+    <string name="branch_update_action">Actualizar sucursal</string>
+    <string name="branch_empty_state">No hay sucursales configuradas.\nCrea la primera sucursal para comenzar a registrar ingresos.</string>
+    <string name="branch_no_branch">Sin sucursal seleccionada</string>
+    <string name="branch_select_hint">Seleccionar sucursal</string>
+    <string name="branch_delete_confirm">¿Estás seguro de eliminar \"%1$s\"? Esta acción no se puede deshacer.</string>
+    <string name="branch_delete_title">Eliminar sucursal</string>
+    <string name="branch_delete_fk_error">No se puede eliminar esta sucursal porque tiene ingresos registrados.</string>
+    <string name="branch_create_success">Sucursal creada correctamente</string>
+    <string name="branch_update_success">Sucursal actualizada correctamente</string>
+    <string name="branch_delete_success">Sucursal eliminada correctamente</string>
+    <string name="branch_load_error">Error al cargar sucursales</string>
+    <string name="branch_required_for_entry">Debes configurar al menos una sucursal antes de registrar ingresos</string>
+    <string name="branch_registering_at">Registrando en:</string>
+    <string name="branch_section_general">INFORMACIÓN GENERAL</string>
+    <string name="branch_section_capacity">CAPACIDAD MÁXIMA</string>
+    <string name="branch_section_rates">TARIFAS</string>
+    <string name="branch_section_currency">MONEDA</string>
+    <string name="branch_hint_name">Nombre de la sucursal *</string>
+    <string name="branch_hint_address">Dirección (opcional)</string>
+    <string name="branch_hint_moto_capacity">Motocicletas</string>
+    <string name="branch_hint_light_capacity">Vehículos ligeros</string>
+    <string name="branch_hint_heavy_capacity">Vehículos pesados</string>
+    <string name="branch_hint_moto_rate">Tarifa motocicletas</string>
+    <string name="branch_hint_light_rate">Tarifa vehículos ligeros</string>
+    <string name="branch_hint_heavy_rate">Tarifa vehículos pesados</string>
+    <string name="branch_capacity_format">M:%1$d  L:%2$d  P:%3$d</string>
+    <string name="dashboard_branches_title">Sucursales</string>
+    <string name="dashboard_branches_subtitle">Gestionar sucursales activas</string>
+    <string name="dashboard_branches_button">Gestionar sucursales</string>
 </resources>

@@ -40,6 +40,16 @@
             android:exported="false"
             android:label="@string/title_activity_home"
             android:theme="@style/Theme.AuraOS.NoActionBar" />
+        <activity
+            android:name=".ui.branches.BranchListActivity"
+            android:exported="false"
+            android:label="@string/branch_list_title"
+            android:theme="@style/Theme.AuraOS.NoActionBar" />
+        <activity
+            android:name=".ui.branches.BranchFormActivity"
+            android:exported="false"
+            android:label="@string/branch_new_title"
+            android:theme="@style/Theme.AuraOS.NoActionBar" />
 
         <activity
             android:name=".ui.login.LoginActivity"

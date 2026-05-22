@@ -8,6 +8,7 @@ import android.view.View
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
@@ -15,9 +16,15 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
 import androidx.lifecycle.lifecycleScope
+import com.beta.auraos.data.BranchRepository
+import com.beta.auraos.data.Result
+import com.beta.auraos.data.local.SessionManager
+import com.beta.auraos.data.model.Branch
 import com.beta.auraos.data.remote.ApiClient
+import com.beta.auraos.data.remote.BranchApi
 import com.beta.auraos.data.remote.ParkingApi
 import com.beta.auraos.databinding.ActivityHomeBinding
+import com.beta.auraos.ui.branches.BranchListActivity
 import com.beta.auraos.util.BottomNavIndicator
 import com.beta.auraos.util.TabNavigator
 import kotlinx.coroutines.Dispatchers
@@ -32,8 +39,16 @@ class HomeActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityHomeBinding
 
-    private var selectedVehicleType = "moto"
+    private var selectedVehicleType = "motorcycle"
     private var isSending = false
+
+    private lateinit var sessionManager: SessionManager
+    private var branches: List<Branch> = emptyList()
+    private var selectedBranch: Branch? = null
+
+    private val branchRepository: BranchRepository by lazy {
+        BranchRepository(ApiClient.createApi<BranchApi>())
+    }
 
     private var frontPhotoUri: Uri? = null
     private var rearPhotoUri: Uri? = null
@@ -96,13 +111,17 @@ class HomeActivity : AppCompatActivity() {
             initialItemId = R.id.nav_register,
         )
 
+        sessionManager = SessionManager(this)
+
         initPhotoUris()
         setupPhotoClickHandlers()
         setupRetakeDeleteHandlers()
         setupVehicleButtons()
         setupConfirmButton()
+        setupBranchSelector()
         setupBottomNav()
         setupWindowInsets()
+        loadBranches()
     }
 
     override fun onDestroy() {
@@ -267,14 +286,14 @@ class HomeActivity : AppCompatActivity() {
     }
 
     private fun setupVehicleButtons() {
-        selectedVehicleType = "moto"
+        selectedVehicleType = "motorcycle"
         binding.btnMoto.isSelected = true
 
         val buttons = listOf(
-            binding.btnMoto to "moto",
-            binding.btnAuto to "auto",
-            binding.btnCamioneta to "camioneta",
-            binding.btnCamion to "camion",
+            binding.btnMoto to "motorcycle",
+            binding.btnAuto to "light",
+            binding.btnCamioneta to "light",
+            binding.btnCamion to "heavy",
         )
 
         buttons.forEach { (button, type) ->
@@ -283,6 +302,78 @@ class HomeActivity : AppCompatActivity() {
                 button.isSelected = true
                 selectedVehicleType = type
             }
+        }
+    }
+
+    private fun setupBranchSelector() {
+        binding.btnBranchSelector.setOnClickListener { showBranchSelector() }
+        binding.tvBranchName.setOnClickListener { showBranchSelector() }
+
+        binding.tvBranchLabel.text = getString(R.string.branch_registering_at)
+    }
+
+    private fun showBranchSelector() {
+        if (branches.isEmpty()) {
+            AlertDialog.Builder(this)
+                .setTitle("Sin sucursales")
+                .setMessage(getString(R.string.branch_required_for_entry))
+                .setPositiveButton("Configurar") { _, _ ->
+                    startActivity(android.content.Intent(this, BranchListActivity::class.java))
+                }
+                .setNegativeButton("Cancelar", null)
+                .show()
+            return
+        }
+
+        val names = branches.map { it.name }.toTypedArray()
+        val selectedIndex = if (selectedBranch != null) branches.indexOf(selectedBranch) else 0
+
+        AlertDialog.Builder(this)
+            .setTitle("Seleccionar sucursal")
+            .setSingleChoiceItems(names, if (selectedIndex >= 0) selectedIndex else 0) { dialog, which ->
+                val branch = branches[which]
+                selectedBranch = branch
+                sessionManager.saveSelectedBranchId(branch.id)
+                binding.tvBranchName.text = branch.name
+                dialog.dismiss()
+            }
+            .setPositiveButton("Gestionar sucursales") { _, _ ->
+                startActivity(android.content.Intent(this, BranchListActivity::class.java))
+            }
+            .setNegativeButton("Cancelar", null)
+            .show()
+    }
+
+    private fun loadBranches() {
+        lifecycleScope.launch(Dispatchers.IO) {
+            val result = branchRepository.getBranches()
+            withContext(Dispatchers.Main) {
+                when (result) {
+                    is Result.Success -> {
+                        branches = result.data
+                        restoreOrSelectBranch()
+                    }
+                    is Result.Error -> {
+                        binding.tvBranchName.text = getString(R.string.branch_load_error)
+                    }
+                }
+            }
+        }
+    }
+
+    private fun restoreOrSelectBranch() {
+        val savedId = sessionManager.getSelectedBranchId()
+        val saved = if (savedId != null) branches.find { it.id == savedId } else null
+
+        if (saved != null) {
+            selectedBranch = saved
+            binding.tvBranchName.text = saved.name
+        } else if (branches.isNotEmpty()) {
+            selectedBranch = branches.first()
+            sessionManager.saveSelectedBranchId(selectedBranch!!.id)
+            binding.tvBranchName.text = selectedBranch!!.name
+        } else {
+            binding.tvBranchName.text = getString(R.string.branch_no_branch)
         }
     }
 
@@ -295,6 +386,12 @@ class HomeActivity : AppCompatActivity() {
 
     private fun validateAndSend() {
         var firstErrorView: View? = null
+
+        if (selectedBranch == null) {
+            Toast.makeText(this, getString(R.string.branch_required_for_entry), Toast.LENGTH_LONG).show()
+            showBranchSelector()
+            return
+        }
 
         if (binding.etPlateNumber.text.isNullOrBlank()) {
             binding.etPlateNumber.error = "Campo obligatorio"
@@ -337,6 +434,8 @@ class HomeActivity : AppCompatActivity() {
                     .toRequestBody("text/plain".toMediaTypeOrNull())
                 val vehicleType = selectedVehicleType
                     .toRequestBody("text/plain".toMediaTypeOrNull())
+                val branchId = (selectedBranch?.id ?: "")
+                    .toRequestBody("text/plain".toMediaTypeOrNull())
 
                 val platePhotoPart = platePhotoUri?.toMultipartPart("platePhoto")
                 val frontPart = frontPhotoUri?.toMultipartPart("front")
@@ -347,6 +446,7 @@ class HomeActivity : AppCompatActivity() {
                 val response = parkingApi.registerEntry(
                     plate = plate,
                     vehicleType = vehicleType,
+                    branchId = branchId,
                     platePhoto = platePhotoPart,
                     front = frontPart,
                     rear = rearPart,
@@ -388,7 +488,7 @@ class HomeActivity : AppCompatActivity() {
         binding.btnAuto.isSelected = false
         binding.btnCamioneta.isSelected = false
         binding.btnCamion.isSelected = false
-        selectedVehicleType = "moto"
+        selectedVehicleType = "motorcycle"
 
         binding.ivPlate.setImageResource(R.drawable.ic_scan_corners)
         binding.ivFront.setImageResource(R.drawable.front)

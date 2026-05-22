@@ -10,6 +10,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
 import androidx.lifecycle.lifecycleScope
+import com.beta.auraos.ui.branches.BranchListActivity
 import com.beta.auraos.util.BorderGlowDrawable
 import com.google.android.material.color.MaterialColors
 import com.beta.auraos.data.LoginDataSource
@@ -100,6 +101,10 @@ class DashboardActivity : AppCompatActivity() {
 
         startBorderGlow(binding.glowRevenue, successColor, cornerRadiusPx)
         startBorderGlow(binding.glowMemberships, primaryColor, cornerRadiusPx)
+
+        binding.cardBranches.setOnClickListener {
+            startActivity(android.content.Intent(this, BranchListActivity::class.java))
+        }
     }
 
     private fun startBorderGlow(overlay: View, color: Int, cornerRadiusPx: Float) {
