@@ -9,26 +9,33 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
-import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.ViewModelProvider
+import com.beta.auraos.data.DashboardRepository
+import com.beta.auraos.data.local.SessionManager
+import com.beta.auraos.data.model.DashboardResponse
+import com.beta.auraos.databinding.ActivityDashboardBinding
 import com.beta.auraos.ui.branches.BranchListActivity
+import com.beta.auraos.ui.dashboard.DashboardUiState
+import com.beta.auraos.ui.dashboard.DashboardViewModel
+import com.beta.auraos.ui.dashboard.DashboardViewModelFactory
 import com.beta.auraos.util.BorderGlowDrawable
+import com.beta.auraos.util.BottomNavIndicator
+import com.beta.auraos.util.TabNavigator
 import com.google.android.material.color.MaterialColors
 import com.beta.auraos.data.LoginDataSource
 import com.beta.auraos.data.Result
 import com.beta.auraos.data.local.BiometricKeyManager
-import com.beta.auraos.data.local.SessionManager
-import com.beta.auraos.databinding.ActivityDashboardBinding
-import com.beta.auraos.util.BottomNavIndicator
-import com.beta.auraos.util.TabNavigator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import androidx.lifecycle.lifecycleScope
 
 class DashboardActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityDashboardBinding
     private lateinit var sessionManager: SessionManager
     private lateinit var biometricKeyManager: BiometricKeyManager
+    private var viewModel: DashboardViewModel? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -105,6 +112,110 @@ class DashboardActivity : AppCompatActivity() {
         binding.cardBranches.setOnClickListener {
             startActivity(android.content.Intent(this, BranchListActivity::class.java))
         }
+
+        setupViewModel()
+        observeDashboard()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        loadDashboard()
+    }
+
+    private fun setupViewModel() {
+        val token = sessionManager.getToken() ?: return
+        val repository = DashboardRepository(token)
+        val factory = DashboardViewModelFactory(repository)
+        viewModel = ViewModelProvider(this, factory)[DashboardViewModel::class.java]
+    }
+
+    private fun observeDashboard() {
+        val vm = viewModel ?: return
+        vm.uiState.observe(this) { state ->
+            when (state) {
+                is DashboardUiState.Success -> bindData(state.data)
+                is DashboardUiState.Error -> showError(state.message)
+                is DashboardUiState.Loading -> { }
+            }
+        }
+    }
+
+    private fun loadDashboard() {
+        val vm = viewModel
+        if (vm == null) {
+            showError("Sesión no iniciada. Inicia sesión para ver el dashboard.")
+            return
+        }
+        val branchId = sessionManager.getSelectedBranchId()
+        if (branchId == null) {
+            showError("Selecciona una sucursal en la pantalla de inicio para ver el dashboard.")
+            return
+        }
+        vm.loadDashboard(branchId)
+    }
+
+    private fun bindData(data: DashboardResponse) {
+        val percent = data.occupancyPercent.toInt()
+        binding.tvOccupancyTitle.text = getString(R.string.dashboard_occupancy_title, percent)
+        binding.tvBaysCounter.text = getString(
+            R.string.dashboard_bays_counter,
+            data.occupiedBays,
+            data.totalBays
+        )
+        binding.pbOccupancy.progress = percent
+
+        val trend = data.trendPercent
+        if (trend >= 0) {
+            binding.tvTrend.text = getString(R.string.dashboard_trend_up, trend.toInt())
+            binding.tvTrend.setTextColor(
+                MaterialColors.getColor(binding.tvTrend, R.attr.semanticSuccessCustom)
+            )
+        } else {
+            binding.tvTrend.text = getString(R.string.dashboard_trend_down, (-trend).toInt())
+            binding.tvTrend.setTextColor(
+                MaterialColors.getColor(binding.tvTrend, com.google.android.material.R.attr.colorError)
+            )
+        }
+
+        binding.tvRevenueAmount.text = getString(R.string.dashboard_revenue_amount, data.dailyRevenue)
+        binding.tvMembershipsCount.text = getString(
+            R.string.dashboard_memberships_count,
+            data.activeMemberships,
+            data.totalMemberships
+        )
+
+        binding.badgeCritical.text = getString(R.string.dashboard_badge_critical, data.criticalAlertsCount)
+        binding.badgeCritical.visibility = if (data.criticalAlertsCount > 0) View.VISIBLE else View.GONE
+
+        if (data.expiringMemberships.isNotEmpty()) {
+            val m = data.expiringMemberships[0]
+            binding.alertTitle1.text = getString(R.string.dashboard_alert_membership_title, m.memberName)
+            binding.alertSubtitle1.text = getString(R.string.dashboard_alert_membership_subtitle, m.tier, m.timeLeft)
+        } else {
+            binding.alertTitle1.text = getString(R.string.dashboard_alert_none)
+            binding.alertSubtitle1.text = ""
+        }
+
+        if (data.vipArrivals.isNotEmpty()) {
+            val v = data.vipArrivals[0]
+            binding.alertTitle2.text = getString(R.string.dashboard_alert_vip_title, v.guestName)
+            binding.alertSubtitle2.text = getString(R.string.dashboard_alert_vip_subtitle, v.slot)
+        } else {
+            binding.alertTitle2.text = getString(R.string.dashboard_alert_vip_none)
+            binding.alertSubtitle2.text = ""
+        }
+    }
+
+    private fun showError(message: String) {
+        if (message.contains("Sesión expirada") || message.contains("Sesión no iniciada")) {
+            Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+            return
+        }
+        if (message.contains("selecciona una sucursal")) {
+            Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+            return
+        }
+        Toast.makeText(this, "Error al cargar dashboard: $message", Toast.LENGTH_SHORT).show()
     }
 
     private fun startBorderGlow(overlay: View, color: Int, cornerRadiusPx: Float) {

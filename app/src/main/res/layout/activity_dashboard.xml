@@ -112,7 +112,6 @@
                         android:id="@+id/tv_trend"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/dashboard_trend"
                         android:textColor="?attr/semanticSuccessCustom"
                         android:textStyle="bold"
                         android:textSize="@dimen/text_size_body"
@@ -349,7 +348,6 @@
                             android:id="@+id/alert_title_1"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/dashboard_alert_membership_title"
                             android:textColor="?attr/textPrimaryCustom"
                             android:textStyle="bold"
                             android:textSize="@dimen/text_size_body"/>
@@ -358,7 +356,6 @@
                             android:id="@+id/alert_subtitle_1"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/dashboard_alert_membership_subtitle"
                             android:textColor="?attr/textSecondaryCustom"
                             android:textSize="@dimen/text_size_small"/>
                     </LinearLayout>
@@ -402,7 +399,6 @@
                             android:id="@+id/alert_title_2"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/dashboard_alert_vip_title"
                             android:textColor="?attr/textPrimaryCustom"
                             android:textStyle="bold"
                             android:textSize="@dimen/text_size_body"/>
@@ -411,7 +407,6 @@
                             android:id="@+id/alert_subtitle_2"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/dashboard_alert_vip_subtitle"
                             android:textColor="?attr/textSecondaryCustom"
                             android:textSize="@dimen/text_size_small"/>
                     </LinearLayout>
@@ -420,20 +415,6 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.core.widget.NestedScrollView>
-
-    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
-        android:id="@+id/fab_asset_entry"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_marginEnd="@dimen/spacing_large"
-        android:layout_marginBottom="90dp"
-        android:text="Asset Entry"
-        android:textColor="?attr/textPrimaryCustom"
-        app:icon="@android:drawable/ic_input_add"
-        app:iconTint="?attr/textPrimaryCustom"
-        app:backgroundTint="?attr/cardGlassFillColorCustom"
-        app:elevation="8dp"/>
 
     <FrameLayout
         android:layout_width="match_parent"
