@@ -308,8 +308,6 @@ class HomeActivity : AppCompatActivity() {
     private fun setupBranchSelector() {
         binding.btnBranchSelector.setOnClickListener { showBranchSelector() }
         binding.tvBranchName.setOnClickListener { showBranchSelector() }
-
-        binding.tvBranchLabel.text = getString(R.string.branch_registering_at)
     }
 
     private fun showBranchSelector() {

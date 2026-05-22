@@ -125,4 +125,5 @@
     <string name="dashboard_branches_title">Sucursales</string>
     <string name="dashboard_branches_subtitle">Gestionar sucursales activas</string>
     <string name="dashboard_branches_button">Gestionar sucursales</string>
+    <string name="action_back">Regresar</string>
 </resources>

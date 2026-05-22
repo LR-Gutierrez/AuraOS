@@ -21,7 +21,6 @@ class BranchListActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityBranchListBinding
     private lateinit var viewModel: BranchViewModel
-    private var isEditMode = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -139,6 +138,12 @@ class BranchListActivity : AppCompatActivity() {
         ViewCompat.setOnApplyWindowInsetsListener(binding.headerBar) { view, insets ->
             val statusBarInsets = insets.getInsets(WindowInsetsCompat.Type.statusBars())
             view.updatePadding(top = statusBarInsets.top)
+            insets
+        }
+
+        ViewCompat.setOnApplyWindowInsetsListener(binding.scrollView) { view, insets ->
+            val navBarInsets = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
+            view.updatePadding(bottom = navBarInsets.bottom)
             insets
         }
     }

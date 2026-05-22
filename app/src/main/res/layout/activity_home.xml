@@ -26,8 +26,9 @@
             <TextView
                 android:id="@+id/tv_app_title"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="0dp"
                 android:fontFamily="sans-serif-black"
+                android:gravity="bottom"
                 android:text="@string/title_activity_home"
                 android:textColor="?attr/textPrimaryCustom"
                 android:textSize="@dimen/text_size_title"
@@ -35,18 +36,6 @@
                 app:layout_constraintBottom_toTopOf="@id/tv_branch_name"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
-
-            <TextView
-                android:id="@+id/tv_branch_label"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="sans-serif"
-                android:text="@string/branch_registering_at"
-                android:textColor="?attr/textSecondaryCustom"
-                android:textSize="10sp"
-                app:layout_constraintBottom_toTopOf="@id/tv_branch_name"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/tv_app_title" />
 
             <TextView
                 android:id="@+id/tv_branch_name"
@@ -63,7 +52,7 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@id/btn_branch_selector"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/tv_branch_label" />
+                app:layout_constraintTop_toBottomOf="@id/tv_app_title" />
 
             <ImageButton
                 android:id="@+id/btn_branch_selector"
