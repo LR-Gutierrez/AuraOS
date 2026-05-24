@@ -113,6 +113,14 @@ class DashboardActivity : AppCompatActivity() {
             startActivity(android.content.Intent(this, BranchListActivity::class.java))
         }
 
+        binding.cardMemberships.setOnClickListener {
+            startActivity(android.content.Intent(this, com.beta.auraos.ui.memberships.MembershipListActivity::class.java))
+        }
+
+        binding.cardExit.setOnClickListener {
+            startActivity(android.content.Intent(this, com.beta.auraos.ui.exit.ExitActivity::class.java))
+        }
+
         setupViewModel()
         observeDashboard()
     }

@@ -52,6 +52,24 @@
             android:theme="@style/Theme.AuraOS.NoActionBar" />
 
         <activity
+            android:name=".ui.exit.ExitActivity"
+            android:exported="false"
+            android:label="@string/exit_title"
+            android:theme="@style/Theme.AuraOS.NoActionBar" />
+
+        <activity
+            android:name=".ui.memberships.MembershipListActivity"
+            android:exported="false"
+            android:label="@string/membership_list_title"
+            android:theme="@style/Theme.AuraOS.NoActionBar" />
+
+        <activity
+            android:name=".ui.memberships.MembershipFormActivity"
+            android:exported="false"
+            android:label="@string/membership_new_title"
+            android:theme="@style/Theme.AuraOS.NoActionBar" />
+
+        <activity
             android:name=".ui.login.LoginActivity"
             android:exported="true"
             android:theme="@style/Theme.AuraOS.NoActionBar">

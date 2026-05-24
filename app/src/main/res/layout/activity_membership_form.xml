@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?attr/homeSurfaceBackground">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        app:elevation="@dimen/elevation_none">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/header_bar"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/home_header_height"
+            android:background="?attr/navbarBackground"
+            android:paddingHorizontal="@dimen/spacing_large">
+
+            <ImageButton
+                android:id="@+id/btn_back"
+                android:layout_width="@dimen/icon_size_large"
+                android:layout_height="@dimen/icon_size_large"
+                android:background="?attr/glassCardBackgroundCustom"
+                android:contentDescription="@string/action_back"
+                android:src="@android:drawable/ic_menu_revert"
+                app:tint="?attr/textPrimaryCustom"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/tv_title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/spacing_medium"
+                android:fontFamily="sans-serif-black"
+                android:text="@string/membership_new_title"
+                android:textColor="?attr/textPrimaryCustom"
+                android:textSize="@dimen/text_size_title"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/btn_back"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/scrollView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipToPadding="true"
+        android:fillViewport="true"
+        android:scrollbars="none"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="@dimen/container_padding"
+            android:paddingTop="@dimen/spacing_large"
+            android:paddingBottom="@dimen/spacing_xxlarge">
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="@dimen/card_corner_radius_large"
+                app:cardBackgroundColor="?attr/cardGlassFillColorCustom"
+                app:strokeColor="?attr/dividerColorCustom"
+                app:strokeWidth="@dimen/stroke_thin">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="@dimen/spacing_large">
+
+                    <TextView
+                        android:id="@+id/lbl_section"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="sans-serif-medium"
+                        android:letterSpacing="0.06"
+                        android:text="@string/membership_section_info"
+                        android:textColor="?attr/textSecondaryCustom"
+                        android:textSize="@dimen/text_size_overline"
+                        android:textStyle="bold"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <EditText
+                        android:id="@+id/et_member_name"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/spacing_medium"
+                        android:background="?attr/hollowInputBackground"
+                        android:fontFamily="sans-serif"
+                        android:hint="@string/membership_hint_name"
+                        android:imeOptions="actionNext"
+                        android:inputType="text|textCapWords"
+                        android:maxLines="1"
+                        android:padding="@dimen/spacing_medium"
+                        android:textColor="?attr/textPrimaryCustom"
+                        android:textColorHint="?attr/textSecondaryCustom"
+                        app:layout_constraintTop_toBottomOf="@id/lbl_section" />
+
+                    <EditText
+                        android:id="@+id/et_tier"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/spacing_small"
+                        android:background="?attr/hollowInputBackground"
+                        android:fontFamily="sans-serif"
+                        android:hint="@string/membership_hint_tier"
+                        android:imeOptions="actionNext"
+                        android:inputType="text|textCapWords"
+                        android:maxLines="1"
+                        android:padding="@dimen/spacing_medium"
+                        android:textColor="?attr/textPrimaryCustom"
+                        android:textColorHint="?attr/textSecondaryCustom"
+                        app:layout_constraintTop_toBottomOf="@id/et_member_name" />
+
+                    <EditText
+                        android:id="@+id/et_end_date"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/spacing_small"
+                        android:background="?attr/hollowInputBackground"
+                        android:fontFamily="sans-serif"
+                        android:hint="@string/membership_hint_end_date"
+                        android:imeOptions="actionDone"
+                        android:inputType="date"
+                        android:maxLines="1"
+                        android:padding="@dimen/spacing_medium"
+                        android:textColor="?attr/textPrimaryCustom"
+                        android:textColorHint="?attr/textSecondaryCustom"
+                        app:layout_constraintTop_toBottomOf="@id/et_tier" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_save"
+                style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/primary_button_height"
+                android:layout_marginTop="@dimen/spacing_xxlarge"
+                android:text="@string/membership_save_action"
+                android:textAllCaps="false"
+                android:textSize="@dimen/text_size_button"
+                android:textStyle="bold"
+                app:backgroundTint="?attr/colorPrimary"
+                app:cornerRadius="@dimen/button_corner_radius_full" />
+
+        </LinearLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+    <FrameLayout
+        android:id="@+id/loading_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#99000000"
+        android:clickable="true"
+        android:focusable="true"
+        android:visibility="gone">
+
+        <com.google.android.material.progressindicator.CircularProgressIndicator
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:indeterminate="true"
+            app:indicatorColor="?attr/colorPrimary"
+            app:indicatorSize="48dp"
+            app:trackThickness="4dp" />
+
+    </FrameLayout>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -128,5 +128,36 @@
     <string name="dashboard_branches_title">Sucursales</string>
     <string name="dashboard_branches_subtitle">Gestionar sucursales activas</string>
     <string name="dashboard_branches_button">Gestionar sucursales</string>
+    <string name="dashboard_exit_subtitle">Registrar salida de vehículos</string>
     <string name="action_back">Regresar</string>
+    <string name="action_cancel">Cancelar</string>
+    <string name="field_required">Campo obligatorio</string>
+
+    <!-- Exit -->
+    <string name="exit_title">Registrar salida</string>
+    <string name="exit_empty">No hay vehículos estacionados actualmente</string>
+    <string name="exit_no_branch">Selecciona una sucursal primero</string>
+    <string name="exit_registering">Registrando salida…</string>
+    <string name="exit_confirm_title">Confirmar salida</string>
+    <string name="exit_confirm_message">¿Registrar salida de %1$s?</string>
+    <string name="exit_confirm_action">Registrar salida</string>
+
+    <!-- Memberships -->
+    <string name="membership_list_title">Membresías</string>
+    <string name="membership_new_title">Nueva membresía</string>
+    <string name="membership_edit_title">Editar membresía</string>
+    <string name="membership_new_action">Nueva membresía</string>
+    <string name="membership_save_action">Guardar membresía</string>
+    <string name="membership_update_action">Actualizar membresía</string>
+    <string name="membership_empty">No hay membresías registradas</string>
+    <string name="membership_hint_name">Nombre del miembro *</string>
+    <string name="membership_hint_tier">Nivel (Elite, Premium, Básico)</string>
+    <string name="membership_hint_end_date">Fecha de vencimiento</string>
+    <string name="membership_create_success">Membresía creada correctamente</string>
+    <string name="membership_update_success">Membresía actualizada correctamente</string>
+    <string name="membership_delete_confirm">¿Eliminar membresía de %1$s?</string>
+    <string name="membership_delete_title">Eliminar membresía</string>
+    <string name="membership_section_info">INFORMACIÓN DEL MIEMBRO</string>
+    <string name="membership_status_active">Activa</string>
+    <string name="membership_status_inactive">Inactiva</string>
 </resources>
