@@ -1,0 +1,388 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?attr/homeSurfaceBackground">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/app_bar_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        app:elevation="@dimen/elevation_none">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/header_bar"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:background="?attr/navbarBackground"
+            android:paddingHorizontal="@dimen/spacing_large"
+            app:layout_scrollFlags="scroll|enterAlways">
+
+            <ImageButton
+                android:id="@+id/btn_back"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@android:drawable/ic_menu_revert"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/action_back"
+                app:tint="?attr/textPrimaryCustom"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent" />
+
+            <TextView
+                android:id="@+id/tv_title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-black"
+                android:text="@string/history_title"
+                android:textColor="?attr/textPrimaryCustom"
+                android:textSize="@dimen/text_size_title"
+                android:textStyle="bold"
+                app:layout_constraintStart_toEndOf="@id/btn_back"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                android:layout_marginStart="@dimen/spacing_medium" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/scroll_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipToPadding="true"
+        android:fillViewport="true"
+        android:scrollbars="none"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <LinearLayout
+            android:id="@+id/content_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="@dimen/container_padding"
+            android:paddingTop="@dimen/spacing_large"
+            android:paddingBottom="@dimen/spacing_large">
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/card_summary"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="@dimen/card_corner_radius_large"
+                app:cardBackgroundColor="?attr/cardGlassFillColorCustom"
+                app:strokeColor="?attr/dividerColorCustom"
+                app:strokeWidth="@dimen/stroke_thin">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center"
+                    android:padding="@dimen/spacing_large">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/today_summary_label"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/history_today_count"
+                            android:textColor="?attr/textSecondaryCustom"
+                            android:textSize="@dimen/text_size_caption"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/tv_today_count"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0"
+                            android:textColor="?attr/textPrimaryCustom"
+                            android:textSize="28sp"
+                            android:textStyle="bold"
+                            android:layout_marginTop="@dimen/spacing_xsmall" />
+
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="1dp"
+                        android:layout_height="48dp"
+                        android:background="?attr/dividerColorCustom"
+                        android:layout_marginHorizontal="@dimen/spacing_medium" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/today_revenue_label"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/history_today_revenue"
+                            android:textColor="?attr/textSecondaryCustom"
+                            android:textSize="@dimen/text_size_caption"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/tv_today_revenue"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="$0"
+                            android:textColor="?attr/semanticSuccessCustom"
+                            android:textSize="28sp"
+                            android:textStyle="bold"
+                            android:layout_marginTop="@dimen/spacing_xsmall" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <LinearLayout
+                android:id="@+id/layout_filter"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_large"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_filter_today"
+                        style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="40dp"
+                        android:layout_marginEnd="@dimen/spacing_xsmall"
+                        android:layout_weight="1"
+                        android:background="@drawable/btn_vehicle_selector"
+                        android:text="@string/history_filter_today"
+                        android:textAllCaps="false"
+                        android:textColor="@drawable/btn_vehicle_text_selector"
+                        android:textSize="12sp"
+                        app:cornerRadius="@dimen/button_corner_radius_full"
+                        app:rippleColor="@android:color/transparent" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_filter_all"
+                        style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="40dp"
+                        android:layout_marginEnd="@dimen/spacing_xsmall"
+                        android:layout_weight="1"
+                        android:background="@drawable/btn_vehicle_selector"
+                        android:text="@string/history_filter_all"
+                        android:textAllCaps="false"
+                        android:textColor="@drawable/btn_vehicle_text_selector"
+                        android:textSize="12sp"
+                        app:cornerRadius="@dimen/button_corner_radius_full"
+                        app:rippleColor="@android:color/transparent" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_filter_range"
+                        style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="40dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/btn_vehicle_selector"
+                        android:text="@string/history_filter_range"
+                        android:textAllCaps="false"
+                        android:textColor="@drawable/btn_vehicle_text_selector"
+                        android:textSize="12sp"
+                        app:cornerRadius="@dimen/button_corner_radius_full"
+                        app:rippleColor="@android:color/transparent" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/layout_date_range"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_small"
+                    android:orientation="horizontal"
+                    android:visibility="gone">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_date_from"
+                        style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="40dp"
+                        android:layout_marginEnd="@dimen/spacing_xsmall"
+                        android:layout_weight="1"
+                        android:background="@drawable/btn_vehicle_selector"
+                        android:text="@string/history_filter_from"
+                        android:textAllCaps="false"
+                        android:textColor="@drawable/btn_vehicle_text_selector"
+                        android:textSize="11sp"
+                        app:cornerRadius="@dimen/button_corner_radius_full"
+                        app:rippleColor="@android:color/transparent" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_date_to"
+                        style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="40dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/btn_vehicle_selector"
+                        android:text="@string/history_filter_to"
+                        android:textAllCaps="false"
+                        android:textColor="@drawable/btn_vehicle_text_selector"
+                        android:textSize="11sp"
+                        app:cornerRadius="@dimen/button_corner_radius_full"
+                        app:rippleColor="@android:color/transparent" />
+
+                </LinearLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/search_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_small"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    app:endIconMode="clear_text"
+                    app:boxStrokeWidth="1dp"
+                    app:boxStrokeColor="?attr/colorSecondary"
+                    app:hintTextColor="?attr/textSecondaryCustom">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/et_search"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/history_search_hint"
+                        android:textColor="?attr/textPrimaryCustom"
+                        android:textColorHint="?attr/textSecondaryCustom"
+                        android:textSize="14sp"
+                        android:inputType="text"
+                        android:maxLines="1"
+                        android:imeOptions="actionSearch" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <LinearLayout
+                    android:id="@+id/layout_sort"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_small"
+                    android:orientation="horizontal">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_sort_date"
+                        style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="32dp"
+                        android:layout_marginEnd="@dimen/spacing_xsmall"
+                        android:layout_weight="1"
+                        android:background="@drawable/btn_vehicle_selector"
+                        android:text="@string/history_sort_date"
+                        android:textAllCaps="false"
+                        android:textColor="@drawable/btn_vehicle_text_selector"
+                        android:textSize="10sp"
+                        app:cornerRadius="@dimen/button_corner_radius_full"
+                        app:rippleColor="@android:color/transparent" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_sort_fee"
+                        style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="32dp"
+                        android:layout_marginEnd="@dimen/spacing_xsmall"
+                        android:layout_weight="1"
+                        android:background="@drawable/btn_vehicle_selector"
+                        android:text="@string/history_sort_fee"
+                        android:textAllCaps="false"
+                        android:textColor="@drawable/btn_vehicle_text_selector"
+                        android:textSize="10sp"
+                        app:cornerRadius="@dimen/button_corner_radius_full"
+                        app:rippleColor="@android:color/transparent" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_sort_duration"
+                        style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="32dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/btn_vehicle_selector"
+                        android:text="@string/history_sort_duration"
+                        android:textAllCaps="false"
+                        android:textColor="@drawable/btn_vehicle_text_selector"
+                        android:textSize="10sp"
+                        app:cornerRadius="@dimen/button_corner_radius_full"
+                        app:rippleColor="@android:color/transparent" />
+
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/tv_filter_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_small"
+                    android:fontFamily="sans-serif-medium"
+                    android:textColor="?attr/textSecondaryCustom"
+                    android:textSize="@dimen/text_size_caption"
+                    android:visibility="gone" />
+
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/tv_empty_state"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="80dp"
+                android:text="@string/history_empty"
+                android:textColor="?attr/textSecondaryCustom"
+                android:textSize="@dimen/text_size_body"
+                android:visibility="visible" />
+
+            <FrameLayout
+                android:id="@+id/loading_overlay"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone">
+                <com.google.android.material.progressindicator.CircularProgressIndicator
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center" />
+            </FrameLayout>
+
+            <TextView
+                android:id="@+id/tv_showing_count"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="@dimen/spacing_small"
+                android:textColor="?attr/textSecondaryCustom"
+                android:textSize="@dimen/text_size_caption"
+                android:visibility="gone" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_load_more"
+                style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_marginTop="@dimen/spacing_small"
+                android:text="@string/history_load_more"
+                android:textAllCaps="false"
+                android:visibility="gone"
+                app:cornerRadius="@dimen/button_corner_radius_full" />
+
+        </LinearLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

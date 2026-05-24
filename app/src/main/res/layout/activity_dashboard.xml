@@ -341,6 +341,64 @@
 
             </com.google.android.material.card.MaterialCardView>
 
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/card_history"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_medium"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                app:cardCornerRadius="@dimen/card_corner_radius_large"
+                app:cardBackgroundColor="?attr/cardGlassFillColorCustom"
+                app:strokeColor="?attr/dividerColorCustom"
+                app:strokeWidth="@dimen/stroke_thin"
+                app:layout_constraintTop_toBottomOf="@id/card_exit"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:padding="@dimen/spacing_medium"
+                    android:paddingStart="16dp">
+
+                    <ImageView
+                        android:id="@+id/icon_history"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_centerVertical="true"
+                        android:src="@android:drawable/ic_menu_sort_by_size"
+                        app:tint="?attr/textPrimaryCustom" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="56dp"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/dashboard_history_title"
+                            android:textColor="?attr/textPrimaryCustom"
+                            android:textSize="18sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/dashboard_history_subtitle"
+                            android:textColor="?attr/textSecondaryCustom"
+                            android:textSize="@dimen/text_size_small" />
+
+                    </LinearLayout>
+
+                </RelativeLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
             <TextView
                 android:id="@+id/tv_alerts_title"
                 android:layout_width="wrap_content"
@@ -351,7 +409,7 @@
                 android:textSize="18sp"
                 android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/card_exit"/>
+                app:layout_constraintTop_toBottomOf="@id/card_history"/>
 
             <TextView
                 android:id="@+id/badge_critical"

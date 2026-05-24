@@ -19,6 +19,30 @@ data class PlateOcrResponse(
     val message: String? = null
 )
 
+data class ApiResponse<T>(
+    val success: Boolean,
+    val message: String?,
+    val data: T?
+)
+
+data class PaginatedData<T>(
+    val data: List<T>,
+    val meta: PaginationMeta
+)
+
+data class TodaySummary(
+    val exitedCount: Int,
+    val totalRevenue: Double
+)
+
+data class PaginationMeta(
+    val total: Int,
+    val page: Int,
+    val limit: Int,
+    val totalPages: Int,
+    val todaySummary: TodaySummary? = null
+)
+
 interface ParkingApi {
 
     @Multipart
@@ -43,16 +67,18 @@ interface ParkingApi {
     @GET("api/v1/vehicle-entries")
     suspend fun getVehicleEntries(
         @Query("branchId") branchId: String? = null,
-        @Query("activeOnly") activeOnly: Boolean? = null
-    ): Response<List<VehicleEntry>>
+        @Query("exited") exited: Boolean? = null,
+        @Query("from") from: String? = null,
+        @Query("to") to: String? = null,
+    ): Response<PaginatedData<VehicleEntry>>
 
     @GET("api/v1/vehicle-entries/{id}")
     suspend fun getVehicleEntry(
         @Path("id") id: String
-    ): Response<VehicleEntry>
+    ): Response<ApiResponse<VehicleEntry>>
 
     @PATCH("api/v1/vehicle-entries/{id}/exit")
     suspend fun registerExit(
         @Path("id") id: String
-    ): Response<VehicleEntry>
+    ): Response<ApiResponse<VehicleEntry>>
 }
