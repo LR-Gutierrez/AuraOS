@@ -12,6 +12,7 @@ import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlin.math.roundToInt
 
 data class HistoryEntry(
     val entry: VehicleEntry,
@@ -30,7 +31,8 @@ enum class SortOrder { ASC, DESC }
 
 data class FilterSummary(
     val count: Int,
-    val revenue: Double
+    val revenue: Double,
+    val avgDurationLabel: String = "0m"
 )
 
 sealed class HistoryUiState {
@@ -166,9 +168,14 @@ class HistoryViewModel(
             )
         }
 
+        val avgMinutes = filtered
+            .mapNotNull { parseDurationToMinutes(it.duration) }
+            .let { minutes -> if (minutes.isEmpty()) 0.0 else minutes.average() }
+
         val summary = FilterSummary(
             count = totalFiltered,
-            revenue = filtered.sumOf { it.fee ?: 0.0 }
+            revenue = filtered.sumOf { it.fee ?: 0.0 },
+            avgDurationLabel = formatMinutes(avgMinutes.roundToInt())
         )
 
         return HistoryUiState.Success(
@@ -184,6 +191,33 @@ class HistoryViewModel(
             shownCount = shownCount,
             hasMore = shownCount < totalFiltered
         )
+    }
+
+    private fun parseDurationToMinutes(duration: String?): Int? {
+        if (duration.isNullOrBlank()) return null
+        // Support formats: "2h 15m", "2h15m", "02:15", "45m", "1h"
+        val hRegex = Regex("""(?:(\d+)\s*h)?\s*(?:(\d+)\s*m)?""")
+        val m = hRegex.matchEntire(duration.trim())?.groupValues
+        if (m != null && (m[1].isNotEmpty() || m[2].isNotEmpty())) {
+            val hours = m[1].toIntOrNull() ?: 0
+            val mins = m[2].toIntOrNull() ?: 0
+            return hours * 60 + mins
+        }
+        // Try HH:mm format
+        val hm = duration.trim().split(":")
+        if (hm.size == 2) {
+            val h = hm[0].toIntOrNull() ?: return null
+            val min = hm[1].toIntOrNull() ?: return null
+            return h * 60 + min
+        }
+        return null
+    }
+
+    private fun formatMinutes(totalMinutes: Int): String {
+        if (totalMinutes <= 0) return "0m"
+        val hours = totalMinutes / 60
+        val mins = totalMinutes % 60
+        return if (hours > 0) "${hours}h ${mins}m" else "${mins}m"
     }
 
     private fun matchesDateFilter(entry: VehicleEntry): Boolean {

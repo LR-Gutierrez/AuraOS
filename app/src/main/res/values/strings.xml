@@ -162,18 +162,22 @@
     <string name="membership_status_inactive">Inactiva</string>
 
     <!-- History -->
-    <string name="history_title">Historial de salidas</string>
+    <string name="history_title">SmartPark OS</string>
     <string name="history_empty">No hay salidas registradas</string>
-    <string name="history_today_count">Salidas hoy</string>
-    <string name="history_today_revenue">Ingresos hoy</string>
+    <string name="history_today_count">Total Exits Today</string>
+    <string name="history_today_revenue">Total Revenue</string>
+    <string name="history_avg_duration">Average Duration</string>
+    <string name="history_metric_trend">%1$d%% vs yesterday</string>
+    <string name="history_metric_peak">$%1$.2f peak hour</string>
+    <string name="history_metric_target">Target: &lt; %1$s</string>
     <string name="history_revenue_amount">$%.2f</string>
     <string name="history_timeline">Entrada: %1$s  →  Salida: %2$s</string>
     <string name="history_duration">Duración: %1$s</string>
     <string name="history_fee">$%.2f</string>
     <string name="dashboard_history_title">Historial</string>
     <string name="dashboard_history_subtitle">Ver salidas completadas y totales del día</string>
-    <string name="history_filter_today">Hoy</string>
-    <string name="history_filter_all">Todos</string>
+    <string name="history_filter_today">Today</string>
+    <string name="history_filter_all">All</string>
     <string name="history_filter_date">Filtrar por fecha</string>
     <string name="history_filter_date_hint">Seleccionar fecha</string>
     <string name="history_filtered_count">Salidas del %1$s</string>
@@ -185,11 +189,21 @@
     <string name="history_range_revenue">Ingresos del período</string>
     <string name="history_filter_from">Desde</string>
     <string name="history_filter_to">Hasta</string>
-    <string name="history_filter_range">Rango</string>
-    <string name="history_search_hint">Buscar por placa…</string>
+    <string name="history_filter_range">Date Range</string>
+    <string name="history_search_hint">Search license plate (e.g. ABC-1234)…</string>
     <string name="history_sort_date">Fecha</string>
-    <string name="history_sort_fee">Tarifa</string>
+    <string name="history_sort_fee">Rate/Tarifa</string>
     <string name="history_sort_duration">Duración</string>
-    <string name="history_load_more">Cargar más</string>
+    <string name="history_load_more">Load Older Exits</string>
     <string name="history_showing">Mostrando %1$d de %2$d</string>
+    <string name="history_list_title">Recent Exits</string>
+    <string name="history_live_updates">Live Updates</string>
+    <string name="history_plate_hint">TX-8829</string>
+    <string name="history_stay_label">Stay Duration</string>
+    <string name="history_entry_exit_label">Entry / Exit</string>
+    <string name="history_paid_label">Total Paid</string>
+    <string name="history_operator_format">Check-out by %1$s</string>
+    <string name="history_operator_gate">Automatic Gate Exit</string>
+    <string name="history_duration_decimal">%1$sh %2$sm</string>
+    <string name="history_duration_short">%1$sh %2$sm</string>
 </resources>

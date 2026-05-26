@@ -121,10 +121,6 @@ class DashboardActivity : AppCompatActivity() {
             startActivity(android.content.Intent(this, com.beta.auraos.ui.exit.ExitActivity::class.java))
         }
 
-        binding.cardHistory.setOnClickListener {
-            startActivity(android.content.Intent(this, com.beta.auraos.ui.history.HistoryActivity::class.java))
-        }
-
         setupViewModel()
         observeDashboard()
     }

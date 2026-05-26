@@ -70,12 +70,6 @@
             android:theme="@style/Theme.AuraOS.NoActionBar" />
 
         <activity
-            android:name=".ui.history.HistoryActivity"
-            android:exported="false"
-            android:label="@string/history_title"
-            android:theme="@style/Theme.AuraOS.NoActionBar" />
-
-        <activity
             android:name=".ui.login.LoginActivity"
             android:exported="true"
             android:theme="@style/Theme.AuraOS.NoActionBar">

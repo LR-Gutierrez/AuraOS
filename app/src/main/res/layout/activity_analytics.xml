@@ -8,12 +8,21 @@
     android:background="?attr/homeSurfaceBackground"
     tools:context=".AnalyticsActivity">
 
+    <View
+        android:layout_width="300dp"
+        android:layout_height="300dp"
+        android:alpha="0.06"
+        android:background="@drawable/bg_aura_primary"
+        android:layout_gravity="top|start"
+        android:translationX="-100dp"
+        android:translationY="-100dp" />
+
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/app_bar_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@android:color/transparent"
-        app:elevation="@dimen/elevation_none">
+        app:elevation="0dp">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/header_bar"
@@ -37,40 +46,391 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
-
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.core.widget.NestedScrollView
         android:id="@+id/homeScrollView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:clipToPadding="true"
-        android:fillViewport="true"
-        android:scrollbars="none"
+        android:clipToPadding="false"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <LinearLayout
+            android:id="@+id/content_container"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:paddingHorizontal="@dimen/container_padding"
-            android:paddingTop="@dimen/spacing_large"
-            android:paddingBottom="@dimen/spacing_xxlarge">
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="24dp"
+            android:paddingTop="16dp"
+            android:paddingBottom="120dp">
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/card_revenue"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="28dp"
+                app:cardBackgroundColor="?attr/cardGlassFillColorCustom"
+                app:strokeColor="?attr/dividerColorCustom"
+                app:strokeWidth="1dp"
+                app:cardElevation="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="24dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/history_today_revenue"
+                        android:textColor="?attr/textSecondaryCustom"
+                        android:textSize="11sp"
+                        android:letterSpacing="0.08"
+                        android:textAllCaps="true" />
+
+                    <TextView
+                        android:id="@+id/tv_today_revenue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="$18.00"
+                        android:textColor="?attr/textPrimaryCustom"
+                        android:textSize="34sp"
+                        android:textStyle="bold"
+                        android:layout_marginTop="4dp" />
+
+                    <TextView
+                        android:id="@+id/tv_peak_text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="$0.00 peak hour"
+                        android:textColor="?attr/textSecondaryCustom"
+                        android:textSize="13sp"
+                        android:alpha="0.6"
+                        android:layout_marginTop="4dp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <GridLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:columnCount="2"
+                android:alignmentMode="alignMargins"
+                android:columnOrderPreserved="false">
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/card_exits"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_marginEnd="8dp"
+                    app:cardCornerRadius="24dp"
+                    app:cardBackgroundColor="?attr/cardGlassFillColorCustom"
+                    app:strokeColor="?attr/dividerColorCustom"
+                    app:strokeWidth="1dp"
+                    app:cardElevation="0dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="20dp">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/history_today_count"
+                            android:textSize="11sp"
+                            android:letterSpacing="0.08"
+                            android:textColor="?attr/textSecondaryCustom"
+                            android:textAllCaps="true" />
+                        <TextView
+                            android:id="@+id/tv_today_count"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="2"
+                            android:textColor="?attr/textPrimaryCustom"
+                            android:textSize="28sp"
+                            android:textStyle="bold"
+                            android:layout_marginTop="4dp" />
+                        <TextView
+                            android:id="@+id/tv_trend_text"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0% vs yesterday"
+                            android:textColor="?attr/semanticSuccessCustom"
+                            android:textSize="12sp"
+                            android:layout_marginTop="4dp" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/card_duration"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_marginStart="8dp"
+                    app:cardCornerRadius="24dp"
+                    app:cardBackgroundColor="?attr/cardGlassFillColorCustom"
+                    app:strokeColor="?attr/dividerColorCustom"
+                    app:strokeWidth="1dp"
+                    app:cardElevation="0dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="20dp">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/history_avg_duration"
+                            android:textSize="11sp"
+                            android:letterSpacing="0.08"
+                            android:textColor="?attr/textSecondaryCustom"
+                            android:textAllCaps="true" />
+                        <TextView
+                            android:id="@+id/tv_avg_duration"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0m"
+                            android:textColor="?attr/textPrimaryCustom"
+                            android:textSize="28sp"
+                            android:textStyle="bold"
+                            android:layout_marginTop="4dp" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/history_metric_target"
+                            android:textColor="?attr/textSecondaryCustom"
+                            android:textSize="12sp"
+                            android:layout_marginTop="4dp"
+                            android:alpha="0.6"/>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+            </GridLayout>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/search_card"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginTop="24dp"
+                app:cardCornerRadius="999dp"
+                app:cardBackgroundColor="#0DFFFFFF"
+                app:strokeColor="?attr/dividerColorCustom"
+                app:strokeWidth="1dp"
+                app:cardElevation="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:paddingHorizontal="20dp">
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@android:drawable/ic_menu_search"
+                        app:tint="?attr/textSecondaryCustom" />
+                    <EditText
+                        android:id="@+id/et_search"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginStart="12dp"
+                        android:background="@null"
+                        android:hint="@string/history_search_hint"
+                        android:textColorHint="?attr/textSecondaryCustom"
+                        android:textSize="15sp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <HorizontalScrollView
+                android:id="@+id/filter_chips_scroll"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:scrollbars="none">
+
+                <LinearLayout
+                    android:id="@+id/layout_filter_chips"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_filter_today"
+                        style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/btn_vehicle_selector"
+                        android:text="@string/history_filter_today"
+                        android:textAllCaps="false"
+                        android:textColor="@drawable/btn_vehicle_text_selector"
+                        android:textSize="12sp"
+                        app:cornerRadius="999dp" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_filter_all"
+                        style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:background="@drawable/btn_vehicle_selector"
+                        android:text="@string/history_filter_all"
+                        android:textAllCaps="false"
+                        android:textColor="@drawable/btn_vehicle_text_selector"
+                        android:textSize="12sp"
+                        app:cornerRadius="999dp" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_filter_range"
+                        style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:background="@drawable/btn_vehicle_selector"
+                        android:text="@string/history_filter_range"
+                        android:textAllCaps="false"
+                        android:textColor="@drawable/btn_vehicle_text_selector"
+                        android:textSize="12sp"
+                        app:cornerRadius="999dp" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_filter_rate"
+                        style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:background="@drawable/btn_vehicle_selector"
+                        android:text="@string/history_sort_fee"
+                        android:textAllCaps="false"
+                        android:textColor="@drawable/btn_vehicle_text_selector"
+                        android:textSize="12sp"
+                        app:cornerRadius="999dp" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_filter_duration"
+                        style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:background="@drawable/btn_vehicle_selector"
+                        android:text="@string/history_sort_duration"
+                        android:textAllCaps="false"
+                        android:textColor="@drawable/btn_vehicle_text_selector"
+                        android:textSize="12sp"
+                        app:cornerRadius="999dp" />
+                </LinearLayout>
+            </HorizontalScrollView>
+
+            <LinearLayout
+                android:id="@+id/layout_date_range"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal"
+                android:visibility="gone">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_date_from"
+                    style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="40dp"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="4dp"
+                    android:background="@drawable/btn_vehicle_selector"
+                    android:text="@string/history_filter_from"
+                    android:textAllCaps="false"
+                    android:textColor="@drawable/btn_vehicle_text_selector"
+                    android:textSize="11sp"
+                    app:cornerRadius="999dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_date_to"
+                    style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="40dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/btn_vehicle_selector"
+                    android:text="@string/history_filter_to"
+                    android:textAllCaps="false"
+                    android:textColor="@drawable/btn_vehicle_text_selector"
+                    android:textSize="11sp"
+                    app:cornerRadius="999dp" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/tv_filter_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:textColor="?attr/textSecondaryCustom"
+                android:textSize="12sp"
+                android:visibility="gone" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="sans-serif"
-                android:text="@string/analytics_placeholder"
+                android:layout_marginTop="32dp"
+                android:text="Recent Exits"
+                android:textColor="?attr/textPrimaryCustom"
+                android:textSize="18sp"
+                android:fontFamily="sans-serif-black" />
+
+            <TextView
+                android:id="@+id/tv_empty_state"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="40dp"
+                android:text="@string/history_empty"
                 android:textColor="?attr/textSecondaryCustom"
-                android:textSize="@dimen/text_size_body"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                android:textSize="15sp"
+                android:visibility="gone" />
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
+            <TextView
+                android:id="@+id/tv_showing_count"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="8dp"
+                android:textColor="?attr/textSecondaryCustom"
+                android:textSize="12sp"
+                android:visibility="gone" />
 
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_load_more"
+                style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/btn_vehicle_selector"
+                android:text="@string/history_load_more"
+                android:textAllCaps="false"
+                android:textColor="@drawable/btn_vehicle_text_selector"
+                android:textSize="13sp"
+                android:visibility="gone"
+                app:cornerRadius="999dp" />
+
+        </LinearLayout>
     </androidx.core.widget.NestedScrollView>
+
+    <FrameLayout
+        android:id="@+id/loading_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#80000000"
+        android:clickable="true"
+        android:focusable="true"
+        android:visibility="gone">
+
+        <com.google.android.material.progressindicator.CircularProgressIndicator
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:indeterminate="true"
+            app:indicatorColor="?attr/textPrimaryCustom" />
+    </FrameLayout>
 
     <FrameLayout
         android:layout_width="match_parent"
