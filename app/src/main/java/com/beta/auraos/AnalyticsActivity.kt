@@ -18,10 +18,20 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import coil.load
 import coil.transform.RoundedCornersTransformation
+import com.beta.auraos.data.BranchRepository
+import com.beta.auraos.data.Result
 import com.beta.auraos.data.VehicleEntryRepository
 import com.beta.auraos.data.local.SessionManager
+import com.beta.auraos.data.model.Branch
+import com.beta.auraos.data.remote.ApiClient
+import com.beta.auraos.data.remote.BranchApi
+import com.beta.auraos.ui.branches.BranchListActivity
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import com.beta.auraos.databinding.ActivityAnalyticsBinding
 import com.beta.auraos.ui.history.HistoryFilter
 import com.beta.auraos.ui.history.HistoryUiState
@@ -45,6 +55,10 @@ class AnalyticsActivity : AppCompatActivity() {
     private lateinit var binding: ActivityAnalyticsBinding
     private lateinit var viewModel: HistoryViewModel
     private lateinit var sessionManager: SessionManager
+    private lateinit var branchRepository: BranchRepository
+
+    private var branches: List<Branch> = emptyList()
+    private var selectedBranch: Branch? = null
 
     private val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.US)
 
@@ -53,6 +67,9 @@ class AnalyticsActivity : AppCompatActivity() {
         enableEdgeToEdge()
 
         sessionManager = SessionManager(this)
+        val api = ApiClient.createApi<BranchApi>()
+        branchRepository = BranchRepository(api)
+
         val repository = VehicleEntryRepository()
         val factory = HistoryViewModelFactory(repository)
         viewModel = ViewModelProvider(this, factory)[HistoryViewModel::class.java]
@@ -61,6 +78,7 @@ class AnalyticsActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         setupWindowInsets()
+        setupBranchSelector()
         setupBottomNav()
         setupFilterButtons()
         setupDateRangeButtons()
@@ -84,7 +102,80 @@ class AnalyticsActivity : AppCompatActivity() {
             }
         }
 
-        loadHistory()
+        loadBranches()
+    }
+
+    private fun setupBranchSelector() {
+        binding.btnBranchSelector.setOnClickListener { showBranchSelector() }
+        binding.tvBranchName.setOnClickListener { showBranchSelector() }
+    }
+
+    private fun loadBranches() {
+        lifecycleScope.launch(Dispatchers.IO) {
+            val result = branchRepository.getBranches()
+            withContext(Dispatchers.Main) {
+                when (result) {
+                    is Result.Success -> {
+                        branches = result.data
+                        restoreOrSelectBranch()
+                    }
+                    is Result.Error -> {
+                        binding.tvBranchName.text = getString(R.string.branch_load_error)
+                    }
+                }
+            }
+        }
+    }
+
+    private fun restoreOrSelectBranch() {
+        val savedId = sessionManager.getSelectedBranchId()
+        val saved = if (savedId != null) branches.find { it.id == savedId } else null
+
+        if (saved != null) {
+            selectedBranch = saved
+            binding.tvBranchName.text = saved.name
+            loadHistory()
+        } else if (branches.isNotEmpty()) {
+            selectedBranch = branches.first()
+            sessionManager.saveSelectedBranchId(selectedBranch!!.id)
+            binding.tvBranchName.text = selectedBranch!!.name
+            loadHistory()
+        } else {
+            binding.tvBranchName.text = getString(R.string.branch_no_branch)
+        }
+    }
+
+    private fun showBranchSelector() {
+        if (branches.isEmpty()) {
+            AlertDialog.Builder(this)
+                .setTitle("Sin sucursales")
+                .setMessage(getString(R.string.branch_required_for_entry))
+                .setPositiveButton("Configurar") { _, _ ->
+                    startActivity(android.content.Intent(this, BranchListActivity::class.java))
+                }
+                .setNegativeButton("Cancelar", null)
+                .show()
+            return
+        }
+
+        val names = branches.map { it.name }.toTypedArray()
+        val selectedIndex = if (selectedBranch != null) branches.indexOf(selectedBranch) else 0
+
+        AlertDialog.Builder(this)
+            .setTitle("Seleccionar sucursal")
+            .setSingleChoiceItems(names, if (selectedIndex >= 0) selectedIndex else 0) { dialog, which ->
+                val branch = branches[which]
+                selectedBranch = branch
+                sessionManager.saveSelectedBranchId(branch.id)
+                binding.tvBranchName.text = branch.name
+                dialog.dismiss()
+                loadHistory()
+            }
+            .setPositiveButton("Gestionar sucursales") { _, _ ->
+                startActivity(android.content.Intent(this, BranchListActivity::class.java))
+            }
+            .setNegativeButton("Cancelar", null)
+            .show()
     }
 
     private fun setupBottomNav() {
@@ -243,12 +334,9 @@ class AnalyticsActivity : AppCompatActivity() {
 
     private fun loadHistory() {
         val branchId = sessionManager.getSelectedBranchId()
-        if (branchId == null) {
-            Toast.makeText(this, R.string.exit_no_branch, Toast.LENGTH_LONG).show()
-            finish()
-            return
+        if (branchId != null) {
+            viewModel.loadHistory(branchId)
         }
-        viewModel.loadHistory(branchId)
     }
 
     private fun bindData(state: HistoryUiState.Success) {
