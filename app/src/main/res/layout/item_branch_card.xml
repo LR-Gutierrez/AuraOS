@@ -75,9 +75,19 @@
             app:layout_constraintTop_toTopOf="parent">
 
             <ImageButton
+                android:id="@+id/btn_default_branch"
+                android:layout_width="@dimen/icon_size_large"
+                android:layout_height="@dimen/icon_size_large"
+                android:background="?attr/glassCardBackgroundCustom"
+                android:contentDescription="Predeterminada"
+                android:src="@android:drawable/btn_star"
+                app:tint="?attr/textSecondaryCustom" />
+
+            <ImageButton
                 android:id="@+id/btn_edit_branch"
                 android:layout_width="@dimen/icon_size_large"
                 android:layout_height="@dimen/icon_size_large"
+                android:layout_marginStart="@dimen/spacing_small"
                 android:background="?attr/glassCardBackgroundCustom"
                 android:contentDescription="Editar"
                 android:src="@android:drawable/ic_menu_edit"
