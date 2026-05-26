@@ -158,8 +158,11 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun setupBiometric() {
-        val isAvailable = loginViewModel.hasBiometricAvailable()
-        binding.biometricContainer?.visibility = if (isAvailable) View.VISIBLE else View.GONE
+        val hasHardware = hasBiometricHardware()
+        val isAvailable = hasHardware && loginViewModel.hasBiometricAvailable()
+        val biometricVisible = if (isAvailable) View.VISIBLE else View.GONE
+        binding.biometricDivider?.visibility = biometricVisible
+        binding.biometricContainer?.visibility = biometricVisible
         if (!isAvailable) return
 
         executor = ContextCompat.getMainExecutor(this)
@@ -181,11 +184,16 @@ class LoginActivity : AppCompatActivity() {
                     if (errorCode != BiometricPrompt.ERROR_NEGATIVE_BUTTON &&
                         errorCode != BiometricPrompt.ERROR_USER_CANCELED
                     ) {
-                        Toast.makeText(
-                            applicationContext,
-                            errString,
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        val message = when (errorCode) {
+                            BiometricPrompt.ERROR_HW_NOT_PRESENT ->
+                                "Este dispositivo no tiene sensor biométrico"
+                            BiometricPrompt.ERROR_HW_UNAVAILABLE ->
+                                "Sensor biométrico no disponible"
+                            BiometricPrompt.ERROR_NO_BIOMETRICS ->
+                                "No hay huellas registradas"
+                            else -> "Error de autenticación"
+                        }
+                        Toast.makeText(applicationContext, message, Toast.LENGTH_SHORT).show()
                     }
                 }
 
@@ -200,32 +208,48 @@ class LoginActivity : AppCompatActivity() {
             })
 
         binding.biometricLogin?.setOnClickListener {
-            val biometricManager = BiometricManager.from(this)
-            when (biometricManager.canAuthenticate(BIOMETRIC_STRONG or DEVICE_CREDENTIAL)) {
-                BiometricManager.BIOMETRIC_SUCCESS -> {
-                    val signature = biometricKeyManager.getSignatureForAuth()
-                    if (signature == null) {
-                        Toast.makeText(this, "Error al inicializar biometría. Vuelva a enrolar.", Toast.LENGTH_SHORT).show()
-                        return@setOnClickListener
+            try {
+                val biometricManager = BiometricManager.from(this)
+                when (biometricManager.canAuthenticate(BIOMETRIC_STRONG or DEVICE_CREDENTIAL)) {
+                    BiometricManager.BIOMETRIC_SUCCESS -> {
+                        val signature = biometricKeyManager.getSignatureForAuth()
+                        if (signature == null) {
+                            Toast.makeText(this, "Error al inicializar biometría. Vuelva a enrolar.", Toast.LENGTH_SHORT).show()
+                            return@setOnClickListener
+                        }
+                        currentChallenge = "smartpark_challenge_${System.currentTimeMillis()}"
+                        val promptInfo = BiometricPrompt.PromptInfo.Builder()
+                            .setTitle("Acceso Rápido")
+                            .setSubtitle("Autentíquese para acceder")
+                            .setAllowedAuthenticators(BIOMETRIC_STRONG or DEVICE_CREDENTIAL)
+                            .build()
+                        biometricPrompt.authenticate(promptInfo, BiometricPrompt.CryptoObject(signature))
                     }
-                    currentChallenge = "smartpark_challenge_${System.currentTimeMillis()}"
-                    val promptInfo = BiometricPrompt.PromptInfo.Builder()
-                        .setTitle("Acceso Rápido")
-                        .setSubtitle("Autentíquese para acceder")
-                        .setAllowedAuthenticators(BIOMETRIC_STRONG or DEVICE_CREDENTIAL)
-                        .build()
-                    biometricPrompt.authenticate(promptInfo, BiometricPrompt.CryptoObject(signature))
+                    BiometricManager.BIOMETRIC_ERROR_NO_HARDWARE -> {
+                        Toast.makeText(this, "Este dispositivo no tiene sensor biométrico", Toast.LENGTH_SHORT).show()
+                    }
+                    BiometricManager.BIOMETRIC_ERROR_HW_UNAVAILABLE -> {
+                        Toast.makeText(this, "Sensor biométrico no disponible", Toast.LENGTH_SHORT).show()
+                    }
+                    BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED -> {
+                        Toast.makeText(this, "No hay huellas registradas. Configure una en Ajustes.", Toast.LENGTH_SHORT).show()
+                    }
+                    else -> {
+                        Toast.makeText(this, "Biometría no disponible en este dispositivo", Toast.LENGTH_SHORT).show()
+                    }
                 }
-                BiometricManager.BIOMETRIC_ERROR_NO_HARDWARE -> {
-                    Toast.makeText(this, "Este dispositivo no tiene sensor biométrico", Toast.LENGTH_SHORT).show()
-                }
-                BiometricManager.BIOMETRIC_ERROR_HW_UNAVAILABLE -> {
-                    Toast.makeText(this, "Sensor biométrico no disponible", Toast.LENGTH_SHORT).show()
-                }
-                BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED -> {
-                    Toast.makeText(this, "No hay huellas registradas. Configure una en Ajustes.", Toast.LENGTH_SHORT).show()
-                }
+            } catch (e: Exception) {
+                Toast.makeText(this, "Error al verificar biometría", Toast.LENGTH_SHORT).show()
             }
+        }
+    }
+
+    private fun hasBiometricHardware(): Boolean {
+        return try {
+            val mgr = BiometricManager.from(this)
+            mgr.canAuthenticate(BIOMETRIC_STRONG) == BiometricManager.BIOMETRIC_SUCCESS
+        } catch (e: Exception) {
+            false
         }
     }
 

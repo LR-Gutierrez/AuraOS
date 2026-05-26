@@ -28,6 +28,8 @@ import com.beta.auraos.data.local.BiometricKeyManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import androidx.biometric.BiometricManager
+import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG
 import androidx.lifecycle.lifecycleScope
 
 class DashboardActivity : AppCompatActivity() {
@@ -79,7 +81,7 @@ class DashboardActivity : AppCompatActivity() {
 
         val email = intent.getStringExtra(EXTRA_EMAIL)
         val userId = intent.getStringExtra(EXTRA_USER_ID)
-        if (email != null && userId != null && !sessionManager.isBiometricEnrolled()) {
+        if (email != null && userId != null && !sessionManager.isBiometricEnrolled() && hasBiometricHardware()) {
             promptBiometricEnrollment(email, userId)
         }
 
@@ -237,6 +239,15 @@ class DashboardActivity : AppCompatActivity() {
             }
         }
         overlay.postOnAnimation(updater)
+    }
+
+    private fun hasBiometricHardware(): Boolean {
+        return try {
+            val mgr = BiometricManager.from(this)
+            mgr.canAuthenticate(BIOMETRIC_STRONG) == BiometricManager.BIOMETRIC_SUCCESS
+        } catch (e: Exception) {
+            false
+        }
     }
 
     private fun promptBiometricEnrollment(email: String, userId: String) {
