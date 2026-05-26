@@ -6,15 +6,20 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
 import androidx.lifecycle.ViewModelProvider
+import coil.load
+import coil.transform.RoundedCornersTransformation
 import com.beta.auraos.data.VehicleEntryRepository
 import com.beta.auraos.data.local.SessionManager
 import com.beta.auraos.databinding.ActivityAnalyticsBinding
@@ -26,6 +31,7 @@ import com.beta.auraos.ui.history.SortField
 import com.beta.auraos.ui.history.SortOrder
 import com.beta.auraos.ui.history.HistoryEntry
 import com.beta.auraos.util.BottomNavIndicator
+import com.beta.auraos.util.PhotoUrlBuilder
 import com.beta.auraos.util.TabNavigator
 import com.beta.auraos.util.formatDateTime
 import com.google.android.material.card.MaterialCardView
@@ -310,6 +316,17 @@ class AnalyticsActivity : AppCompatActivity() {
         val padding = (16 * density).toInt()
         val e = entry.entry
 
+        val photoFields = listOfNotNull(
+            "Placa" to e.platePhotoUrl,
+            "Frontal" to e.frontPhotoUrl,
+            "Trasera" to e.rearPhotoUrl,
+            "Izquierda" to e.leftPhotoUrl,
+            "Derecha" to e.rightPhotoUrl
+        ).mapNotNull { (label, url) ->
+            val fullUrl = PhotoUrlBuilder.build(url)
+            if (fullUrl != null) label to fullUrl else null
+        }
+
         val card = MaterialCardView(this).apply {
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
@@ -325,6 +342,18 @@ class AnalyticsActivity : AppCompatActivity() {
             strokeColor = strokeColorInt
             strokeWidth = resources.getDimensionPixelSize(R.dimen.stroke_thin)
             setContentPadding(padding, padding, padding, padding)
+            isClickable = photoFields.isNotEmpty()
+            isFocusable = photoFields.isNotEmpty()
+            if (photoFields.isNotEmpty()) {
+                foreground = {
+                    val tv = android.util.TypedValue()
+                    this@AnalyticsActivity.theme.resolveAttribute(
+                        android.R.attr.selectableItemBackground, tv, true
+                    )
+                    ContextCompat.getDrawable(this@AnalyticsActivity, tv.resourceId)
+                }()
+                setOnClickListener { showPhotoDialog(entry.entry.plate, photoFields) }
+            }
         }
 
         val cardContent = LinearLayout(this).apply {
@@ -335,7 +364,7 @@ class AnalyticsActivity : AppCompatActivity() {
             orientation = LinearLayout.VERTICAL
         }
 
-        // Top row: plate box + info
+        // Top row: thumbnail + info
         val topRow = LinearLayout(this).apply {
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
@@ -345,33 +374,28 @@ class AnalyticsActivity : AppCompatActivity() {
             gravity = android.view.Gravity.CENTER_VERTICAL
         }
 
-        // Plate number box
-        val plateBox = LinearLayout(this).apply {
+        // Photo thumbnail
+        val thumbUrl = PhotoUrlBuilder.build(e.platePhotoUrl)
+        val thumbnail = ImageView(this).apply {
             layoutParams = LinearLayout.LayoutParams(
-                (120 * density).toInt(),
+                (48 * density).toInt(),
                 (48 * density).toInt()
             )
-            orientation = LinearLayout.HORIZONTAL
-            gravity = android.view.Gravity.CENTER
-            setBackgroundColor(
-                MaterialColors.getColor(this, R.attr.homeSurfaceBackground)
-            )
-            setPadding(
-                (12 * density).toInt(), 0,
-                (12 * density).toInt(), 0
-            )
+            scaleType = ImageView.ScaleType.CENTER_CROP
+            if (thumbUrl != null) {
+                load(thumbUrl) {
+                    crossfade(true)
+                    transformations(RoundedCornersTransformation(6f * density))
+                    placeholder(android.R.drawable.ic_menu_camera)
+                    error(android.R.drawable.ic_menu_camera)
+                }
+            } else {
+                setImageResource(android.R.drawable.ic_menu_camera)
+            }
         }
-        val plateText = TextView(this).apply {
-            text = e.plate
-            setTextColor(MaterialColors.getColor(binding.root, R.attr.textPrimaryCustom))
-            textSize = 18f
-            typeface = Typeface.create("sans-serif", Typeface.BOLD)
-            letterSpacing = 0.05f
-        }
-        plateBox.addView(plateText)
-        topRow.addView(plateBox)
+        topRow.addView(thumbnail)
 
-        // Vehicle type + operator info
+        // Info column
         val infoCol = LinearLayout(this).apply {
             layoutParams = LinearLayout.LayoutParams(
                 0,
@@ -384,19 +408,21 @@ class AnalyticsActivity : AppCompatActivity() {
 
         val vehicleTypeStr = e.vehicleType.replaceFirstChar { it.uppercase() }
         val vipStr = if (e.isVip) " \u2605 VIP" else ""
-        val typeText = TextView(this).apply {
-            text = "$vehicleTypeStr$vipStr"
-            setTextColor(MaterialColors.getColor(binding.root, R.attr.textPrimaryCustom))
-            textSize = 15f
-        }
-        infoCol.addView(typeText)
 
-        val operatorText = TextView(this).apply {
-            text = getString(R.string.history_operator_format, vehicleTypeStr)
+        val plateText = TextView(this).apply {
+            text = "${e.plate}  $vipStr"
+            setTextColor(MaterialColors.getColor(binding.root, R.attr.textPrimaryCustom))
+            textSize = 16f
+            typeface = Typeface.create("sans-serif", Typeface.BOLD)
+        }
+        infoCol.addView(plateText)
+
+        val typeText = TextView(this).apply {
+            text = vehicleTypeStr
             setTextColor(MaterialColors.getColor(binding.root, R.attr.textSecondaryCustom))
             textSize = 12f
         }
-        infoCol.addView(operatorText)
+        infoCol.addView(typeText)
 
         topRow.addView(infoCol)
         cardContent.addView(topRow)
@@ -492,6 +518,52 @@ class AnalyticsActivity : AppCompatActivity() {
         cardContent.addView(bottomRow)
         card.addView(cardContent)
         return card
+    }
+
+    private fun showPhotoDialog(plate: String, photos: List<Pair<String, String>>) {
+        val density = resources.displayMetrics.density
+        val scroll = android.widget.ScrollView(this)
+        val container = LinearLayout(this).apply {
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+            orientation = LinearLayout.VERTICAL
+            setPadding((16 * density).toInt(), (8 * density).toInt(), (16 * density).toInt(), 0)
+        }
+
+        for ((label, url) in photos) {
+            val labelText = TextView(this).apply {
+                text = label
+                setTextColor(MaterialColors.getColor(binding.root, R.attr.textSecondaryCustom))
+                textSize = 11f
+                setPadding(0, (8 * density).toInt(), 0, (4 * density).toInt())
+            }
+            container.addView(labelText)
+
+            val iv = ImageView(this).apply {
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    (180 * density).toInt()
+                )
+                scaleType = ImageView.ScaleType.CENTER_CROP
+                load(url) {
+                    crossfade(true)
+                    transformations(RoundedCornersTransformation(8f * density))
+                    placeholder(android.R.drawable.ic_menu_gallery)
+                    error(android.R.drawable.ic_menu_gallery)
+                }
+            }
+            container.addView(iv)
+        }
+
+        scroll.addView(container)
+
+        AlertDialog.Builder(this)
+            .setTitle("Fotos - $plate")
+            .setView(scroll)
+            .setPositiveButton("Cerrar", null)
+            .show()
     }
 
     private fun setupWindowInsets() {
