@@ -1,0 +1,236 @@
+<resources>
+    <string name="app_name">AuraOS</string>
+    <string name="app_edition">Parking Edition</string>
+    <string name="app_logo">Logotipo de la app</string>
+
+    <string name="title_activity_login">Iniciar Sesión</string>
+    <string name="title_activity_home">Registrar</string>
+    <string name="title_activity_dashboard">Panel</string>
+    <string name="title_activity_map">Mapa</string>
+    <string name="title_activity_analytics">Analíticas</string>
+    <string name="dashboard_title">Panel</string>
+    <string name="map_title">Mapa</string>
+    <string name="analytics_title">Analíticas</string>
+    <string name="dashboard_placeholder">Contenido del panel próximamente</string>
+    <string name="map_placeholder">Contenido del mapa próximamente</string>
+    <string name="analytics_placeholder">Contenido de analíticas próximamente</string>
+    <string name="action_settings">Ajustes</string>
+
+    <string name="title_authentication">Autenticación</string>
+    <string name="username">Usuario</string>
+    <string name="prompt_email">Correo electrónico</string>
+    <string name="pin_password">PIN / Contraseña</string>
+    <string name="prompt_password">Contraseña</string>
+
+    <string name="action_sign_in">Iniciar sesión o registrarse</string>
+    <string name="action_sign_in_short">Entrar</string>
+    <string name="label_or_continue_with">o continuar con</string>
+    <string name="quick_access">Acceso Rápido</string>
+    <string name="biometric_login_icon">Icono de acceso biométrico</string>
+
+    <string name="welcome">¡Bienvenido!</string>
+    <string name="invalid_username">Usuario no válido</string>
+    <string name="invalid_password">La contraseña debe tener más de 5 caracteres</string>
+    <string name="login_failed">Error al iniciar sesión</string>
+
+    <string name="help">Ayuda</string>
+    <string name="privacy">Privacidad</string>
+    <string name="network_status">Estado de Red</string>
+
+    <string name="cd_user_profile">Foto de perfil del usuario</string>
+    <string name="home_app_title">SmartPark OS</string>
+    <string name="live_feed_label">● LIVE 4K FEED</string>
+    <string name="ocr_status_label">NÚMERO DE PLACA</string>
+    <string name="plate_input_hint">ABC-1234</string>
+    <string name="plate_validation_status">Ingrese la matrícula del vehículo</string>
+    <string name="vehicle_category_label">CATEGORÍA DE VEHÍCULO</string>
+    <string name="vehicle_type_moto">Moto</string>
+    <string name="vehicle_type_auto">Auto</string>
+    <string name="vehicle_type_camioneta">Camioneta</string>
+    <string name="vehicle_type_camion">Camión</string>
+    <string name="bodywork_status_label">ESTADO DE CARROCERÍA</string>
+    <string name="cd_photo_front">Foto frontal</string>
+    <string name="cd_photo_rear">Foto trasera</string>
+    <string name="cd_photo_left">Foto izquierda</string>
+    <string name="cd_photo_right">Foto derecha</string>
+    <string name="cd_plate_photo">Foto de placa</string>
+    <string name="photo_label_front">Frente</string>
+    <string name="photo_label_rear">Atrás</string>
+    <string name="photo_label_left">Izquierda</string>
+    <string name="photo_label_right">Derecha</string>
+
+    <string name="action_retake">Volver a tomar foto</string>
+    <string name="action_delete">Eliminar foto</string>
+
+    <string name="action_confirm_entry">✓ Confirmar Ingreso</string>
+    <string name="action_sending">Enviando…</string>
+    <string name="confirm_entry_success">✅ Ingreso registrado correctamente</string>
+    <string name="confirm_entry_error">❌ Error al registrar ingreso: %1$s</string>
+    <string name="camera_permission_required">Se requiere permiso de cámara</string>
+    <string name="plate_capture_hint">Toca para capturar placa</string>
+    <string name="required_field_error">Campo obligatorio</string>
+    <string name="plate_capturing">Capturando placa…</string>
+    <string name="plate_sending">Enviando para reconocimiento…</string>
+    <string name="plate_ocr_error">Error al reconocer placa</string>
+    <string name="camera_error">⚠ Error al inicializar la cámara</string>
+
+    <!-- Dashboard -->
+    <string name="dashboard_capacity_label">CAPACIDAD EN VIVO</string>
+    <string name="dashboard_occupancy_title">Ocupación: %1$d%%</string>
+    <string name="dashboard_bays_counter">%1$d / %2$d espacios ocupados</string>
+    <string name="dashboard_trend_up">+%1$d%% vs ayer</string>
+    <string name="dashboard_trend_down">-%1$d%% vs ayer</string>
+    <string name="dashboard_revenue_label">Ingresos del día</string>
+    <string name="dashboard_revenue_amount">$%1$.2f</string>
+    <string name="dashboard_memberships_label">Membresías activas</string>
+    <string name="dashboard_memberships_count">%1$d / %2$d</string>
+    <string name="dashboard_alerts_title">Alertas</string>
+    <string name="dashboard_badge_critical">%1$d acciones críticas</string>
+    <string name="dashboard_alert_membership_title">Membresía próxima a vencer: %1$s</string>
+    <string name="dashboard_alert_membership_subtitle">%1$s • %2$s restante</string>
+    <string name="dashboard_alert_vip_title">VIP: %1$s</string>
+    <string name="dashboard_alert_vip_subtitle">Cajón %1$s</string>
+    <string name="dashboard_alert_none">Sin alertas pendientes</string>
+    <string name="dashboard_alert_vip_none">Sin llegadas VIP recientes</string>
+
+    <!-- Sucursales -->
+    <string name="branch_list_title">Sucursales</string>
+    <string name="branch_new_title">Nueva Sucursal</string>
+    <string name="branch_edit_title">Editar Sucursal</string>
+    <string name="branch_new_action">Nueva Sucursal</string>
+    <string name="branch_save_action">Guardar Sucursal</string>
+    <string name="branch_update_action">Actualizar Sucursal</string>
+    <string name="branch_empty_state">No hay sucursales configuradas.\nCrea la primera sucursal para comenzar a registrar ingresos.</string>
+    <string name="branch_no_branch">Sin sucursal seleccionada</string>
+    <string name="branch_select_hint">Seleccionar sucursal</string>
+    <string name="branch_delete_confirm">¿Estás seguro de eliminar \"%1$s\"? Esta acción no se puede deshacer.</string>
+    <string name="branch_delete_title">Eliminar Sucursal</string>
+    <string name="branch_delete_fk_error">No se puede eliminar esta sucursal porque tiene ingresos registrados.</string>
+    <string name="branch_create_success">Sucursal creada correctamente</string>
+    <string name="branch_update_success">Sucursal actualizada correctamente</string>
+    <string name="branch_delete_success">Sucursal eliminada correctamente</string>
+    <string name="branch_load_error">Error al cargar sucursales</string>
+    <string name="branch_required_for_entry">Debes configurar al menos una sucursal antes de registrar ingresos</string>
+    <string name="branch_registering_at">Registrando en:</string>
+    <string name="branch_section_general">INFORMACIÓN GENERAL</string>
+    <string name="branch_section_capacity">CAPACIDAD MÁXIMA</string>
+    <string name="branch_section_rates">TARIFAS</string>
+    <string name="branch_section_currency">MONEDA</string>
+    <string name="branch_hint_name">Nombre de la sucursal *</string>
+    <string name="branch_hint_address">Dirección (opcional)</string>
+    <string name="branch_hint_moto_capacity">Motocicletas</string>
+    <string name="branch_hint_light_capacity">Vehículos ligeros</string>
+    <string name="branch_hint_heavy_capacity">Vehículos pesados</string>
+    <string name="branch_hint_moto_rate">Tarifa motocicletas</string>
+    <string name="branch_hint_light_rate">Tarifa vehículos ligeros</string>
+    <string name="branch_hint_heavy_rate">Tarifa vehículos pesados</string>
+    <string name="branch_section_overnight_rates">TARIFAS PERNOCTA</string>
+    <string name="branch_hint_moto_overnight">Pernocta motocicletas</string>
+    <string name="branch_hint_light_overnight">Pernocta vehículos ligeros</string>
+    <string name="branch_hint_heavy_overnight">Pernocta vehículos pesados</string>
+    <string name="branch_section_hours">HORARIOS</string>
+    <string name="branch_hint_open_weekday">Apertura entre semana</string>
+    <string name="branch_hint_close_weekday">Cierre entre semana</string>
+    <string name="branch_hint_open_weekend">Apertura fin de semana</string>
+    <string name="branch_hint_close_weekend">Cierre fin de semana</string>
+    <string name="branch_capacity_format">M:%1$d  L:%2$d  P:%3$d</string>
+    <string name="dashboard_branches_title">Sucursales</string>
+    <string name="dashboard_branches_subtitle">Gestionar sucursales activas</string>
+    <string name="dashboard_branches_button">Gestionar Sucursales</string>
+    <string name="dashboard_exit_subtitle">Registrar salida de vehículos</string>
+    <string name="action_back">Regresar</string>
+    <string name="action_cancel">Cancelar</string>
+    <string name="field_required">Campo obligatorio</string>
+
+    <!-- Salida -->
+    <string name="exit_title">Registrar Salida</string>
+    <string name="exit_empty">No hay vehículos estacionados actualmente</string>
+    <string name="exit_no_branch">Selecciona una sucursal primero</string>
+    <string name="exit_registering">Registrando salida…</string>
+    <string name="exit_confirm_title">Confirmar Salida</string>
+    <string name="exit_confirm_message">¿Registrar salida de %1$s?</string>
+    <string name="exit_confirm_action">Registrar Salida</string>
+
+    <!-- Membresías -->
+    <string name="membership_list_title">Membresías</string>
+    <string name="membership_new_title">Nueva Membresía</string>
+    <string name="membership_edit_title">Editar Membresía</string>
+    <string name="membership_new_action">Nueva Membresía</string>
+    <string name="membership_save_action">Guardar Membresía</string>
+    <string name="membership_update_action">Actualizar Membresía</string>
+    <string name="membership_empty">No hay membresías registradas</string>
+    <string name="membership_hint_name">Nombre del miembro *</string>
+    <string name="membership_hint_tier">Nivel (Elite, Premium, Básico)</string>
+    <string name="membership_hint_end_date">Fecha de vencimiento</string>
+    <string name="membership_create_success">Membresía creada correctamente</string>
+    <string name="membership_update_success">Membresía actualizada correctamente</string>
+    <string name="membership_delete_confirm">¿Eliminar membresía de %1$s?</string>
+    <string name="membership_delete_title">Eliminar Membresía</string>
+    <string name="membership_section_info">INFORMACIÓN DEL MIEMBRO</string>
+    <string name="membership_status_active">Activa</string>
+    <string name="membership_status_inactive">Inactiva</string>
+
+    <!-- Historial -->
+    <string name="history_title">SmartPark OS</string>
+    <string name="history_empty">No hay salidas registradas</string>
+    <string name="history_today_count">Salidas Hoy</string>
+    <string name="history_today_revenue">Ingresos Totales</string>
+    <string name="history_avg_duration">Duración Promedio</string>
+    <string name="history_metric_trend">%1$d%% vs ayer</string>
+    <string name="history_metric_peak">$%1$.2f hora pico</string>
+    <string name="history_metric_target">Meta: &lt; %1$s</string>
+    <string name="history_revenue_amount">$%.2f</string>
+    <string name="history_timeline">Entrada: %1$s  →  Salida: %2$s</string>
+    <string name="history_duration">Duración: %1$s</string>
+    <string name="history_fee">$%.2f</string>
+    <string name="dashboard_history_title">Historial</string>
+    <string name="dashboard_history_subtitle">Ver salidas completadas y totales del día</string>
+    <string name="history_filter_today">Hoy</string>
+    <string name="history_filter_all">Todos</string>
+    <string name="history_filter_date">Filtrar por fecha</string>
+    <string name="history_filter_date_hint">Seleccionar fecha</string>
+    <string name="history_filtered_count">Salidas del %1$s</string>
+    <string name="history_all_count">Total salidas</string>
+    <string name="history_all_revenue">Total ingresos</string>
+    <string name="history_date_count">Salidas del día</string>
+    <string name="history_date_revenue">Ingresos del día</string>
+    <string name="history_range_count">Salidas del período</string>
+    <string name="history_range_revenue">Ingresos del período</string>
+    <string name="history_filter_from">Desde</string>
+    <string name="history_filter_to">Hasta</string>
+    <string name="history_filter_range">Rango de Fechas</string>
+    <string name="history_search_hint">Buscar placa (ej. ABC-1234)…</string>
+    <string name="history_sort_date">Fecha</string>
+    <string name="history_sort_fee">Tarifa</string>
+    <string name="history_sort_duration">Duración</string>
+    <string name="history_load_more">Cargar Salidas Anteriores</string>
+    <string name="history_showing">Mostrando %1$d de %2$d</string>
+    <string name="history_list_title">Salidas Recientes</string>
+    <string name="history_live_updates">Actualizaciones en Vivo</string>
+    <string name="history_plate_hint">TX-8829</string>
+    <string name="history_stay_label">Tiempo Estacionado</string>
+    <string name="history_entry_exit_label">Entrada / Salida</string>
+    <string name="history_paid_label">Total Pagado</string>
+    <string name="history_operator_format">Salida por %1$s</string>
+    <string name="history_operator_gate">Salida Automática</string>
+    <string name="history_duration_decimal">%1$sh %2$sm</string>
+    <string name="history_duration_short">%1$sh %2$sm</string>
+
+    <!-- Feed de Tráfico -->
+    <string name="traffic_inbound_label">INGRESOS</string>
+    <string name="traffic_inbound_count">%1$d/h</string>
+    <string name="traffic_occupancy_label">OCUPACIÓN</string>
+    <string name="traffic_occupancy_percent">%1$s</string>
+    <string name="traffic_outbound_label">SALIDAS</string>
+    <string name="traffic_outbound_count">%1$d/h</string>
+    <string name="traffic_card_inbound_subtitle">Auto-Estacionamiento</string>
+    <string name="traffic_card_occupied_subtitle">Estancia Activa</string>
+    <string name="traffic_card_occupied_status">Presente</string>
+    <string name="traffic_card_pending_text">Pendiente</string>
+    <string name="traffic_feed_title">Feed de Actividad en Vivo</string>
+    <string name="quick_login_greeting">¡Hola %1$s!</string>
+    <string name="quick_login_subtitle">Bienvenido de nuevo</string>
+    <string name="quick_login_email_label">Correo electrónico</string>
+    <string name="quick_login_switch">Este no es mi correo</string>
+    <string name="quick_login_sign_in">Ingresar</string>
+</resources>
