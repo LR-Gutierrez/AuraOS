@@ -30,17 +30,31 @@ class SessionManager(context: Context) {
 
     init {
         prefs = appContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        encryptedPrefs = createEncryptedPrefs()
+    }
 
+    private fun createEncryptedPrefs(): SharedPreferences {
         val masterKey = MasterKey.Builder(appContext)
             .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
             .build()
-        encryptedPrefs = EncryptedSharedPreferences.create(
-            appContext,
-            ENCRYPTED_PREFS_NAME,
-            masterKey,
-            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-        )
+        return try {
+            EncryptedSharedPreferences.create(
+                appContext,
+                ENCRYPTED_PREFS_NAME,
+                masterKey,
+                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            )
+        } catch (e: Exception) {
+            appContext.deleteSharedPreferences(ENCRYPTED_PREFS_NAME)
+            EncryptedSharedPreferences.create(
+                appContext,
+                ENCRYPTED_PREFS_NAME,
+                masterKey,
+                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            )
+        }
     }
 
     fun saveToken(token: String) {
