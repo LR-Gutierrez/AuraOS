@@ -81,6 +81,22 @@ class LoginRepository(
 
     fun getUserId(): String? = sessionManager.getUserId()
 
+    fun saveLastEmail(email: String) {
+        sessionManager.saveLastEmail(email)
+    }
+
+    fun getLastEmail(): String? = sessionManager.getLastEmail()
+
+    fun saveLastDisplayName(name: String) {
+        sessionManager.saveLastDisplayName(name)
+    }
+
+    fun getLastDisplayName(): String? = sessionManager.getLastDisplayName()
+
+    fun hasPreviousLogin(): Boolean {
+        return sessionManager.hasPreviousLogin()
+    }
+
     fun logout() {
         user = null
         dataSource.logout()

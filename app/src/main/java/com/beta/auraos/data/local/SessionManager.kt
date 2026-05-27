@@ -113,6 +113,22 @@ class SessionManager(context: Context) {
         prefs.edit().remove(KEY_SELECTED_BRANCH_ID).apply()
     }
 
+    fun saveLastEmail(email: String) {
+        prefs.edit().putString(KEY_LAST_EMAIL, email).apply()
+    }
+
+    fun getLastEmail(): String? = prefs.getString(KEY_LAST_EMAIL, null)
+
+    fun saveLastDisplayName(name: String) {
+        prefs.edit().putString(KEY_LAST_DISPLAY_NAME, name).apply()
+    }
+
+    fun getLastDisplayName(): String? = prefs.getString(KEY_LAST_DISPLAY_NAME, null)
+
+    fun hasPreviousLogin(): Boolean {
+        return getToken() != null && getUserId() != null
+    }
+
     fun clearSession() {
         clearToken()
         clearCredentials()
@@ -120,6 +136,8 @@ class SessionManager(context: Context) {
             .remove(KEY_USER_ID)
             .remove(KEY_BIOMETRIC_ENROLLED)
             .remove(KEY_SELECTED_BRANCH_ID)
+            .remove(KEY_LAST_EMAIL)
+            .remove(KEY_LAST_DISPLAY_NAME)
             .apply()
     }
 
@@ -132,5 +150,7 @@ class SessionManager(context: Context) {
         private const val KEY_USER_ID = "user_id"
         private const val KEY_BIOMETRIC_ENROLLED = "biometric_enrolled"
         private const val KEY_SELECTED_BRANCH_ID = "selected_branch_id"
+        private const val KEY_LAST_EMAIL = "last_email"
+        private const val KEY_LAST_DISPLAY_NAME = "last_display_name"
     }
 }

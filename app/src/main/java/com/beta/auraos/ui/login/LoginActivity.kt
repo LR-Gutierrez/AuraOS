@@ -28,27 +28,6 @@ import com.beta.auraos.databinding.ActivityLoginBinding
 import java.security.Signature
 import java.util.concurrent.Executor
 
-/**
- * Login screen with email/password form and biometric quick-access.
- *
- * ## Biometric (crypto-based) flow
- * 1. On launch, checks `loginViewModel.hasBiometricAvailable()` — if
- *    `false` the biometric container is hidden entirely.
- * 2. User taps the fingerprint icon → `BiometricKeyManager.getSignatureForAuth()`
- *    provides a [Signature] initialised with the AndroidKeyStore private key.
- * 3. A `BiometricPrompt.CryptoObject` wraps that signature so Android's
- *    biometric gate protects the private key.
- * 4. On `onAuthenticationSucceeded` the challenge string is signed via
- *    [BiometricKeyManager.signChallenge] and sent to the server as
- *    `POST /api/v1/biometric-login`.
- *
- * ## Edge cases handled
- * - **Key invalidation**: if `getSignatureForAuth()` returns `null` the
- *   key was invalidated (new fingerprint enrolled). User is told to
- *   re-enrol via password login.
- * - **Loading guard**: the form is disabled while a request is in-flight
- *   (see [LoginViewModel.isLoading]).
- */
 class LoginActivity : AppCompatActivity() {
 
     private lateinit var loginViewModel: LoginViewModel
@@ -58,6 +37,8 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var biometricKeyManager: BiometricKeyManager
     private var lastPassword: String = ""
     private var currentChallenge: String = ""
+    private var isReturningUser = false
+    private var autoBiometricAttempted = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -72,35 +53,38 @@ class LoginActivity : AppCompatActivity() {
             insets
         }
 
-        val username = binding.username
-        val password = binding.password
-        val login = binding.login
-        val loading = binding.loading
-
         loginViewModel = ViewModelProvider(this, LoginViewModelFactory(application))
             .get(LoginViewModel::class.java)
 
         biometricKeyManager = BiometricKeyManager(application)
 
+        isReturningUser = loginViewModel.isReturningUser()
+
+        setupObservers()
+        setupQuickLogin()
+        setupFullLogin()
+        setupBiometric()
+
+        if (isReturningUser) {
+            startReturningUserFlow()
+        }
+    }
+
+    private fun setupObservers() {
         loginViewModel.isLoading.observe(this@LoginActivity) { isLoading ->
-            loading.visibility = if (isLoading) View.VISIBLE else View.GONE
-            login.isEnabled = !isLoading && (loginViewModel.loginFormState.value?.isDataValid == true)
-            username.isEnabled = !isLoading
-            password.isEnabled = !isLoading
+            binding.loading.visibility = if (isLoading) View.VISIBLE else View.GONE
         }
 
         loginViewModel.loginFormState.observe(this@LoginActivity, Observer {
             val loginState = it ?: return@Observer
-
             if (loginViewModel.isLoading.value != true) {
-                login.isEnabled = loginState.isDataValid
+                binding.login.isEnabled = loginState.isDataValid
             }
-
             if (loginState.usernameError != null) {
-                username.error = getString(loginState.usernameError)
+                binding.username.error = getString(loginState.usernameError)
             }
             if (loginState.passwordError != null) {
-                password.error = getString(loginState.passwordError)
+                binding.password.error = getString(loginState.passwordError)
             }
         })
 
@@ -121,6 +105,33 @@ class LoginActivity : AppCompatActivity() {
                 updateUiWithUser(result.success)
             }
         }
+    }
+
+    private fun setupQuickLogin() {
+        binding.tvQuickGreeting?.text = getString(
+            R.string.quick_login_greeting,
+            loginViewModel.getStoredDisplayName()
+                ?: loginViewModel.getStoredEmail()
+                ?: ""
+        )
+        binding.tvQuickEmail?.text = loginViewModel.getStoredEmail() ?: ""
+
+        binding.etQuickPassword?.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                doQuickLogin()
+                true
+            } else false
+        }
+
+        binding.btnQuickLogin?.setOnClickListener { doQuickLogin() }
+
+        binding.tvQuickSwitch?.setOnClickListener { switchToFullLogin() }
+    }
+
+    private fun setupFullLogin() {
+        val username = binding.username
+        val password = binding.password
+        val login = binding.login
 
         username.afterTextChanged {
             loginViewModel.loginDataChanged(
@@ -153,8 +164,98 @@ class LoginActivity : AppCompatActivity() {
                 loginViewModel.login(username.text.toString(), password.text.toString())
             }
         }
+    }
 
-        setupBiometric()
+    private fun startReturningUserFlow() {
+        binding.formCard?.visibility = View.GONE
+        binding.brandingContainer?.visibility = View.GONE
+        binding.loading?.visibility = View.VISIBLE
+
+        val hasHardware = hasBiometricHardware()
+        val keyExists = biometricKeyManager.isKeyGenerated()
+        val bioAvailable = hasHardware && loginViewModel.hasBiometricAvailable() && keyExists
+
+        if (bioAvailable) {
+            autoBiometricAttempted = true
+            binding.loading?.post { autoBiometricLogin() }
+        } else {
+            showQuickLogin()
+        }
+    }
+
+    private fun autoBiometricLogin() {
+        val signature = biometricKeyManager.getSignatureForAuth()
+        if (signature == null) {
+            showQuickLogin()
+            return
+        }
+
+        currentChallenge = "smartpark_challenge_${System.currentTimeMillis()}"
+
+        val promptInfo = BiometricPrompt.PromptInfo.Builder()
+            .setTitle("Acceso Rápido")
+            .setSubtitle("Autentíquese para acceder")
+            .setAllowedAuthenticators(BIOMETRIC_STRONG or DEVICE_CREDENTIAL)
+            .build()
+
+        executor = ContextCompat.getMainExecutor(this)
+
+        biometricPrompt = BiometricPrompt(this, executor,
+            object : BiometricPrompt.AuthenticationCallback() {
+                override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
+                    super.onAuthenticationSucceeded(result)
+                    val sig = result.cryptoObject?.signature
+                    if (sig != null) {
+                        val signed = biometricKeyManager.signChallenge(sig, currentChallenge)
+                        val userId = loginViewModel.getUserId() ?: return
+                        loginViewModel.loginWithBiometric(userId, currentChallenge, signed)
+                    }
+                }
+
+                override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
+                    super.onAuthenticationError(errorCode, errString)
+                    if (errorCode == BiometricPrompt.ERROR_NEGATIVE_BUTTON ||
+                        errorCode == BiometricPrompt.ERROR_USER_CANCELED
+                    ) {
+                        showQuickLogin()
+                    }
+                }
+
+                override fun onAuthenticationFailed() {
+                    super.onAuthenticationFailed()
+                    Toast.makeText(
+                        applicationContext,
+                        "Huella no reconocida. Intente de nuevo.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            })
+
+        biometricPrompt.authenticate(promptInfo, BiometricPrompt.CryptoObject(signature))
+    }
+
+    private fun showQuickLogin() {
+        binding.loading?.visibility = View.GONE
+        binding.brandingContainer?.visibility = View.VISIBLE
+        binding.formCard?.visibility = View.VISIBLE
+        binding.quickLoginContainer?.visibility = View.VISIBLE
+        binding.fullLoginContainer?.visibility = View.GONE
+    }
+
+    private fun switchToFullLogin() {
+        binding.quickLoginContainer?.visibility = View.GONE
+        binding.fullLoginContainer?.visibility = View.VISIBLE
+    }
+
+    private fun doQuickLogin() {
+        val email = loginViewModel.getStoredEmail() ?: return
+        val password = binding.etQuickPassword?.text.toString()
+        if (password.length <= 5) {
+            binding.etQuickPassword?.error = getString(R.string.invalid_password)
+            return
+        }
+        lastPassword = password
+        loginViewModel.login(email, password)
     }
 
     private fun setupBiometric() {
@@ -277,17 +378,12 @@ class LoginActivity : AppCompatActivity() {
     }
 }
 
-/**
- * Extension function to simplify setting an afterTextChanged action to EditText components.
- */
 fun EditText.afterTextChanged(afterTextChanged: (String) -> Unit) {
     this.addTextChangedListener(object : TextWatcher {
         override fun afterTextChanged(editable: Editable?) {
             afterTextChanged.invoke(editable.toString())
         }
-
         override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
-
         override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {}
     })
 }

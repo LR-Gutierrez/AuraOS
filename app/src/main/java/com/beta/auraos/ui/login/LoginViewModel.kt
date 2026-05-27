@@ -52,6 +52,8 @@ class LoginViewModel(private val loginRepository: LoginRepository) : ViewModel()
 
             if (result is Result.Success) {
                 loginRepository.saveUserId(result.data.userId)
+                loginRepository.saveLastEmail(result.data.email)
+                loginRepository.saveLastDisplayName(result.data.displayName)
                 _loginResult.value = LoginResult(
                     success = LoggedInUserView(
                         displayName = result.data.displayName,
@@ -104,6 +106,12 @@ class LoginViewModel(private val loginRepository: LoginRepository) : ViewModel()
     }
 
     fun getUserId(): String? = loginRepository.getUserId()
+
+    fun isReturningUser(): Boolean = loginRepository.hasPreviousLogin()
+
+    fun getStoredEmail(): String? = loginRepository.getLastEmail()
+
+    fun getStoredDisplayName(): String? = loginRepository.getLastDisplayName()
 
     fun loginDataChanged(username: String, password: String) {
         if (!isUserNameValid(username)) {

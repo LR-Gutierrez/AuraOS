@@ -228,4 +228,9 @@
     <string name="traffic_card_occupied_status">Present</string>
     <string name="traffic_card_pending_text">Pending</string>
     <string name="traffic_feed_title">Live Activity Feed</string>
+    <string name="quick_login_greeting">¡Hola %1$s!</string>
+    <string name="quick_login_subtitle">Bienvenido de nuevo</string>
+    <string name="quick_login_email_label">Correo electrónico</string>
+    <string name="quick_login_switch">Este no es mi correo</string>
+    <string name="quick_login_sign_in">Ingresar</string>
 </resources>
