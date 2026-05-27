@@ -150,12 +150,12 @@ class AnalyticsActivity : AppCompatActivity() {
     private fun showBranchSelector() {
         if (branches.isEmpty()) {
             AlertDialog.Builder(this)
-                .setTitle("Sin sucursales")
-                .setMessage(getString(R.string.branch_required_for_entry))
-                .setPositiveButton("Configurar") { _, _ ->
+                .setTitle(getString(R.string.dialog_no_branches_title))
+                .setMessage(getString(R.string.dialog_no_branches_message))
+                .setPositiveButton(getString(R.string.dialog_setup)) { _, _ ->
                     startActivity(android.content.Intent(this, BranchListActivity::class.java))
                 }
-                .setNegativeButton("Cancelar", null)
+                .setNegativeButton(getString(R.string.dialog_cancel), null)
                 .show()
             return
         }
@@ -164,7 +164,7 @@ class AnalyticsActivity : AppCompatActivity() {
         val selectedIndex = if (selectedBranch != null) branches.indexOf(selectedBranch) else 0
 
         AlertDialog.Builder(this)
-            .setTitle("Seleccionar sucursal")
+            .setTitle(getString(R.string.dialog_select_branch_title))
             .setSingleChoiceItems(names, if (selectedIndex >= 0) selectedIndex else 0) { dialog, which ->
                 val branch = branches[which]
                 selectedBranch = branch
@@ -173,10 +173,10 @@ class AnalyticsActivity : AppCompatActivity() {
                 dialog.dismiss()
                 loadHistory()
             }
-            .setPositiveButton("Gestionar sucursales") { _, _ ->
+            .setPositiveButton(getString(R.string.dialog_manage_branches)) { _, _ ->
                 startActivity(android.content.Intent(this, BranchListActivity::class.java))
             }
-            .setNegativeButton("Cancelar", null)
+            .setNegativeButton(getString(R.string.dialog_cancel), null)
             .show()
     }
 
@@ -346,10 +346,10 @@ class AnalyticsActivity : AppCompatActivity() {
             tv.text = getString(R.string.history_metric_trend, 0)
             tv.setTextColor(MaterialColors.getColor(binding.root, R.attr.textSecondaryCustom))
         } else if (trend > 0) {
-            tv.text = "+$trend%"
+            tv.text = getString(R.string.analytics_trend_up, trend)
             tv.setTextColor(android.graphics.Color.parseColor("#4CAF50"))
         } else {
-            tv.text = "$trend%"
+            tv.text = getString(R.string.analytics_trend_down, trend)
             tv.setTextColor(android.graphics.Color.parseColor("#EF5350"))
         }
     }
@@ -417,11 +417,11 @@ class AnalyticsActivity : AppCompatActivity() {
         val type = entry.activityType
 
         val photoFields = listOfNotNull(
-            "Placa" to e.platePhotoUrl,
-            "Frontal" to e.frontPhotoUrl,
-            "Trasera" to e.rearPhotoUrl,
-            "Izquierda" to e.leftPhotoUrl,
-            "Derecha" to e.rightPhotoUrl
+            getString(R.string.cd_plate_photo) to e.platePhotoUrl,
+            getString(R.string.photo_label_front) to e.frontPhotoUrl,
+            getString(R.string.photo_label_rear) to e.rearPhotoUrl,
+            getString(R.string.photo_label_left) to e.leftPhotoUrl,
+            getString(R.string.photo_label_right) to e.rightPhotoUrl
         ).mapNotNull { (label, url) ->
             val fullUrl = PhotoUrlBuilder.build(url)
             if (fullUrl != null) label to fullUrl else null
@@ -697,9 +697,9 @@ class AnalyticsActivity : AppCompatActivity() {
         scroll.addView(container)
 
         AlertDialog.Builder(this)
-            .setTitle("Fotos - $plate")
+            .setTitle(getString(R.string.photos_title, plate))
             .setView(scroll)
-            .setPositiveButton("Cerrar", null)
+            .setPositiveButton(getString(R.string.dialog_close), null)
             .show()
     }
 

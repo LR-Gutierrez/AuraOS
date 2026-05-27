@@ -233,4 +233,78 @@
     <string name="quick_login_email_label">Email address</string>
     <string name="quick_login_switch">This is not my email</string>
     <string name="quick_login_sign_in">Sign In</string>
+
+    <!-- Common Dialogs -->
+    <string name="dialog_no_branches_title">No Branches</string>
+    <string name="dialog_no_branches_message">You need to configure at least one branch before registering entries</string>
+    <string name="dialog_setup">Set Up</string>
+    <string name="dialog_select_branch_title">Select Branch</string>
+    <string name="dialog_manage_branches">Manage Branches</string>
+    <string name="dialog_cancel">Cancel</string>
+    <string name="dialog_ok">OK</string>
+
+    <!-- Biometric Enrollment -->
+    <string name="biometric_enroll_title">Biometric Access</string>
+    <string name="biometric_enroll_message">Would you like to enable quick fingerprint access for next time?</string>
+    <string name="biometric_enroll_activate">Activate</string>
+    <string name="biometric_enroll_later">Not now</string>
+    <string name="biometric_enrolled_success">Biometric access activated</string>
+    <string name="biometric_enrolled_error">Error activating biometrics</string>
+    <string name="biometric_key_generate_error">Could not generate biometric key</string>
+    <string name="biometric_session_expired">Session expired. Please sign in again.</string>
+
+    <!-- Biometric Prompt -->
+    <string name="biometric_prompt_title">Quick Access</string>
+    <string name="biometric_prompt_subtitle">Authenticate to access</string>
+    <string name="biometric_error_hw_not_present">This device has no biometric sensor</string>
+    <string name="biometric_error_hw_unavailable">Biometric sensor unavailable</string>
+    <string name="biometric_error_no_fingerprints">No fingerprints registered. Set one up in Settings.</string>
+    <string name="biometric_error_auth_failed">Authentication error</string>
+    <string name="biometric_error_init">Error initializing biometrics. Please re-enroll.</string>
+    <string name="biometric_error_verify">Error verifying biometrics</string>
+    <string name="biometric_fingerprint_not_recognized">Fingerprint not recognized. Try again.</string>
+
+    <!-- Common Error Messages -->
+    <string name="error_unknown">Unknown error</string>
+    <string name="error_connection">Connection error: %1$s</string>
+    <string name="error_server">Server error (%1$d)</string>
+    <string name="error_empty_response">Empty response from server</string>
+    <string name="error_invalid_credentials">Invalid credentials</string>
+    <string name="error_invalid_data">Invalid data</string>
+    <string name="error_not_found">Not found</string>
+    <string name="error_session_expired">Session expired. Sign in again.</string>
+
+    <!-- Dashboard Errors -->
+    <string name="dashboard_no_session">Session not started. Sign in to see the dashboard.</string>
+    <string name="dashboard_load_error">Error loading dashboard: %1$s</string>
+    <string name="dashboard_branch_not_found">Branch not found</string>
+
+    <!-- Branch specific -->
+    <string name="branch_no_address">No address</string>
+    <string name="branch_default_toast">Default branch: %1$s</string>
+    <string name="field_required_plain">Required field</string>
+    <string name="branch_currencies">USD,MXN,GTQ</string>
+
+    <!-- Welcome Toast -->
+    <string name="welcome_toast">Welcome %1$s</string>
+
+    <!-- History -->
+    <string name="history_filter_today_label">Today</string>
+    <string name="history_filter_all_label">All</string>
+    <string name="history_filter_range_label">Range</string>
+    <string name="history_duration_placeholder">--</string>
+    <string name="history_occupancy_format">%1$s%%</string>
+    <string name="history_duration_zero">0m</string>
+    <string name="history_duration_format_hours">%1$sh %2$sm</string>
+    <string name="history_duration_format_mins">%1$sm</string>
+    <string name="photos_title">Photos - %1$s</string>
+    <string name="dialog_close">Close</string>
+    <string name="dialog_delete">Delete</string>
+    <string name="branch_rates_format">%1$s %2$s / %3$s / %4$s</string>
+    <string name="branch_overnight_format">Overnight: %1$s / %2$s / %3$s</string>
+    <string name="branch_hours_format">Mon–Sat %1$s–%2$s  Sun %3$s–%4$s</string>
+    <string name="membership_select_branch_first">Select a branch first</string>
+    <string name="membership_tier_basic">Basic</string>
+    <string name="analytics_trend_up">+%1$d%%</string>
+    <string name="analytics_trend_down">%1$d%%</string>
 </resources>

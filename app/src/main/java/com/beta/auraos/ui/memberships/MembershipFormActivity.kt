@@ -75,13 +75,13 @@ class MembershipFormActivity : AppCompatActivity() {
         }
 
         if (branchId == null) {
-            Toast.makeText(this, "Selecciona una sucursal primero", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, getString(R.string.membership_select_branch_first), Toast.LENGTH_LONG).show()
             return
         }
 
         val input = CreateMembershipInput(
             memberName = name,
-            tier = tier.ifEmpty { "Básico" },
+            tier = tier.ifEmpty { getString(R.string.membership_tier_basic) },
             endDate = endDate.ifEmpty { "2026-12-31" },
             branchId = branchId
         )

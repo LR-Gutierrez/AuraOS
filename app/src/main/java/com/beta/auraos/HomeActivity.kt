@@ -320,12 +320,12 @@ class HomeActivity : AppCompatActivity() {
     private fun showBranchSelector() {
         if (branches.isEmpty()) {
             AlertDialog.Builder(this)
-                .setTitle("Sin sucursales")
-                .setMessage(getString(R.string.branch_required_for_entry))
-                .setPositiveButton("Configurar") { _, _ ->
+                .setTitle(getString(R.string.dialog_no_branches_title))
+                .setMessage(getString(R.string.dialog_no_branches_message))
+                .setPositiveButton(getString(R.string.dialog_setup)) { _, _ ->
                     startActivity(android.content.Intent(this, BranchListActivity::class.java))
                 }
-                .setNegativeButton("Cancelar", null)
+                .setNegativeButton(getString(R.string.dialog_cancel), null)
                 .show()
             return
         }
@@ -334,7 +334,7 @@ class HomeActivity : AppCompatActivity() {
         val selectedIndex = if (selectedBranch != null) branches.indexOf(selectedBranch) else 0
 
         AlertDialog.Builder(this)
-            .setTitle("Seleccionar sucursal")
+            .setTitle(getString(R.string.dialog_select_branch_title))
             .setSingleChoiceItems(names, if (selectedIndex >= 0) selectedIndex else 0) { dialog, which ->
                 val branch = branches[which]
                 selectedBranch = branch
@@ -342,10 +342,10 @@ class HomeActivity : AppCompatActivity() {
                 binding.tvBranchName.text = branch.name
                 dialog.dismiss()
             }
-            .setPositiveButton("Gestionar sucursales") { _, _ ->
+            .setPositiveButton(getString(R.string.dialog_manage_branches)) { _, _ ->
                 startActivity(android.content.Intent(this, BranchListActivity::class.java))
             }
-            .setNegativeButton("Cancelar", null)
+            .setNegativeButton(getString(R.string.dialog_cancel), null)
             .show()
     }
 
@@ -399,7 +399,7 @@ class HomeActivity : AppCompatActivity() {
         }
 
         if (binding.etPlateNumber.text.isNullOrBlank()) {
-            binding.etPlateNumber.error = "Campo obligatorio"
+            binding.etPlateNumber.error = getString(R.string.field_required_plain)
             if (firstErrorView == null) firstErrorView = binding.etPlateNumber
         }
 

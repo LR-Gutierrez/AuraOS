@@ -106,13 +106,13 @@ class BranchListActivity : AppCompatActivity() {
         val btnDelete = card.findViewById<View>(R.id.btn_delete_branch)
 
         tvName.text = branch.name
-        tvAddress.text = branch.address ?: "Sin dirección"
+        tvAddress.text = branch.address ?: getString(R.string.branch_no_address)
         tvAddress.visibility = if (branch.address != null) View.VISIBLE else View.GONE
 
-        tvCapacity.text = "M:${branch.motorcycleCapacity}  L:${branch.lightVehicleCapacity}  P:${branch.heavyVehicleCapacity}"
-        tvRates.text = "${branch.currency} ${branch.motorcycleRate} / ${branch.lightVehicleRate} / ${branch.heavyVehicleRate}"
-        tvOvernight.text = "Pernocta: ${branch.motorcycleOvernightRate} / ${branch.lightVehicleOvernightRate} / ${branch.heavyVehicleOvernightRate}"
-        tvHours.text = "Lun–Sab ${branch.openTimeWeekday}–${branch.closeTimeWeekday}  Dom ${branch.openTimeWeekend}–${branch.closeTimeWeekend}"
+        tvCapacity.text = getString(R.string.branch_capacity_format, branch.motorcycleCapacity, branch.lightVehicleCapacity, branch.heavyVehicleCapacity)
+        tvRates.text = getString(R.string.branch_rates_format, branch.currency, branch.motorcycleRate, branch.lightVehicleRate, branch.heavyVehicleRate)
+        tvOvernight.text = getString(R.string.branch_overnight_format, branch.motorcycleOvernightRate, branch.lightVehicleOvernightRate, branch.heavyVehicleOvernightRate)
+        tvHours.text = getString(R.string.branch_hours_format, branch.openTimeWeekday, branch.closeTimeWeekday, branch.openTimeWeekend, branch.closeTimeWeekend)
 
         if (isDefault) {
             val gold = MaterialColors.getColor(card, com.google.android.material.R.attr.colorPrimary)
@@ -125,7 +125,7 @@ class BranchListActivity : AppCompatActivity() {
         btnDefault.setOnClickListener {
             sessionManager.saveSelectedBranchId(branch.id)
             renderBranchList(viewModel.branches.value ?: emptyList())
-            Toast.makeText(this, "Sucursal predeterminada: ${branch.name}", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.branch_default_toast, branch.name), Toast.LENGTH_SHORT).show()
         }
 
         btnEdit.setOnClickListener {
@@ -145,12 +145,12 @@ class BranchListActivity : AppCompatActivity() {
 
     private fun confirmDeleteBranch(branch: Branch) {
         AlertDialog.Builder(this)
-            .setTitle("Eliminar sucursal")
-            .setMessage("¿Estás seguro de eliminar \"${branch.name}\"? Esta acción no se puede deshacer.")
-            .setPositiveButton("Eliminar") { _, _ ->
+            .setTitle(getString(R.string.branch_delete_title))
+            .setMessage(getString(R.string.branch_delete_confirm, branch.name))
+            .setPositiveButton(getString(R.string.dialog_delete)) { _, _ ->
                 viewModel.deleteBranch(branch.id)
             }
-            .setNegativeButton("Cancelar", null)
+            .setNegativeButton(getString(R.string.dialog_cancel), null)
             .show()
     }
 

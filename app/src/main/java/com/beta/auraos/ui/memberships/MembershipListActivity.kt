@@ -102,7 +102,7 @@ class MembershipListActivity : AppCompatActivity() {
                 AlertDialog.Builder(this)
                     .setTitle(m.memberName)
                     .setMessage("${getString(R.string.membership_hint_tier)}: ${m.tier}\n${getString(R.string.membership_hint_end_date)}: ${formatDate(m.endDate)}\n${getString(R.string.membership_status_active)}: ${if (m.isActive) getString(R.string.membership_status_active) else getString(R.string.membership_status_inactive)}")
-                    .setPositiveButton("OK", null)
+                    .setPositiveButton(getString(R.string.dialog_ok), null)
                     .setNegativeButton(getString(R.string.membership_delete_title)) { _, _ ->
                         confirmDelete(m)
                     }

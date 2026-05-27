@@ -233,4 +233,78 @@
     <string name="quick_login_email_label">Correo electrónico</string>
     <string name="quick_login_switch">Este no es mi correo</string>
     <string name="quick_login_sign_in">Ingresar</string>
+
+    <!-- Diálogos comunes -->
+    <string name="dialog_no_branches_title">Sin sucursales</string>
+    <string name="dialog_no_branches_message">Debes configurar al menos una sucursal antes de registrar ingresos</string>
+    <string name="dialog_setup">Configurar</string>
+    <string name="dialog_select_branch_title">Seleccionar sucursal</string>
+    <string name="dialog_manage_branches">Gestionar sucursales</string>
+    <string name="dialog_cancel">Cancelar</string>
+    <string name="dialog_ok">OK</string>
+
+    <!-- Enrollment Biométrico -->
+    <string name="biometric_enroll_title">Acceso Biométrico</string>
+    <string name="biometric_enroll_message">¿Desea activar el acceso rápido con huella digital para la próxima vez?</string>
+    <string name="biometric_enroll_activate">Activar</string>
+    <string name="biometric_enroll_later">Ahora no</string>
+    <string name="biometric_enrolled_success">Acceso biométrico activado</string>
+    <string name="biometric_enrolled_error">Error al activar biometría</string>
+    <string name="biometric_key_generate_error">No se pudo generar la llave biométrica</string>
+    <string name="biometric_session_expired">Sesión expirada. Inicie sesión nuevamente.</string>
+
+    <!-- Prompt Biométrico -->
+    <string name="biometric_prompt_title">Acceso Rápido</string>
+    <string name="biometric_prompt_subtitle">Autentíquese para acceder</string>
+    <string name="biometric_error_hw_not_present">Este dispositivo no tiene sensor biométrico</string>
+    <string name="biometric_error_hw_unavailable">Sensor biométrico no disponible</string>
+    <string name="biometric_error_no_fingerprints">No hay huellas registradas. Configure una en Ajustes.</string>
+    <string name="biometric_error_auth_failed">Error de autenticación</string>
+    <string name="biometric_error_init">Error al inicializar biometría. Vuelva a enrolar.</string>
+    <string name="biometric_error_verify">Error al verificar biometría</string>
+    <string name="biometric_fingerprint_not_recognized">Huella no reconocida. Intente de nuevo.</string>
+
+    <!-- Mensajes de error comunes -->
+    <string name="error_unknown">Error desconocido</string>
+    <string name="error_connection">Error de conexión: %1$s</string>
+    <string name="error_server">Error del servidor (%1$d)</string>
+    <string name="error_empty_response">Respuesta vacía del servidor</string>
+    <string name="error_invalid_credentials">Credenciales inválidas</string>
+    <string name="error_invalid_data">Datos inválidos</string>
+    <string name="error_not_found">No encontrado</string>
+    <string name="error_session_expired">Sesión expirada. Inicia sesión nuevamente.</string>
+
+    <!-- Errores del Dashboard -->
+    <string name="dashboard_no_session">Sesión no iniciada. Inicia sesión para ver el dashboard.</string>
+    <string name="dashboard_load_error">Error al cargar dashboard: %1$s</string>
+    <string name="dashboard_branch_not_found">Sucursal no encontrada</string>
+
+    <!-- Sucursales -->
+    <string name="branch_no_address">Sin dirección</string>
+    <string name="branch_default_toast">Sucursal predeterminada: %1$s</string>
+    <string name="field_required_plain">Campo obligatorio</string>
+    <string name="branch_currencies">USD,MXN,GTQ</string>
+
+    <!-- Toast Bienvenida -->
+    <string name="welcome_toast">Bienvenido %1$s</string>
+
+    <!-- Historial -->
+    <string name="history_filter_today_label">Hoy</string>
+    <string name="history_filter_all_label">Todos</string>
+    <string name="history_filter_range_label">Rango</string>
+    <string name="history_duration_placeholder">--</string>
+    <string name="history_occupancy_format">%1$s%%</string>
+    <string name="history_duration_zero">0m</string>
+    <string name="history_duration_format_hours">%1$sh %2$sm</string>
+    <string name="history_duration_format_mins">%1$sm</string>
+    <string name="photos_title">Fotos - %1$s</string>
+    <string name="dialog_close">Cerrar</string>
+    <string name="dialog_delete">Eliminar</string>
+    <string name="branch_rates_format">%1$s %2$s / %3$s / %4$s</string>
+    <string name="branch_overnight_format">Pernocta: %1$s / %2$s / %3$s</string>
+    <string name="branch_hours_format">Lun–Sab %1$s–%2$s  Dom %3$s–%4$s</string>
+    <string name="membership_select_branch_first">Selecciona una sucursal primero</string>
+    <string name="membership_tier_basic">Básico</string>
+    <string name="analytics_trend_up">+%1$d%%</string>
+    <string name="analytics_trend_down">%1$d%%</string>
 </resources>

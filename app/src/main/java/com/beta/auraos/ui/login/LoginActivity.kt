@@ -194,8 +194,8 @@ class LoginActivity : AppCompatActivity() {
         currentChallenge = "smartpark_challenge_${System.currentTimeMillis()}"
 
         val promptInfo = BiometricPrompt.PromptInfo.Builder()
-            .setTitle("Acceso Rápido")
-            .setSubtitle("Autentíquese para acceder")
+            .setTitle(getString(R.string.biometric_prompt_title))
+            .setSubtitle(getString(R.string.biometric_prompt_subtitle))
             .setAllowedAuthenticators(BIOMETRIC_STRONG or DEVICE_CREDENTIAL)
             .build()
 
@@ -226,7 +226,7 @@ class LoginActivity : AppCompatActivity() {
                     super.onAuthenticationFailed()
                     Toast.makeText(
                         applicationContext,
-                        "Huella no reconocida. Intente de nuevo.",
+                        getString(R.string.biometric_fingerprint_not_recognized),
                         Toast.LENGTH_SHORT
                     ).show()
                 }
@@ -289,12 +289,12 @@ class LoginActivity : AppCompatActivity() {
                     ) {
                         val message = when (errorCode) {
                             BiometricPrompt.ERROR_HW_NOT_PRESENT ->
-                                "Este dispositivo no tiene sensor biométrico"
+                                getString(R.string.biometric_error_hw_not_present)
                             BiometricPrompt.ERROR_HW_UNAVAILABLE ->
-                                "Sensor biométrico no disponible"
+                                getString(R.string.biometric_error_hw_unavailable)
                             BiometricPrompt.ERROR_NO_BIOMETRICS ->
-                                "No hay huellas registradas"
-                            else -> "Error de autenticación"
+                                getString(R.string.biometric_error_no_fingerprints)
+                            else -> getString(R.string.biometric_error_auth_failed)
                         }
                         Toast.makeText(applicationContext, message, Toast.LENGTH_SHORT).show()
                     }
@@ -304,7 +304,7 @@ class LoginActivity : AppCompatActivity() {
                     super.onAuthenticationFailed()
                     Toast.makeText(
                         applicationContext,
-                        "Huella no reconocida. Intente de nuevo.",
+                        getString(R.string.biometric_fingerprint_not_recognized),
                         Toast.LENGTH_SHORT
                     ).show()
                 }
@@ -317,32 +317,32 @@ class LoginActivity : AppCompatActivity() {
                     BiometricManager.BIOMETRIC_SUCCESS -> {
                         val signature = biometricKeyManager.getSignatureForAuth()
                         if (signature == null) {
-                            Toast.makeText(this, "Error al inicializar biometría. Vuelva a enrolar.", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this, getString(R.string.biometric_error_init), Toast.LENGTH_SHORT).show()
                             return@setOnClickListener
                         }
                         currentChallenge = "smartpark_challenge_${System.currentTimeMillis()}"
                         val promptInfo = BiometricPrompt.PromptInfo.Builder()
-                            .setTitle("Acceso Rápido")
-                            .setSubtitle("Autentíquese para acceder")
+                            .setTitle(getString(R.string.biometric_prompt_title))
+                            .setSubtitle(getString(R.string.biometric_prompt_subtitle))
                             .setAllowedAuthenticators(BIOMETRIC_STRONG or DEVICE_CREDENTIAL)
                             .build()
                         biometricPrompt.authenticate(promptInfo, BiometricPrompt.CryptoObject(signature))
                     }
                     BiometricManager.BIOMETRIC_ERROR_NO_HARDWARE -> {
-                        Toast.makeText(this, "Este dispositivo no tiene sensor biométrico", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, getString(R.string.biometric_error_hw_not_present), Toast.LENGTH_SHORT).show()
                     }
                     BiometricManager.BIOMETRIC_ERROR_HW_UNAVAILABLE -> {
-                        Toast.makeText(this, "Sensor biométrico no disponible", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, getString(R.string.biometric_error_hw_unavailable), Toast.LENGTH_SHORT).show()
                     }
                     BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED -> {
-                        Toast.makeText(this, "No hay huellas registradas. Configure una en Ajustes.", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, getString(R.string.biometric_error_no_fingerprints), Toast.LENGTH_SHORT).show()
                     }
                     else -> {
-                        Toast.makeText(this, "Biometría no disponible en este dispositivo", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, getString(R.string.biometric_error_hw_not_present), Toast.LENGTH_SHORT).show()
                     }
                 }
             } catch (e: Exception) {
-                Toast.makeText(this, "Error al verificar biometría", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.biometric_error_verify), Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -359,7 +359,7 @@ class LoginActivity : AppCompatActivity() {
     private fun updateUiWithUser(model: LoggedInUserView) {
         Toast.makeText(
             applicationContext,
-            "Bienvenido ${model.displayName}",
+            getString(R.string.welcome_toast, model.displayName),
             Toast.LENGTH_LONG
         ).show()
 

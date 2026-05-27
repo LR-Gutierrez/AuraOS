@@ -54,8 +54,8 @@ class BranchFormActivity : AppCompatActivity() {
         setupWindowInsets()
 
         if (isEditMode) {
-            binding.tvAppTitle.text = "Editar sucursal"
-            binding.btnSave.text = "Actualizar sucursal"
+            binding.tvAppTitle.text = getString(R.string.branch_edit_title)
+            binding.btnSave.text = getString(R.string.branch_update_action)
             viewModel.loadBranch(branchId!!)
         }
     }
@@ -128,7 +128,7 @@ class BranchFormActivity : AppCompatActivity() {
     private fun validateAndSave() {
         val name = binding.etName.text.toString().trim()
         if (name.isEmpty()) {
-            binding.etName.error = "Campo obligatorio"
+            binding.etName.error = getString(R.string.field_required_plain)
             binding.etName.requestFocus()
             return
         }

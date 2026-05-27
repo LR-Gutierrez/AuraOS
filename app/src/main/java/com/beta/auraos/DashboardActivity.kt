@@ -195,12 +195,12 @@ class DashboardActivity : AppCompatActivity() {
     private fun showBranchSelector() {
         if (branches.isEmpty()) {
             AlertDialog.Builder(this)
-                .setTitle("Sin sucursales")
-                .setMessage(getString(R.string.branch_required_for_entry))
-                .setPositiveButton("Configurar") { _, _ ->
+                .setTitle(getString(R.string.dialog_no_branches_title))
+                .setMessage(getString(R.string.dialog_no_branches_message))
+                .setPositiveButton(getString(R.string.dialog_setup)) { _, _ ->
                     startActivity(android.content.Intent(this, BranchListActivity::class.java))
                 }
-                .setNegativeButton("Cancelar", null)
+                .setNegativeButton(getString(R.string.dialog_cancel), null)
                 .show()
             return
         }
@@ -209,7 +209,7 @@ class DashboardActivity : AppCompatActivity() {
         val selectedIndex = if (selectedBranch != null) branches.indexOf(selectedBranch) else 0
 
         AlertDialog.Builder(this)
-            .setTitle("Seleccionar sucursal")
+            .setTitle(getString(R.string.dialog_select_branch_title))
             .setSingleChoiceItems(names, if (selectedIndex >= 0) selectedIndex else 0) { dialog, which ->
                 val branch = branches[which]
                 selectedBranch = branch
@@ -218,10 +218,10 @@ class DashboardActivity : AppCompatActivity() {
                 dialog.dismiss()
                 loadDashboard()
             }
-            .setPositiveButton("Gestionar sucursales") { _, _ ->
+            .setPositiveButton(getString(R.string.dialog_manage_branches)) { _, _ ->
                 startActivity(android.content.Intent(this, BranchListActivity::class.java))
             }
-            .setNegativeButton("Cancelar", null)
+            .setNegativeButton(getString(R.string.dialog_cancel), null)
             .show()
     }
 
@@ -308,15 +308,12 @@ class DashboardActivity : AppCompatActivity() {
     }
 
     private fun showError(message: String) {
-        if (message.contains("Sesión expirada") || message.contains("Sesión no iniciada")) {
+        if (message.contains("Sesión expirada") || message.contains("sesión") ||
+            message.contains("Session expired") || message.contains("session")) {
             Toast.makeText(this, message, Toast.LENGTH_LONG).show()
             return
         }
-        if (message.contains("selecciona una sucursal")) {
-            Toast.makeText(this, message, Toast.LENGTH_LONG).show()
-            return
-        }
-        Toast.makeText(this, "Error al cargar dashboard: $message", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, getString(R.string.dashboard_load_error, message), Toast.LENGTH_SHORT).show()
     }
 
     private fun startBorderGlow(overlay: View, color: Int, cornerRadiusPx: Float) {
@@ -345,12 +342,12 @@ class DashboardActivity : AppCompatActivity() {
         val password = intent.getStringExtra(EXTRA_PASSWORD) ?: return
 
         AlertDialog.Builder(this)
-            .setTitle("Acceso Biométrico")
-            .setMessage("¿Desea activar el acceso rápido con huella digital para la próxima vez?")
-            .setPositiveButton("Activar") { _, _ ->
+            .setTitle(getString(R.string.biometric_enroll_title))
+            .setMessage(getString(R.string.biometric_enroll_message))
+            .setPositiveButton(getString(R.string.biometric_enroll_activate)) { _, _ ->
                 enrollBiometric(email, password, userId)
             }
-            .setNegativeButton("Ahora no", null)
+            .setNegativeButton(getString(R.string.biometric_enroll_later), null)
             .show()
     }
 
@@ -360,16 +357,16 @@ class DashboardActivity : AppCompatActivity() {
                 try {
                     biometricKeyManager.generateKeyPair()
                     val publicKey = biometricKeyManager.getPublicKey()
-                        ?: return@withContext Result.Error(java.io.IOException("No se pudo generar la llave biométrica"))
+                        ?: return@withContext Result.Error(java.io.IOException(getString(R.string.biometric_key_generate_error)))
 
                     val token = sessionManager.getToken()
-                        ?: return@withContext Result.Error(java.io.IOException("Sesión expirada. Inicie sesión nuevamente."))
+                        ?: return@withContext Result.Error(java.io.IOException(getString(R.string.biometric_session_expired)))
 
                     val dataSource = LoginDataSource(sessionManager)
                     dataSource.biometricEnroll(token, userId, publicKey)
                 } catch (e: Exception) {
                     biometricKeyManager.deleteKey()
-                    Result.Error(java.io.IOException(e.localizedMessage ?: "Error al registrar biometría"))
+                    Result.Error(java.io.IOException(e.localizedMessage ?: getString(R.string.biometric_enrolled_error)))
                 }
             }
 
@@ -378,11 +375,11 @@ class DashboardActivity : AppCompatActivity() {
                     is Result.Success -> {
                         sessionManager.saveCredentials(email, password)
                         sessionManager.setBiometricEnrolled(true)
-                        Toast.makeText(this@DashboardActivity, "Acceso biométrico activado", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@DashboardActivity, getString(R.string.biometric_enrolled_success), Toast.LENGTH_SHORT).show()
                     }
                     is Result.Error -> {
                         biometricKeyManager.deleteKey()
-                        Toast.makeText(this@DashboardActivity, result.exception.localizedMessage ?: "Error al activar biometría", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@DashboardActivity, result.exception.localizedMessage ?: getString(R.string.biometric_enrolled_error), Toast.LENGTH_SHORT).show()
                     }
                 }
             }
