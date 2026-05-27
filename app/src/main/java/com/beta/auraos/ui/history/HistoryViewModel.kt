@@ -8,9 +8,9 @@ import com.beta.auraos.data.HistoryResult
 import com.beta.auraos.data.Result
 import com.beta.auraos.data.VehicleEntryRepository
 import com.beta.auraos.data.model.VehicleEntry
+import com.beta.auraos.data.remote.AnalyticsSummaryResponse
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
-import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
@@ -48,7 +48,9 @@ data class FilterSummary(
     val occupancyPercent: String = "0%",
     val inboundTrend: Int = 0,
     val occupancyTrend: Int = 0,
-    val outboundTrend: Int = 0
+    val outboundTrend: Int = 0,
+    val peakHourRevenue: Double = 0.0,
+    val peakHourLabel: String = ""
 )
 
 sealed class HistoryUiState {
@@ -85,14 +87,12 @@ class HistoryViewModel(
 
     private var exitedEntries: List<VehicleEntry> = emptyList()
     private var activeEntries: List<VehicleEntry> = emptyList()
-    private var yesterdayExitedCount: Int = 0
-    private var yesterdayActiveCount: Int = 0
+    private var analyticsSummary: AnalyticsSummaryResponse? = null
 
     private val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.US).apply {
         timeZone = TimeZone.getTimeZone("UTC")
     }
     private val pageSize = 20
-    private val inboundThresholdMinutes = 30
 
     companion object {
         const val PAGE_SIZE = 20
@@ -103,16 +103,11 @@ class HistoryViewModel(
         viewModelScope.launch {
             val historyDeferred = repository.getHistoryEntries(branchId)
             val activeDeferred = repository.getActiveEntries(branchId)
+            val analyticsDeferred = repository.getAnalyticsSummary(branchId)
 
-            val yesterday = dateFormat.format(
-                Calendar.getInstance(TimeZone.getTimeZone("UTC")).apply { add(Calendar.DAY_OF_MONTH, -1) }.time
-            )
-            val yesterdayResult = repository.getHistoryEntries(
-                branchId, from = yesterday, to = yesterday
-            )
-            yesterdayExitedCount = if (yesterdayResult is Result.Success) {
-                yesterdayResult.data.entries.size
-            } else 0
+            analyticsSummary = if (analyticsDeferred is Result.Success) {
+                analyticsDeferred.data
+            } else null
 
             val state = when {
                 historyDeferred is Result.Success -> {
@@ -184,12 +179,13 @@ class HistoryViewModel(
         val merged = mutableListOf<HistoryEntry>()
 
         val now = System.currentTimeMillis()
+        val thresholdMs = (analyticsSummary?.inboundThresholdMinutes ?: 30) * 60 * 1000L
 
         for (entry in activeEntries) {
             if (!matchesDateFilterActive(entry)) continue
             if (!matchesSearch(entry)) continue
             val createdAtMs = parseDateToMillis(entry.createdAt)
-            val isRecent = createdAtMs != null && (now - createdAtMs) < inboundThresholdMinutes * 60 * 1000L
+            val isRecent = createdAtMs != null && (now - createdAtMs) < thresholdMs
             val type = if (isRecent) ActivityType.INBOUND else ActivityType.OCCUPIED
             val durationLabel = if (entry.duration != null) entry.duration else "--"
             merged.add(
@@ -235,28 +231,24 @@ class HistoryViewModel(
         val outboundCount = merged.count { it.activityType == ActivityType.OUTBOUND }
 
         val totalActiveVehicles = inboundCount + currentOccupancyCount
-        val totalCapacity = 70
+        val totalCapacity = analyticsSummary?.totalCapacity ?: 70
         val occupancyPercent = ((totalActiveVehicles.toFloat() / totalCapacity) * 100).toInt()
 
-        val outboundTrend = if (yesterdayExitedCount > 0) {
-            ((outboundCount - yesterdayExitedCount) * 100) / yesterdayExitedCount
-        } else if (outboundCount > 0) {
-            100
-        } else 0
-
         val summary = FilterSummary(
-            count = outboundCount,
-            revenue = merged.filter { it.activityType == ActivityType.OUTBOUND }.sumOf { it.fee },
-            avgDurationLabel = formatMinutes(avgMinutes.roundToInt()),
-            inboundCount = inboundCount,
-            occupancyCount = totalActiveVehicles,
-            outboundCount = outboundCount,
+            count = analyticsSummary?.outboundCount ?: outboundCount,
+            revenue = analyticsSummary?.totalRevenue ?: merged.filter { it.activityType == ActivityType.OUTBOUND }.sumOf { it.fee },
+            avgDurationLabel = analyticsSummary?.avgDurationMinutes?.let {
+                if (it > 0) formatMinutes(it.roundToInt()) else null
+            } ?: formatMinutes(avgMinutes.roundToInt()),
+            inboundCount = analyticsSummary?.inboundCount ?: inboundCount,
+            occupancyCount = analyticsSummary?.activeCount ?: totalActiveVehicles,
+            outboundCount = analyticsSummary?.outboundCount ?: outboundCount,
             occupancyPercent = "$occupancyPercent%",
-            inboundTrend = if (inboundCount > 0) 100 else 0,
-            occupancyTrend = if (yesterdayActiveCount > 0 && totalActiveVehicles > yesterdayActiveCount) {
-                ((totalActiveVehicles - yesterdayActiveCount) * 100) / yesterdayActiveCount
-            } else 0,
-            outboundTrend = outboundTrend
+            inboundTrend = analyticsSummary?.inboundTrendPercent ?: if (inboundCount > 0) 100 else 0,
+            occupancyTrend = analyticsSummary?.activeTrendPercent ?: 0,
+            outboundTrend = analyticsSummary?.outboundTrendPercent ?: 0,
+            peakHourRevenue = analyticsSummary?.peakHourRevenue ?: 0.0,
+            peakHourLabel = analyticsSummary?.peakHourLabel ?: ""
         )
 
         return HistoryUiState.Success(

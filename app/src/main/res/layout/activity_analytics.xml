@@ -402,6 +402,7 @@
                             android:textStyle="bold"
                             android:layout_marginTop="4dp" />
                         <TextView
+                            android:id="@+id/tv_avg_duration_target"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/history_metric_target"

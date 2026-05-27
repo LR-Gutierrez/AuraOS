@@ -358,6 +358,7 @@ class AnalyticsActivity : AppCompatActivity() {
         binding.tvTodayCount.text = state.summary.outboundCount.toString()
         binding.tvTodayRevenue.text = getString(R.string.history_revenue_amount, state.summary.revenue)
         binding.tvAvgDuration.text = state.summary.avgDurationLabel
+        binding.tvAvgDurationTarget.text = getString(R.string.history_metric_target, state.summary.avgDurationLabel)
 
         binding.tvInboundCount.text = state.summary.inboundCount.toString()
         binding.tvOccupancyCount.text = state.summary.occupancyCount.toString()
@@ -367,8 +368,15 @@ class AnalyticsActivity : AppCompatActivity() {
         bindTrendText(binding.tvOccupancyTrend, state.summary.occupancyTrend)
         bindTrendText(binding.tvOutboundTrend, state.summary.outboundTrend)
 
-        binding.tvTrendText.text = getString(R.string.history_metric_trend, 0)
-        binding.tvPeakText.text = getString(R.string.history_metric_peak, 0.0)
+        binding.tvTrendText.text = getString(R.string.history_metric_trend, state.summary.outboundTrend)
+
+        val peakLabel = state.summary.peakHourLabel
+        val peakRevenue = state.summary.peakHourRevenue
+        binding.tvPeakText.text = if (peakLabel.isNotBlank()) {
+            "$peakLabel — $${"%.2f".format(peakRevenue)}"
+        } else {
+            getString(R.string.history_metric_peak, peakRevenue)
+        }
 
         val staticChildCount = 10
         val dynamicCardCount = binding.contentContainer.childCount - staticChildCount

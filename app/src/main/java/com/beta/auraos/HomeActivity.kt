@@ -130,6 +130,7 @@ class HomeActivity : AppCompatActivity() {
 
     private fun initPhotoUris() {
         val photoDir = File(filesDir, "photos").also { it.mkdirs() }
+        photoDir.listFiles()?.forEach { it.delete() }
         frontPhotoUri = FileProvider.getUriForFile(this, "${packageName}.fileprovider", File(photoDir, "front.jpg"))
         rearPhotoUri = FileProvider.getUriForFile(this, "${packageName}.fileprovider", File(photoDir, "rear.jpg"))
         leftPhotoUri = FileProvider.getUriForFile(this, "${packageName}.fileprovider", File(photoDir, "left.jpg"))
@@ -249,6 +250,12 @@ class HomeActivity : AppCompatActivity() {
             else -> return
         }
         setPhotoState(slot, false)
+    }
+
+    private fun deleteAllPhotoFiles() {
+        val photoDir = File(filesDir, "photos")
+        if (!photoDir.exists()) return
+        photoDir.listFiles()?.forEach { it.delete() }
     }
 
     private fun sendPlateForOcr(uri: Uri) {
@@ -478,6 +485,7 @@ class HomeActivity : AppCompatActivity() {
     }
 
     private fun resetForm() {
+        deleteAllPhotoFiles()
         binding.etPlateNumber.setText("")
         binding.etPlateNumber.error = null
         binding.tvDbStatus.text = getString(R.string.plate_validation_status)

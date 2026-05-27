@@ -1,6 +1,7 @@
 package com.beta.auraos.data
 
 import com.beta.auraos.data.model.VehicleEntry
+import com.beta.auraos.data.remote.AnalyticsSummaryResponse
 import com.beta.auraos.data.remote.ApiClient
 import com.beta.auraos.data.remote.ParkingApi
 import com.beta.auraos.data.remote.TodaySummary
@@ -79,6 +80,28 @@ class VehicleEntryRepository {
             } else {
                 val errorBody = response.errorBody()?.string() ?: "Error desconocido"
                 Result.Error(Exception("Error al registrar salida: $errorBody"))
+            }
+        } catch (e: Exception) {
+            Result.Error(Exception("Error de conexión: ${e.localizedMessage}"))
+        }
+    }
+
+    suspend fun getAnalyticsSummary(
+        branchId: String,
+        date: String? = null,
+        inboundThresholdMinutes: Int? = null
+    ): Result<AnalyticsSummaryResponse> {
+        return try {
+            val response = api.getAnalyticsSummary(
+                branchId = branchId,
+                date = date,
+                inboundThresholdMinutes = inboundThresholdMinutes
+            )
+            if (response.isSuccessful) {
+                response.body()?.let { Result.Success(it) }
+                    ?: Result.Error(Exception("Respuesta vacía del servidor"))
+            } else {
+                Result.Error(Exception("Error al cargar resumen: ${response.code()}"))
             }
         } catch (e: Exception) {
             Result.Error(Exception("Error de conexión: ${e.localizedMessage}"))

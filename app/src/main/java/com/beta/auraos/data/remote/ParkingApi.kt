@@ -43,6 +43,24 @@ data class PaginationMeta(
     val todaySummary: TodaySummary? = null
 )
 
+data class AnalyticsSummaryResponse(
+    val branchId: String,
+    val date: String,
+    val totalCapacity: Int,
+    val inboundCount: Int,
+    val activeCount: Int,
+    val outboundCount: Int,
+    val totalRevenue: Double,
+    val avgDurationMinutes: Double,
+    val inboundTrendPercent: Int,
+    val activeTrendPercent: Int,
+    val outboundTrendPercent: Int,
+    val revenueTrendPercent: Int,
+    val peakHourRevenue: Double,
+    val peakHourLabel: String,
+    val inboundThresholdMinutes: Int
+)
+
 interface ParkingApi {
 
     @Multipart
@@ -81,4 +99,11 @@ interface ParkingApi {
     suspend fun registerExit(
         @Path("id") id: String
     ): Response<ApiResponse<VehicleEntry>>
+
+    @GET("api/v1/analytics/summary")
+    suspend fun getAnalyticsSummary(
+        @Query("branchId") branchId: String,
+        @Query("date") date: String? = null,
+        @Query("inboundThresholdMinutes") inboundThresholdMinutes: Int? = null
+    ): Response<AnalyticsSummaryResponse>
 }
