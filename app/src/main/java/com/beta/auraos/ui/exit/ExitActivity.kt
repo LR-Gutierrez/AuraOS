@@ -236,6 +236,14 @@ class ExitActivity : AppCompatActivity() {
             setPadding((16 * density).toInt(), (8 * density).toInt(), (16 * density).toInt(), 0)
         }
 
+        val msgText = TextView(this).apply {
+            text = getString(R.string.exit_confirm_message, entry.plate)
+            setTextColor(MaterialColors.getColor(binding.root, R.attr.textPrimaryCustom))
+            textSize = 14f
+            setPadding(0, 0, 0, (12 * density).toInt())
+        }
+        container.addView(msgText)
+
         val photoFields = listOf(
             "Placa" to entry.platePhotoUrl,
             "Frontal" to entry.frontPhotoUrl,
@@ -260,7 +268,7 @@ class ExitActivity : AppCompatActivity() {
             val iv = ImageView(this).apply {
                 layoutParams = LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.MATCH_PARENT,
-                    (180 * density).toInt()
+                    (120 * density).toInt()
                 )
                 scaleType = ImageView.ScaleType.CENTER_CROP
                 load(fullUrl) {
@@ -277,7 +285,6 @@ class ExitActivity : AppCompatActivity() {
 
         AlertDialog.Builder(this)
             .setTitle(getString(R.string.exit_confirm_title))
-            .setMessage(getString(R.string.exit_confirm_message, entry.plate))
             .setView(scroll)
             .setPositiveButton(getString(R.string.exit_confirm_action)) { _, _ ->
                 viewModel.registerExit(entry.id)

@@ -359,9 +359,9 @@ class AnalyticsActivity : AppCompatActivity() {
         binding.tvTodayRevenue.text = getString(R.string.history_revenue_amount, state.summary.revenue)
         binding.tvAvgDuration.text = state.summary.avgDurationLabel
 
-        binding.tvInboundCount.text = getString(R.string.traffic_inbound_count, state.summary.inboundCount)
-        binding.tvOccupancyCount.text = state.summary.occupancyPercent
-        binding.tvOutboundCount.text = getString(R.string.traffic_outbound_count, state.summary.outboundCount)
+        binding.tvInboundCount.text = state.summary.inboundCount.toString()
+        binding.tvOccupancyCount.text = state.summary.occupancyCount.toString()
+        binding.tvOutboundCount.text = state.summary.outboundCount.toString()
 
         bindTrendText(binding.tvInboundTrend, state.summary.inboundTrend)
         bindTrendText(binding.tvOccupancyTrend, state.summary.occupancyTrend)
@@ -370,25 +370,10 @@ class AnalyticsActivity : AppCompatActivity() {
         binding.tvTrendText.text = getString(R.string.history_metric_trend, 0)
         binding.tvPeakText.text = getString(R.string.history_metric_peak, 0.0)
 
-        when (state.filter) {
-            HistoryFilter.TODAY -> {
-                binding.tvFilterLabel.visibility = View.GONE
-            }
-            HistoryFilter.ALL -> {
-                binding.tvFilterLabel.visibility = View.GONE
-            }
-            HistoryFilter.RANGE -> {
-                binding.tvFilterLabel.visibility = View.VISIBLE
-                val from = state.filterFrom ?: "..."
-                val to = state.filterTo ?: "..."
-                binding.tvFilterLabel.text = "$from → $to"
-            }
-        }
-
-        val staticChildCount = 11
+        val staticChildCount = 10
         val dynamicCardCount = binding.contentContainer.childCount - staticChildCount
         if (dynamicCardCount > 0) {
-            binding.contentContainer.removeViews(8, dynamicCardCount)
+            binding.contentContainer.removeViews(7, dynamicCardCount)
         }
 
         if (state.totalFiltered > HistoryViewModel.PAGE_SIZE) {
@@ -403,7 +388,7 @@ class AnalyticsActivity : AppCompatActivity() {
         binding.tvEmptyState.visibility = if (state.entries.isEmpty()) View.VISIBLE else View.GONE
         if (state.entries.isEmpty()) return
 
-        var insertIdx = 8
+        var insertIdx = 7
         for (historyEntry in state.entries) {
             val card = createHistoryCard(historyEntry)
             val lp = LinearLayout.LayoutParams(
@@ -688,7 +673,7 @@ class AnalyticsActivity : AppCompatActivity() {
             val iv = ImageView(this).apply {
                 layoutParams = LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.MATCH_PARENT,
-                    (180 * density).toInt()
+                    (120 * density).toInt()
                 )
                 scaleType = ImageView.ScaleType.CENTER_CROP
                 load(url) {

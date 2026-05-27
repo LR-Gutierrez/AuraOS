@@ -178,7 +178,7 @@
                             android:id="@+id/tv_inbound_count"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="0/h"
+                            android:text="0"
                             android:textColor="?attr/textPrimaryCustom"
                             android:textSize="22sp"
                             android:textStyle="bold"
@@ -233,7 +233,7 @@
                             android:id="@+id/tv_occupancy_count"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="0%"
+                            android:text="0"
                             android:textColor="?attr/textPrimaryCustom"
                             android:textSize="22sp"
                             android:textStyle="bold"
@@ -288,7 +288,7 @@
                             android:id="@+id/tv_outbound_count"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="0/h"
+                            android:text="0"
                             android:textColor="?attr/textPrimaryCustom"
                             android:textSize="22sp"
                             android:textStyle="bold"
@@ -561,15 +561,6 @@
                     android:textSize="11sp"
                     app:cornerRadius="999dp" />
             </LinearLayout>
-
-            <TextView
-                android:id="@+id/tv_filter_label"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:textColor="?attr/textSecondaryCustom"
-                android:textSize="12sp"
-                android:visibility="gone" />
 
             <TextView
                 android:layout_width="wrap_content"
