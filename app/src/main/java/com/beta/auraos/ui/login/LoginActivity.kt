@@ -159,7 +159,8 @@ class LoginActivity : AppCompatActivity() {
 
     private fun setupBiometric() {
         val hasHardware = hasBiometricHardware()
-        val isAvailable = hasHardware && loginViewModel.hasBiometricAvailable()
+        val keyExists = biometricKeyManager.isKeyGenerated()
+        val isAvailable = hasHardware && loginViewModel.hasBiometricAvailable() && keyExists
         val biometricVisible = if (isAvailable) View.VISIBLE else View.GONE
         binding.biometricDivider?.visibility = biometricVisible
         binding.biometricContainer?.visibility = biometricVisible

@@ -89,8 +89,15 @@ class DashboardActivity : AppCompatActivity() {
 
         val email = intent.getStringExtra(EXTRA_EMAIL)
         val userId = intent.getStringExtra(EXTRA_USER_ID)
-        if (email != null && userId != null && !sessionManager.isBiometricEnrolled() && hasBiometricHardware()) {
-            promptBiometricEnrollment(email, userId)
+        if (email != null && userId != null && hasBiometricHardware()) {
+            val keyExists = biometricKeyManager.isKeyGenerated()
+            val alreadyEnrolled = sessionManager.isBiometricEnrolled() && keyExists
+            if (!alreadyEnrolled) {
+                if (sessionManager.isBiometricEnrolled() && !keyExists) {
+                    sessionManager.setBiometricEnrolled(false)
+                }
+                promptBiometricEnrollment(email, userId)
+            }
         }
 
         val branchApi = ApiClient.createApi<BranchApi>()
