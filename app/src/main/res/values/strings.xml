@@ -206,4 +206,17 @@
     <string name="history_operator_gate">Automatic Gate Exit</string>
     <string name="history_duration_decimal">%1$sh %2$sm</string>
     <string name="history_duration_short">%1$sh %2$sm</string>
+
+    <!-- Traffic Feed -->
+    <string name="traffic_inbound_label">INBOUND</string>
+    <string name="traffic_inbound_count">%1$d/h</string>
+    <string name="traffic_occupancy_label">OCCUPANCY</string>
+    <string name="traffic_occupancy_percent">%1$s</string>
+    <string name="traffic_outbound_label">OUTBOUND</string>
+    <string name="traffic_outbound_count">%1$d/h</string>
+    <string name="traffic_card_inbound_subtitle">Standard Self-Park</string>
+    <string name="traffic_card_occupied_subtitle">Active Stay</string>
+    <string name="traffic_card_occupied_status">Present</string>
+    <string name="traffic_card_pending_text">Pending</string>
+    <string name="traffic_feed_title">Live Activity Feed</string>
 </resources>

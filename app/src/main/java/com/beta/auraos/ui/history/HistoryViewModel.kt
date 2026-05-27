@@ -10,14 +10,22 @@ import com.beta.auraos.data.VehicleEntryRepository
 import com.beta.auraos.data.model.VehicleEntry
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import kotlin.math.roundToInt
 
+enum class ActivityType {
+    INBOUND,
+    OCCUPIED,
+    OUTBOUND
+}
+
 data class HistoryEntry(
     val entry: VehicleEntry,
     val durationLabel: String,
-    val fee: Double
+    val fee: Double,
+    val activityType: ActivityType = ActivityType.OUTBOUND
 )
 
 enum class HistoryFilter(val label: String) {
@@ -32,7 +40,14 @@ enum class SortOrder { ASC, DESC }
 data class FilterSummary(
     val count: Int,
     val revenue: Double,
-    val avgDurationLabel: String = "0m"
+    val avgDurationLabel: String = "0m",
+    val inboundCount: Int = 0,
+    val occupancyCount: Int = 0,
+    val outboundCount: Int = 0,
+    val occupancyPercent: String = "0%",
+    val inboundTrend: Int = 0,
+    val occupancyTrend: Int = 0,
+    val outboundTrend: Int = 0
 )
 
 sealed class HistoryUiState {
@@ -67,10 +82,14 @@ class HistoryViewModel(
     private var sortField = SortField.DATE
     private var sortOrder = SortOrder.DESC
 
-    private var allEntries: List<VehicleEntry> = emptyList()
+    private var exitedEntries: List<VehicleEntry> = emptyList()
+    private var activeEntries: List<VehicleEntry> = emptyList()
+    private var yesterdayExitedCount: Int = 0
+    private var yesterdayActiveCount: Int = 0
 
     private val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.US)
     private val pageSize = 20
+    private val inboundThresholdMinutes = 30
 
     companion object {
         const val PAGE_SIZE = 20
@@ -79,15 +98,33 @@ class HistoryViewModel(
     fun loadHistory(branchId: String) {
         _uiState.value = HistoryUiState.Loading
         viewModelScope.launch {
-            val result = repository.getHistoryEntries(branchId)
-            val state = when (result) {
-                is Result.Success -> {
-                    allEntries = result.data.entries
+            val historyDeferred = repository.getHistoryEntries(branchId)
+            val activeDeferred = repository.getActiveEntries(branchId)
+
+            val yesterday = dateFormat.format(
+                Calendar.getInstance().apply { add(Calendar.DAY_OF_MONTH, -1) }.time
+            )
+            val yesterdayResult = repository.getHistoryEntries(
+                branchId, from = yesterday, to = yesterday
+            )
+            yesterdayExitedCount = if (yesterdayResult is Result.Success) {
+                yesterdayResult.data.entries.size
+            } else 0
+
+            val state = when {
+                historyDeferred is Result.Success -> {
+                    exitedEntries = historyDeferred.data.entries
+                    activeEntries = if (activeDeferred is Result.Success) {
+                        activeDeferred.data
+                    } else {
+                        emptyList()
+                    }
                     applyFilters()
                 }
-                is Result.Error -> HistoryUiState.Error(
-                    result.exception.message ?: "Error al cargar historial"
+                historyDeferred is Result.Error -> HistoryUiState.Error(
+                    historyDeferred.exception.message ?: "Error al cargar historial"
                 )
+                else -> HistoryUiState.Error("Error desconocido al cargar datos")
             }
             _uiState.value = state
         }
@@ -129,18 +166,7 @@ class HistoryViewModel(
         if (state !is HistoryUiState.Success || !state.hasMore) return
         val newShown = state.shownCount + PAGE_SIZE
 
-        val filtered = allEntries
-            .filter { matchesDateFilter(it) }
-            .filter { matchesSearch(it) }
-            .sortedWith(comparator())
-            .map { entry ->
-                HistoryEntry(
-                    entry = entry,
-                    durationLabel = entry.duration ?: "",
-                    fee = entry.fee ?: 0.0
-                )
-            }
-
+        val filtered = buildMergedEntries()
         val totalFiltered = filtered.size
         val actualShown = minOf(newShown, totalFiltered)
 
@@ -151,35 +177,85 @@ class HistoryViewModel(
         )
     }
 
-    private fun applyFilters(): HistoryUiState.Success {
-        val filtered = allEntries
-            .filter { matchesDateFilter(it) }
-            .filter { matchesSearch(it) }
-            .sortedWith(comparator())
+    private fun buildMergedEntries(): List<HistoryEntry> {
+        val merged = mutableListOf<HistoryEntry>()
 
-        val totalFiltered = filtered.size
-        val shownCount = minOf(pageSize, totalFiltered)
+        val now = System.currentTimeMillis()
 
-        val historyEntries = filtered.map { entry ->
-            HistoryEntry(
-                entry = entry,
-                durationLabel = entry.duration ?: "",
-                fee = entry.fee ?: 0.0
+        for (entry in activeEntries) {
+            if (!matchesDateFilterActive(entry)) continue
+            if (!matchesSearch(entry)) continue
+            val createdAtMs = parseDateToMillis(entry.createdAt)
+            val isRecent = createdAtMs != null && (now - createdAtMs) < inboundThresholdMinutes * 60 * 1000L
+            val type = if (isRecent) ActivityType.INBOUND else ActivityType.OCCUPIED
+            val durationLabel = if (entry.duration != null) entry.duration else "--"
+            merged.add(
+                HistoryEntry(
+                    entry = entry,
+                    durationLabel = durationLabel,
+                    fee = 0.0,
+                    activityType = type
+                )
             )
         }
 
-        val avgMinutes = filtered
-            .mapNotNull { parseDurationToMinutes(it.duration) }
+        for (entry in exitedEntries) {
+            if (!matchesDateFilter(entry)) continue
+            if (!matchesSearch(entry)) continue
+            merged.add(
+                HistoryEntry(
+                    entry = entry,
+                    durationLabel = entry.duration ?: "",
+                    fee = entry.fee ?: 0.0,
+                    activityType = ActivityType.OUTBOUND
+                )
+            )
+        }
+
+        merged.sortWith(comparator())
+        return merged
+    }
+
+    private fun applyFilters(): HistoryUiState.Success {
+        val merged = buildMergedEntries()
+
+        val totalFiltered = merged.size
+        val shownCount = minOf(pageSize, totalFiltered)
+
+        val avgMinutes = merged
+            .filter { it.activityType == ActivityType.OUTBOUND }
+            .mapNotNull { parseDurationToMinutes(it.entry.duration) }
             .let { minutes -> if (minutes.isEmpty()) 0.0 else minutes.average() }
 
+        val inboundCount = merged.count { it.activityType == ActivityType.INBOUND }
+        val occupancyCount = merged.count { it.activityType == ActivityType.OCCUPIED }
+        val outboundCount = merged.count { it.activityType == ActivityType.OUTBOUND }
+        val totalCapacity = 70
+        val occupancyPercent = ((occupancyCount.toFloat() / totalCapacity) * 100).toInt()
+
+        val outboundTrend = if (yesterdayExitedCount > 0) {
+            ((outboundCount - yesterdayExitedCount) * 100) / yesterdayExitedCount
+        } else if (outboundCount > 0) {
+            100
+        } else 0
+
         val summary = FilterSummary(
-            count = totalFiltered,
-            revenue = filtered.sumOf { it.fee ?: 0.0 },
-            avgDurationLabel = formatMinutes(avgMinutes.roundToInt())
+            count = outboundCount,
+            revenue = merged.filter { it.activityType == ActivityType.OUTBOUND }.sumOf { it.fee },
+            avgDurationLabel = formatMinutes(avgMinutes.roundToInt()),
+            inboundCount = inboundCount,
+            occupancyCount = occupancyCount,
+            outboundCount = outboundCount,
+            occupancyPercent = "$occupancyPercent%",
+            inboundTrend = if (inboundCount > 0) 100 else 0,
+            occupancyTrend = if (yesterdayActiveCount > 0 && occupancyCount > yesterdayActiveCount) {
+                ((occupancyCount - yesterdayActiveCount) * 100) / yesterdayActiveCount
+            } else 0,
+            outboundTrend = outboundTrend
         )
 
         return HistoryUiState.Success(
-            entries = historyEntries.take(shownCount),
+            entries = merged.take(shownCount),
             summary = summary,
             filter = currentFilter,
             filterFrom = filterFrom,
@@ -233,16 +309,48 @@ class HistoryViewModel(
         }
     }
 
+    private fun matchesDateFilterActive(entry: VehicleEntry): Boolean {
+        val entryDate = entry.createdAt.take(10)
+        return when (currentFilter) {
+            HistoryFilter.TODAY -> entryDate == dateFormat.format(Date())
+            HistoryFilter.ALL -> true
+            HistoryFilter.RANGE -> {
+                val fromOk = filterFrom == null || entryDate >= filterFrom!!
+                val toOk = filterTo == null || entryDate <= filterTo!!
+                fromOk && toOk
+            }
+        }
+    }
+
+    private fun parseDateToMillis(dateStr: String): Long? {
+        return try {
+            val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US)
+            sdf.parse(dateStr)?.time
+        } catch (_: Exception) {
+            try {
+                val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US)
+                sdf.parse(dateStr)?.time
+            } catch (_: Exception) {
+                null
+            }
+        }
+    }
+
     private fun matchesSearch(entry: VehicleEntry): Boolean {
         if (searchQuery.isBlank()) return true
         return entry.plate.contains(searchQuery, ignoreCase = true)
     }
 
-    private fun comparator(): Comparator<VehicleEntry> {
-        val cmp: Comparator<VehicleEntry> = when (sortField) {
-            SortField.DATE -> compareBy<VehicleEntry> { it.exitedAt ?: "" }
-            SortField.FEE -> compareBy<VehicleEntry> { it.fee ?: 0.0 }
-            SortField.DURATION -> compareBy<VehicleEntry> { it.duration ?: "" }
+    private fun comparator(): Comparator<HistoryEntry> {
+        val cmp: Comparator<HistoryEntry> = when (sortField) {
+            SortField.DATE -> compareBy<HistoryEntry> {
+                when (it.activityType) {
+                    ActivityType.INBOUND, ActivityType.OCCUPIED -> it.entry.createdAt
+                    ActivityType.OUTBOUND -> it.entry.exitedAt ?: it.entry.createdAt
+                }
+            }
+            SortField.FEE -> compareBy<HistoryEntry> { it.fee }
+            SortField.DURATION -> compareBy<HistoryEntry> { it.durationLabel }
         }
         return if (sortOrder == SortOrder.DESC) cmp.reversed() else cmp
     }

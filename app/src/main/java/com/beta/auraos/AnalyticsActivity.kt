@@ -33,6 +33,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import com.beta.auraos.databinding.ActivityAnalyticsBinding
+import com.beta.auraos.ui.history.ActivityType
 import com.beta.auraos.ui.history.HistoryFilter
 import com.beta.auraos.ui.history.HistoryUiState
 import com.beta.auraos.ui.history.HistoryViewModel
@@ -43,6 +44,7 @@ import com.beta.auraos.ui.history.HistoryEntry
 import com.beta.auraos.util.BottomNavIndicator
 import com.beta.auraos.util.PhotoUrlBuilder
 import com.beta.auraos.util.TabNavigator
+import com.beta.auraos.util.formatDate
 import com.beta.auraos.util.formatDateTime
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.color.MaterialColors
@@ -339,16 +341,34 @@ class AnalyticsActivity : AppCompatActivity() {
         }
     }
 
+    private fun bindTrendText(tv: TextView, trend: Int) {
+        if (trend == 0) {
+            tv.text = getString(R.string.history_metric_trend, 0)
+            tv.setTextColor(MaterialColors.getColor(binding.root, R.attr.textSecondaryCustom))
+        } else if (trend > 0) {
+            tv.text = "+$trend%"
+            tv.setTextColor(android.graphics.Color.parseColor("#4CAF50"))
+        } else {
+            tv.text = "$trend%"
+            tv.setTextColor(android.graphics.Color.parseColor("#EF5350"))
+        }
+    }
+
     private fun bindData(state: HistoryUiState.Success) {
-        binding.tvTodayCount.text = state.summary.count.toString()
+        binding.tvTodayCount.text = state.summary.outboundCount.toString()
         binding.tvTodayRevenue.text = getString(R.string.history_revenue_amount, state.summary.revenue)
         binding.tvAvgDuration.text = state.summary.avgDurationLabel
 
+        binding.tvInboundCount.text = getString(R.string.traffic_inbound_count, state.summary.inboundCount)
+        binding.tvOccupancyCount.text = state.summary.occupancyPercent
+        binding.tvOutboundCount.text = getString(R.string.traffic_outbound_count, state.summary.outboundCount)
+
+        bindTrendText(binding.tvInboundTrend, state.summary.inboundTrend)
+        bindTrendText(binding.tvOccupancyTrend, state.summary.occupancyTrend)
+        bindTrendText(binding.tvOutboundTrend, state.summary.outboundTrend)
+
         binding.tvTrendText.text = getString(R.string.history_metric_trend, 0)
         binding.tvPeakText.text = getString(R.string.history_metric_peak, 0.0)
-
-        // Se elimina o comenta la línea de tvTargetText porque la meta es estática en el XML actual
-        // binding.tvTargetText.text = getString(R.string.history_metric_target, "4h")
 
         when (state.filter) {
             HistoryFilter.TODAY -> {
@@ -365,12 +385,10 @@ class AnalyticsActivity : AppCompatActivity() {
             }
         }
 
-        // Mantener todas las vistas estáticas del XML (0-9) e insertar cards dinámicamente
-        val headerIndex = 7
-        val staticChildCount = 10
-        val extraViewCount = binding.contentContainer.childCount - staticChildCount
-        if (extraViewCount > 0) {
-            binding.contentContainer.removeViews(staticChildCount, extraViewCount)
+        val staticChildCount = 11
+        val dynamicCardCount = binding.contentContainer.childCount - staticChildCount
+        if (dynamicCardCount > 0) {
+            binding.contentContainer.removeViews(8, dynamicCardCount)
         }
 
         if (state.totalFiltered > HistoryViewModel.PAGE_SIZE) {
@@ -385,7 +403,7 @@ class AnalyticsActivity : AppCompatActivity() {
         binding.tvEmptyState.visibility = if (state.entries.isEmpty()) View.VISIBLE else View.GONE
         if (state.entries.isEmpty()) return
 
-        var insertIdx = 7
+        var insertIdx = 8
         for (historyEntry in state.entries) {
             val card = createHistoryCard(historyEntry)
             val lp = LinearLayout.LayoutParams(
@@ -403,6 +421,7 @@ class AnalyticsActivity : AppCompatActivity() {
         val density = resources.displayMetrics.density
         val padding = (16 * density).toInt()
         val e = entry.entry
+        val type = entry.activityType
 
         val photoFields = listOfNotNull(
             "Placa" to e.platePhotoUrl,
@@ -413,6 +432,14 @@ class AnalyticsActivity : AppCompatActivity() {
         ).mapNotNull { (label, url) ->
             val fullUrl = PhotoUrlBuilder.build(url)
             if (fullUrl != null) label to fullUrl else null
+        }
+
+        val strokeColor = when (type) {
+            ActivityType.INBOUND -> android.graphics.Color.parseColor("#4CAF50")
+            ActivityType.OCCUPIED -> android.graphics.Color.parseColor("#FFC107")
+            ActivityType.OUTBOUND -> MaterialColors.getColor(
+                binding.root, R.attr.dividerColorCustom
+            )
         }
 
         val card = MaterialCardView(this).apply {
@@ -426,8 +453,7 @@ class AnalyticsActivity : AppCompatActivity() {
                 )
             )
             radius = resources.getDimension(R.dimen.card_corner_radius_large)
-            val strokeColorInt = MaterialColors.getColor(this, R.attr.dividerColorCustom)
-            strokeColor = strokeColorInt
+            this.strokeColor = strokeColor
             strokeWidth = resources.getDimensionPixelSize(R.dimen.stroke_thin)
             setContentPadding(padding, padding, padding, padding)
             isClickable = photoFields.isNotEmpty()
@@ -440,7 +466,7 @@ class AnalyticsActivity : AppCompatActivity() {
                     )
                     ContextCompat.getDrawable(this@AnalyticsActivity, tv.resourceId)
                 }()
-                setOnClickListener { showPhotoDialog(entry.entry.plate, photoFields) }
+                setOnClickListener { showPhotoDialog(e.plate, photoFields) }
             }
         }
 
@@ -452,7 +478,6 @@ class AnalyticsActivity : AppCompatActivity() {
             orientation = LinearLayout.VERTICAL
         }
 
-        // Top row: thumbnail + info
         val topRow = LinearLayout(this).apply {
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
@@ -462,7 +487,6 @@ class AnalyticsActivity : AppCompatActivity() {
             gravity = android.view.Gravity.CENTER_VERTICAL
         }
 
-        // Photo thumbnail
         val thumbUrl = PhotoUrlBuilder.build(e.platePhotoUrl)
         val thumbnail = ImageView(this).apply {
             layoutParams = LinearLayout.LayoutParams(
@@ -483,7 +507,6 @@ class AnalyticsActivity : AppCompatActivity() {
         }
         topRow.addView(thumbnail)
 
-        // Info column
         val infoCol = LinearLayout(this).apply {
             layoutParams = LinearLayout.LayoutParams(
                 0,
@@ -501,21 +524,31 @@ class AnalyticsActivity : AppCompatActivity() {
             text = "${e.plate}  $vipStr"
             setTextColor(MaterialColors.getColor(binding.root, R.attr.textPrimaryCustom))
             textSize = 16f
-            typeface = Typeface.create("sans-serif", Typeface.BOLD)
+            typeface = Typeface.MONOSPACE
+            setTypeface(Typeface.MONOSPACE, Typeface.BOLD)
         }
         infoCol.addView(plateText)
 
+        val secondaryText = when (type) {
+            ActivityType.INBOUND -> getString(R.string.traffic_card_inbound_subtitle)
+            ActivityType.OCCUPIED -> "${vehicleTypeStr} • ${getString(R.string.traffic_card_occupied_subtitle)}"
+            ActivityType.OUTBOUND -> vehicleTypeStr
+        }
+        val secondaryColor = if (type == ActivityType.OCCUPIED) {
+            android.graphics.Color.parseColor("#FFC107")
+        } else {
+            MaterialColors.getColor(binding.root, R.attr.textSecondaryCustom)
+        }
+
         val typeText = TextView(this).apply {
-            text = vehicleTypeStr
-            setTextColor(MaterialColors.getColor(binding.root, R.attr.textSecondaryCustom))
+            text = secondaryText
+            setTextColor(secondaryColor)
             textSize = 12f
         }
         infoCol.addView(typeText)
-
         topRow.addView(infoCol)
         cardContent.addView(topRow)
 
-        // Bottom row: duration, entry/exit, fee in grid
         val bottomRow = LinearLayout(this).apply {
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
@@ -524,7 +557,6 @@ class AnalyticsActivity : AppCompatActivity() {
             orientation = LinearLayout.HORIZONTAL
         }
 
-        // Duration column
         val durationCol = LinearLayout(this).apply {
             layoutParams = LinearLayout.LayoutParams(
                 0,
@@ -533,6 +565,7 @@ class AnalyticsActivity : AppCompatActivity() {
             )
             orientation = LinearLayout.VERTICAL
         }
+
         val durationLabel = TextView(this).apply {
             text = getString(R.string.history_stay_label)
             setTextColor(MaterialColors.getColor(binding.root, R.attr.textSecondaryCustom))
@@ -540,15 +573,19 @@ class AnalyticsActivity : AppCompatActivity() {
             alpha = 0.5f
         }
         durationCol.addView(durationLabel)
+
+        val displayDuration = when (type) {
+            ActivityType.INBOUND -> getString(R.string.traffic_card_pending_text)
+            else -> entry.durationLabel
+        }
         val durationVal = TextView(this).apply {
-            text = entry.durationLabel
+            text = displayDuration
             setTextColor(MaterialColors.getColor(binding.root, R.attr.textPrimaryCustom))
             textSize = 16f
         }
         durationCol.addView(durationVal)
         bottomRow.addView(durationCol)
 
-        // Entry/Exit column
         val entryExitCol = LinearLayout(this).apply {
             layoutParams = LinearLayout.LayoutParams(
                 0,
@@ -565,17 +602,29 @@ class AnalyticsActivity : AppCompatActivity() {
         }
         entryExitCol.addView(entryExitLabel)
 
-        val entryStr = formatDateTime(e.createdAt).substringAfter(" ")
-        val exitStr = formatDateTime(e.exitedAt).substringAfter(" ")
+        val entryDate = formatDate(e.createdAt)
+        val entryTime = formatDateTime(e.createdAt).substringAfter(" ")
+        val dateText = TextView(this).apply {
+            text = entryDate
+            setTextColor(MaterialColors.getColor(binding.root, R.attr.textSecondaryCustom))
+            textSize = 11f
+            alpha = 0.7f
+        }
+        entryExitCol.addView(dateText)
+
+        val displayExit = when (type) {
+            ActivityType.INBOUND -> getString(R.string.traffic_card_pending_text)
+            ActivityType.OCCUPIED -> getString(R.string.traffic_card_occupied_status)
+            ActivityType.OUTBOUND -> formatDateTime(e.exitedAt).substringAfter(" ")
+        }
         val entryExitVal = TextView(this).apply {
-            text = "$entryStr — $exitStr"
+            text = "$entryTime — $displayExit"
             setTextColor(MaterialColors.getColor(binding.root, R.attr.textPrimaryCustom))
             textSize = 14f
         }
         entryExitCol.addView(entryExitVal)
         bottomRow.addView(entryExitCol)
 
-        // Fee column
         val feeCol = LinearLayout(this).apply {
             layoutParams = LinearLayout.LayoutParams(
                 0,
@@ -592,11 +641,18 @@ class AnalyticsActivity : AppCompatActivity() {
             alpha = 0.5f
         }
         feeCol.addView(feeLabel)
-        val feeVal = TextView(this).apply {
-            text = getString(R.string.history_fee, entry.fee)
-            setTextColor(
+
+        val (displayFee, feeColor) = when (type) {
+            ActivityType.INBOUND -> getString(R.string.traffic_card_pending_text) to
+                MaterialColors.getColor(binding.root, R.attr.textSecondaryCustom)
+            ActivityType.OCCUPIED -> getString(R.string.traffic_card_pending_text) to
+                MaterialColors.getColor(binding.root, R.attr.textSecondaryCustom)
+            ActivityType.OUTBOUND -> getString(R.string.history_fee, entry.fee) to
                 MaterialColors.getColor(binding.root, R.attr.semanticSuccessCustom)
-            )
+        }
+        val feeVal = TextView(this).apply {
+            text = displayFee
+            setTextColor(feeColor)
             textSize = 18f
             typeface = Typeface.create("sans-serif", Typeface.BOLD)
         }
