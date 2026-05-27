@@ -13,6 +13,7 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import java.util.TimeZone
 import kotlin.math.roundToInt
 
 enum class ActivityType {
@@ -87,7 +88,9 @@ class HistoryViewModel(
     private var yesterdayExitedCount: Int = 0
     private var yesterdayActiveCount: Int = 0
 
-    private val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.US)
+    private val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.US).apply {
+        timeZone = TimeZone.getTimeZone("UTC")
+    }
     private val pageSize = 20
     private val inboundThresholdMinutes = 30
 
@@ -102,7 +105,7 @@ class HistoryViewModel(
             val activeDeferred = repository.getActiveEntries(branchId)
 
             val yesterday = dateFormat.format(
-                Calendar.getInstance().apply { add(Calendar.DAY_OF_MONTH, -1) }.time
+                Calendar.getInstance(TimeZone.getTimeZone("UTC")).apply { add(Calendar.DAY_OF_MONTH, -1) }.time
             )
             val yesterdayResult = repository.getHistoryEntries(
                 branchId, from = yesterday, to = yesterday
