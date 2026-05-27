@@ -179,7 +179,7 @@ class HistoryViewModel(
         val merged = mutableListOf<HistoryEntry>()
 
         val now = System.currentTimeMillis()
-        val thresholdMs = (analyticsSummary?.inboundThresholdMinutes ?: 30) * 60 * 1000L
+        val thresholdMs = (analyticsSummary?.inboundThresholdMinutes ?: 0) * 60 * 1000L
 
         for (entry in activeEntries) {
             if (!matchesDateFilterActive(entry)) continue
@@ -231,7 +231,7 @@ class HistoryViewModel(
         val outboundCount = merged.count { it.activityType == ActivityType.OUTBOUND }
 
         val totalActiveVehicles = inboundCount + currentOccupancyCount
-        val totalCapacity = analyticsSummary?.totalCapacity ?: 70
+        val totalCapacity = analyticsSummary?.totalCapacity ?: maxOf(totalActiveVehicles, 1)
         val occupancyPercent = ((totalActiveVehicles.toFloat() / totalCapacity) * 100).toInt()
 
         val summary = FilterSummary(
