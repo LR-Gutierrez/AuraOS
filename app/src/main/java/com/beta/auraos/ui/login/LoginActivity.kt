@@ -108,13 +108,14 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun setupQuickLogin() {
+        val storedEmail = loginViewModel.getStoredEmail()
         binding.tvQuickGreeting?.text = getString(
             R.string.quick_login_greeting,
             loginViewModel.getStoredDisplayName()
-                ?: loginViewModel.getStoredEmail()
+                ?: storedEmail
                 ?: ""
         )
-        binding.tvQuickEmail?.text = loginViewModel.getStoredEmail() ?: ""
+        binding.tvQuickEmail?.text = storedEmail?.let { maskEmail(it) } ?: ""
 
         binding.etQuickPassword?.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_DONE) {
@@ -375,6 +376,15 @@ class LoginActivity : AppCompatActivity() {
 
     private fun showLoginFailed(message: String) {
         Toast.makeText(applicationContext, message, Toast.LENGTH_SHORT).show()
+    }
+
+    private fun maskEmail(email: String): String {
+        val atIndex = email.indexOf('@')
+        if (atIndex <= 1) return email
+        val localPart = email.substring(0, atIndex)
+        val domain = email.substring(atIndex)
+        val visible = minOf(localPart.length, 3)
+        return localPart.substring(0, visible) + "***" + domain
     }
 }
 
