@@ -228,10 +228,12 @@ class HistoryViewModel(
             .let { minutes -> if (minutes.isEmpty()) 0.0 else minutes.average() }
 
         val inboundCount = merged.count { it.activityType == ActivityType.INBOUND }
-        val occupancyCount = merged.count { it.activityType == ActivityType.OCCUPIED }
+        val currentOccupancyCount = merged.count { it.activityType == ActivityType.OCCUPIED }
         val outboundCount = merged.count { it.activityType == ActivityType.OUTBOUND }
+
+        val totalActiveVehicles = inboundCount + currentOccupancyCount
         val totalCapacity = 70
-        val occupancyPercent = ((occupancyCount.toFloat() / totalCapacity) * 100).toInt()
+        val occupancyPercent = ((totalActiveVehicles.toFloat() / totalCapacity) * 100).toInt()
 
         val outboundTrend = if (yesterdayExitedCount > 0) {
             ((outboundCount - yesterdayExitedCount) * 100) / yesterdayExitedCount
@@ -244,12 +246,12 @@ class HistoryViewModel(
             revenue = merged.filter { it.activityType == ActivityType.OUTBOUND }.sumOf { it.fee },
             avgDurationLabel = formatMinutes(avgMinutes.roundToInt()),
             inboundCount = inboundCount,
-            occupancyCount = occupancyCount,
+            occupancyCount = totalActiveVehicles,
             outboundCount = outboundCount,
             occupancyPercent = "$occupancyPercent%",
             inboundTrend = if (inboundCount > 0) 100 else 0,
-            occupancyTrend = if (yesterdayActiveCount > 0 && occupancyCount > yesterdayActiveCount) {
-                ((occupancyCount - yesterdayActiveCount) * 100) / yesterdayActiveCount
+            occupancyTrend = if (yesterdayActiveCount > 0 && totalActiveVehicles > yesterdayActiveCount) {
+                ((totalActiveVehicles - yesterdayActiveCount) * 100) / yesterdayActiveCount
             } else 0,
             outboundTrend = outboundTrend
         )
