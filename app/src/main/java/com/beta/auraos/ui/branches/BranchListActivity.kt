@@ -99,6 +99,8 @@ class BranchListActivity : AppCompatActivity() {
         val tvAddress = card.findViewById<TextView>(R.id.tv_branch_address)
         val tvCapacity = card.findViewById<TextView>(R.id.tv_branch_capacity)
         val tvRates = card.findViewById<TextView>(R.id.tv_branch_rates)
+        val tvOvernight = card.findViewById<TextView>(R.id.tv_branch_overnight_rates)
+        val tvHours = card.findViewById<TextView>(R.id.tv_branch_hours)
         val btnDefault = card.findViewById<android.widget.ImageButton>(R.id.btn_default_branch)
         val btnEdit = card.findViewById<View>(R.id.btn_edit_branch)
         val btnDelete = card.findViewById<View>(R.id.btn_delete_branch)
@@ -109,6 +111,8 @@ class BranchListActivity : AppCompatActivity() {
 
         tvCapacity.text = "M:${branch.motorcycleCapacity}  L:${branch.lightVehicleCapacity}  P:${branch.heavyVehicleCapacity}"
         tvRates.text = "${branch.currency} ${branch.motorcycleRate} / ${branch.lightVehicleRate} / ${branch.heavyVehicleRate}"
+        tvOvernight.text = "Pernocta: ${branch.motorcycleOvernightRate} / ${branch.lightVehicleOvernightRate} / ${branch.heavyVehicleOvernightRate}"
+        tvHours.text = "Lun–Sab ${branch.openTimeWeekday}–${branch.closeTimeWeekday}  Dom ${branch.openTimeWeekend}–${branch.closeTimeWeekend}"
 
         if (isDefault) {
             val gold = MaterialColors.getColor(card, com.google.android.material.R.attr.colorPrimary)

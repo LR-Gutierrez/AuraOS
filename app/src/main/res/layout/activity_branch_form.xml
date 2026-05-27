@@ -320,7 +320,7 @@
             </com.google.android.material.card.MaterialCardView>
 
             <com.google.android.material.card.MaterialCardView
-                android:id="@+id/card_currency"
+                android:id="@+id/card_overnight_rates"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/spacing_medium"
@@ -329,6 +329,205 @@
                 app:strokeColor="?attr/dividerColorCustom"
                 app:strokeWidth="@dimen/stroke_thin"
                 app:layout_constraintTop_toBottomOf="@id/card_rates">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="@dimen/spacing_large">
+
+                    <TextView
+                        android:id="@+id/lbl_section_overnight_rates"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="sans-serif-medium"
+                        android:letterSpacing="0.06"
+                        android:text="@string/branch_section_overnight_rates"
+                        android:textColor="?attr/textSecondaryCustom"
+                        android:textSize="@dimen/text_size_overline"
+                        android:textStyle="bold"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <EditText
+                        android:id="@+id/et_moto_overnight"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/spacing_medium"
+                        android:background="?attr/hollowInputBackground"
+                        android:fontFamily="sans-serif"
+                        android:hint="@string/branch_hint_moto_overnight"
+                        android:imeOptions="actionNext"
+                        android:inputType="numberDecimal"
+                        android:maxLines="1"
+                        android:padding="@dimen/spacing_medium"
+                        android:textColor="?attr/textPrimaryCustom"
+                        android:textColorHint="?attr/textSecondaryCustom"
+                        android:textSize="@dimen/text_size_body"
+                        app:layout_constraintTop_toBottomOf="@id/lbl_section_overnight_rates"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent" />
+
+                    <EditText
+                        android:id="@+id/et_light_overnight"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/spacing_small"
+                        android:background="?attr/hollowInputBackground"
+                        android:fontFamily="sans-serif"
+                        android:hint="@string/branch_hint_light_overnight"
+                        android:imeOptions="actionNext"
+                        android:inputType="numberDecimal"
+                        android:maxLines="1"
+                        android:padding="@dimen/spacing_medium"
+                        android:textColor="?attr/textPrimaryCustom"
+                        android:textColorHint="?attr/textSecondaryCustom"
+                        android:textSize="@dimen/text_size_body"
+                        app:layout_constraintTop_toBottomOf="@id/et_moto_overnight"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent" />
+
+                    <EditText
+                        android:id="@+id/et_heavy_overnight"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/spacing_small"
+                        android:background="?attr/hollowInputBackground"
+                        android:fontFamily="sans-serif"
+                        android:hint="@string/branch_hint_heavy_overnight"
+                        android:imeOptions="actionNext"
+                        android:inputType="numberDecimal"
+                        android:maxLines="1"
+                        android:padding="@dimen/spacing_medium"
+                        android:textColor="?attr/textPrimaryCustom"
+                        android:textColorHint="?attr/textSecondaryCustom"
+                        android:textSize="@dimen/text_size_body"
+                        app:layout_constraintTop_toBottomOf="@id/et_light_overnight"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/card_hours"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_medium"
+                app:cardCornerRadius="@dimen/card_corner_radius_large"
+                app:cardBackgroundColor="?attr/cardGlassFillColorCustom"
+                app:strokeColor="?attr/dividerColorCustom"
+                app:strokeWidth="@dimen/stroke_thin"
+                app:layout_constraintTop_toBottomOf="@id/card_overnight_rates">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="@dimen/spacing_large">
+
+                    <TextView
+                        android:id="@+id/lbl_section_hours"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="sans-serif-medium"
+                        android:letterSpacing="0.06"
+                        android:text="@string/branch_section_hours"
+                        android:textColor="?attr/textSecondaryCustom"
+                        android:textSize="@dimen/text_size_overline"
+                        android:textStyle="bold"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <EditText
+                        android:id="@+id/et_open_weekday"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/spacing_medium"
+                        android:background="?attr/hollowInputBackground"
+                        android:fontFamily="sans-serif"
+                        android:hint="@string/branch_hint_open_weekday"
+                        android:imeOptions="actionNext"
+                        android:inputType="time"
+                        android:maxLines="1"
+                        android:padding="@dimen/spacing_medium"
+                        android:textColor="?attr/textPrimaryCustom"
+                        android:textColorHint="?attr/textSecondaryCustom"
+                        android:textSize="@dimen/text_size_body"
+                        app:layout_constraintTop_toBottomOf="@id/lbl_section_hours"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent" />
+
+                    <EditText
+                        android:id="@+id/et_close_weekday"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/spacing_small"
+                        android:background="?attr/hollowInputBackground"
+                        android:fontFamily="sans-serif"
+                        android:hint="@string/branch_hint_close_weekday"
+                        android:imeOptions="actionNext"
+                        android:inputType="time"
+                        android:maxLines="1"
+                        android:padding="@dimen/spacing_medium"
+                        android:textColor="?attr/textPrimaryCustom"
+                        android:textColorHint="?attr/textSecondaryCustom"
+                        android:textSize="@dimen/text_size_body"
+                        app:layout_constraintTop_toBottomOf="@id/et_open_weekday"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent" />
+
+                    <EditText
+                        android:id="@+id/et_open_weekend"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/spacing_small"
+                        android:background="?attr/hollowInputBackground"
+                        android:fontFamily="sans-serif"
+                        android:hint="@string/branch_hint_open_weekend"
+                        android:imeOptions="actionNext"
+                        android:inputType="time"
+                        android:maxLines="1"
+                        android:padding="@dimen/spacing_medium"
+                        android:textColor="?attr/textPrimaryCustom"
+                        android:textColorHint="?attr/textSecondaryCustom"
+                        android:textSize="@dimen/text_size_body"
+                        app:layout_constraintTop_toBottomOf="@id/et_close_weekday"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent" />
+
+                    <EditText
+                        android:id="@+id/et_close_weekend"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/spacing_small"
+                        android:background="?attr/hollowInputBackground"
+                        android:fontFamily="sans-serif"
+                        android:hint="@string/branch_hint_close_weekend"
+                        android:imeOptions="actionDone"
+                        android:inputType="time"
+                        android:maxLines="1"
+                        android:padding="@dimen/spacing_medium"
+                        android:textColor="?attr/textPrimaryCustom"
+                        android:textColorHint="?attr/textSecondaryCustom"
+                        android:textSize="@dimen/text_size_body"
+                        app:layout_constraintTop_toBottomOf="@id/et_open_weekend"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/card_currency"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_medium"
+                app:cardCornerRadius="@dimen/card_corner_radius_large"
+                app:cardBackgroundColor="?attr/cardGlassFillColorCustom"
+                app:strokeColor="?attr/dividerColorCustom"
+                app:strokeWidth="@dimen/stroke_thin"
+                app:layout_constraintTop_toBottomOf="@id/card_hours">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"

@@ -66,13 +66,40 @@
             app:layout_constraintTop_toBottomOf="@id/tv_branch_capacity"
             app:layout_constraintEnd_toStartOf="@id/layout_actions" />
 
+        <TextView
+            android:id="@+id/tv_branch_overnight_rates"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_xsmall"
+            android:fontFamily="sans-serif-mono"
+            android:textColor="?attr/textSecondaryCustom"
+            android:textSize="@dimen/text_size_caption"
+            android:alpha="0.7"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tv_branch_rates"
+            app:layout_constraintEnd_toStartOf="@id/layout_actions" />
+
+        <TextView
+            android:id="@+id/tv_branch_hours"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_xsmall"
+            android:fontFamily="sans-serif"
+            android:textColor="?attr/textSecondaryCustom"
+            android:textSize="@dimen/text_size_caption"
+            android:alpha="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tv_branch_overnight_rates"
+            app:layout_constraintEnd_toStartOf="@id/layout_actions" />
+
         <LinearLayout
             android:id="@+id/layout_actions"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent">
 
             <ImageButton
                 android:id="@+id/btn_default_branch"

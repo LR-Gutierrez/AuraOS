@@ -62,6 +62,13 @@ class BranchRepository(private val api: BranchApi) {
             input.lightVehicleRate?.let { map["lightVehicleRate"] = it }
             input.heavyVehicleRate?.let { map["heavyVehicleRate"] = it }
             input.currency?.let { map["currency"] = it }
+            input.motorcycleOvernightRate?.let { map["motorcycleOvernightRate"] = it }
+            input.lightVehicleOvernightRate?.let { map["lightVehicleOvernightRate"] = it }
+            input.heavyVehicleOvernightRate?.let { map["heavyVehicleOvernightRate"] = it }
+            input.openTimeWeekday?.let { map["openTimeWeekday"] = it }
+            input.closeTimeWeekday?.let { map["closeTimeWeekday"] = it }
+            input.openTimeWeekend?.let { map["openTimeWeekend"] = it }
+            input.closeTimeWeekend?.let { map["closeTimeWeekend"] = it }
 
             val response = api.updateBranch(id, map)
             if (response.isSuccessful) {

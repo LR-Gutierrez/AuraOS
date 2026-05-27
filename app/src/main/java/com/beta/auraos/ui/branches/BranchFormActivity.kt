@@ -109,6 +109,15 @@ class BranchFormActivity : AppCompatActivity() {
         binding.etLightRate.setText(branch.lightVehicleRate.toString())
         binding.etHeavyRate.setText(branch.heavyVehicleRate.toString())
 
+        binding.etMotoOvernight.setText(branch.motorcycleOvernightRate.toString())
+        binding.etLightOvernight.setText(branch.lightVehicleOvernightRate.toString())
+        binding.etHeavyOvernight.setText(branch.heavyVehicleOvernightRate.toString())
+
+        binding.etOpenWeekday.setText(branch.openTimeWeekday)
+        binding.etCloseWeekday.setText(branch.closeTimeWeekday)
+        binding.etOpenWeekend.setText(branch.openTimeWeekend)
+        binding.etCloseWeekend.setText(branch.closeTimeWeekend)
+
         val currencies = arrayOf("USD", "MXN", "GTQ")
         val currencyIndex = currencies.indexOf(branch.currency)
         if (currencyIndex >= 0) {
@@ -134,6 +143,15 @@ class BranchFormActivity : AppCompatActivity() {
         val lightRate = binding.etLightRate.text.toString().toDoubleOrNull() ?: 0.0
         val heavyRate = binding.etHeavyRate.text.toString().toDoubleOrNull() ?: 0.0
 
+        val motoOvernight = binding.etMotoOvernight.text.toString().toDoubleOrNull() ?: 0.0
+        val lightOvernight = binding.etLightOvernight.text.toString().toDoubleOrNull() ?: 0.0
+        val heavyOvernight = binding.etHeavyOvernight.text.toString().toDoubleOrNull() ?: 0.0
+
+        val openWeekday = binding.etOpenWeekday.text.toString().trim().ifEmpty { "07:00" }
+        val closeWeekday = binding.etCloseWeekday.text.toString().trim().ifEmpty { "23:00" }
+        val openWeekend = binding.etOpenWeekend.text.toString().trim().ifEmpty { "09:00" }
+        val closeWeekend = binding.etCloseWeekend.text.toString().trim().ifEmpty { "22:00" }
+
         val currency = binding.spinnerCurrency.selectedItem.toString()
 
         if (isEditMode) {
@@ -146,6 +164,13 @@ class BranchFormActivity : AppCompatActivity() {
                 motorcycleRate = motoRate,
                 lightVehicleRate = lightRate,
                 heavyVehicleRate = heavyRate,
+                motorcycleOvernightRate = motoOvernight,
+                lightVehicleOvernightRate = lightOvernight,
+                heavyVehicleOvernightRate = heavyOvernight,
+                openTimeWeekday = openWeekday,
+                closeTimeWeekday = closeWeekday,
+                openTimeWeekend = openWeekend,
+                closeTimeWeekend = closeWeekend,
                 currency = currency
             )
             viewModel.updateBranch(branchId!!, input)
@@ -159,6 +184,13 @@ class BranchFormActivity : AppCompatActivity() {
                 motorcycleRate = motoRate,
                 lightVehicleRate = lightRate,
                 heavyVehicleRate = heavyRate,
+                motorcycleOvernightRate = motoOvernight,
+                lightVehicleOvernightRate = lightOvernight,
+                heavyVehicleOvernightRate = heavyOvernight,
+                openTimeWeekday = openWeekday,
+                closeTimeWeekday = closeWeekday,
+                openTimeWeekend = openWeekend,
+                closeTimeWeekend = closeWeekend,
                 currency = currency
             )
             viewModel.createBranch(input)

@@ -124,6 +124,15 @@
     <string name="branch_hint_moto_rate">Tarifa motocicletas</string>
     <string name="branch_hint_light_rate">Tarifa vehículos ligeros</string>
     <string name="branch_hint_heavy_rate">Tarifa vehículos pesados</string>
+    <string name="branch_section_overnight_rates">TARIFAS PERNOCTA</string>
+    <string name="branch_hint_moto_overnight">Pernocta motocicletas</string>
+    <string name="branch_hint_light_overnight">Pernocta vehículos ligeros</string>
+    <string name="branch_hint_heavy_overnight">Pernocta vehículos pesados</string>
+    <string name="branch_section_hours">HORARIOS</string>
+    <string name="branch_hint_open_weekday">Apertura entre semana</string>
+    <string name="branch_hint_close_weekday">Cierre entre semana</string>
+    <string name="branch_hint_open_weekend">Apertura fin de semana</string>
+    <string name="branch_hint_close_weekend">Cierre fin de semana</string>
     <string name="branch_capacity_format">M:%1$d  L:%2$d  P:%3$d</string>
     <string name="dashboard_branches_title">Sucursales</string>
     <string name="dashboard_branches_subtitle">Gestionar sucursales activas</string>
