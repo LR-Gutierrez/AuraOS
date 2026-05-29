@@ -65,6 +65,11 @@
         <item name="liveBadgeTextCustom">@color/crystal_error</item>
 
         <item name="photoOverlayCustom">@drawable/bg_glass_photo_overlay</item>
+
+        <!-- Branch surfaces (Crystal Edition) -->
+        <item name="branchSurfaceCustom">@color/branch_surface_light</item>
+        <item name="branchProgressTrackCustom">@color/branch_progress_track_light</item>
+        <item name="branchSurfaceTextCustom">@color/crystal_on_surface</item>
     </style>
 
     <style name="Theme.AuraOS.NoActionBar" parent="Theme.AuraOS">

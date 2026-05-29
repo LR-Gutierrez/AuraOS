@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.ArrayAdapter
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -13,9 +14,12 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
 import androidx.lifecycle.ViewModelProvider
 import com.beta.auraos.R
+import com.beta.auraos.data.model.Branch
 import com.beta.auraos.data.model.CreateBranchInput
 import com.beta.auraos.data.model.UpdateBranchInput
 import com.beta.auraos.databinding.ActivityBranchFormBinding
+import com.google.android.material.timepicker.MaterialTimePicker
+import com.google.android.material.timepicker.TimeFormat
 
 class BranchFormActivity : AppCompatActivity() {
 
@@ -68,7 +72,77 @@ class BranchFormActivity : AppCompatActivity() {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         binding.spinnerCurrency.adapter = adapter
 
+        setupCapacityStepper(
+            decrementBtn = binding.btnDecrementMoto,
+            incrementBtn = binding.btnIncrementMoto,
+            valueView = binding.tvMotoCapacityValue
+        )
+        setupCapacityStepper(
+            decrementBtn = binding.btnDecrementLight,
+            incrementBtn = binding.btnIncrementLight,
+            valueView = binding.tvLightCapacityValue
+        )
+        setupCapacityStepper(
+            decrementBtn = binding.btnDecrementHeavy,
+            incrementBtn = binding.btnIncrementHeavy,
+            valueView = binding.tvHeavyCapacityValue
+        )
+
+        setupTimeBlock(binding.tvOpenWeekdayBlock, "07:00")
+        setupTimeBlock(binding.tvCloseWeekdayBlock, "23:00")
+        setupTimeBlock(binding.tvOpenWeekendBlock, "09:00")
+        setupTimeBlock(binding.tvCloseWeekendBlock, "22:00")
+
+        binding.switchApiSync.setOnCheckedChangeListener { _, isChecked ->
+            Toast.makeText(
+                this,
+                if (isChecked) "Real-time API sync enabled"
+                else "Real-time API sync disabled",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+
         binding.btnSave.setOnClickListener { validateAndSave() }
+    }
+
+    private fun setupCapacityStepper(
+        decrementBtn: View,
+        incrementBtn: View,
+        valueView: TextView
+    ) {
+        decrementBtn.setOnClickListener {
+            val current = valueView.text.toString().toIntOrNull() ?: 0
+            if (current > 0) {
+                valueView.setText((current - 1).toString())
+            }
+        }
+        incrementBtn.setOnClickListener {
+            val current = valueView.text.toString().toIntOrNull() ?: 0
+            valueView.setText((current + 1).toString())
+        }
+    }
+
+    private fun setupTimeBlock(block: TextView, defaultTime: String) {
+        block.text = defaultTime
+        block.setOnClickListener {
+            val parts = block.text.toString().split(":")
+            val hour = parts.getOrNull(0)?.toIntOrNull() ?: 0
+            val minute = parts.getOrNull(1)?.toIntOrNull() ?: 0
+
+            val picker = MaterialTimePicker.Builder()
+                .setTimeFormat(TimeFormat.CLOCK_24H)
+                .setHour(hour)
+                .setMinute(minute)
+                .setTitleText("Select time")
+                .build()
+
+            picker.addOnPositiveButtonClickListener {
+                val formatted = String.format("%02d:%02d", picker.hour, picker.minute)
+                block.text = formatted
+            }
+
+            picker.show(supportFragmentManager, "time_picker")
+        }
     }
 
     private fun setupObservers() {
@@ -99,12 +173,14 @@ class BranchFormActivity : AppCompatActivity() {
         }
     }
 
-    private fun populateForm(branch: com.beta.auraos.data.model.Branch) {
+    private fun populateForm(branch: Branch) {
         binding.etName.setText(branch.name)
         if (branch.address != null) binding.etAddress.setText(branch.address)
-        binding.etMotoCapacity.setText(branch.motorcycleCapacity.toString())
-        binding.etLightCapacity.setText(branch.lightVehicleCapacity.toString())
-        binding.etHeavyCapacity.setText(branch.heavyVehicleCapacity.toString())
+
+        binding.tvMotoCapacityValue.setText(branch.motorcycleCapacity.toString())
+        binding.tvLightCapacityValue.setText(branch.lightVehicleCapacity.toString())
+        binding.tvHeavyCapacityValue.setText(branch.heavyVehicleCapacity.toString())
+
         binding.etMotoRate.setText(branch.motorcycleRate.toString())
         binding.etLightRate.setText(branch.lightVehicleRate.toString())
         binding.etHeavyRate.setText(branch.heavyVehicleRate.toString())
@@ -113,10 +189,10 @@ class BranchFormActivity : AppCompatActivity() {
         binding.etLightOvernight.setText(branch.lightVehicleOvernightRate.toString())
         binding.etHeavyOvernight.setText(branch.heavyVehicleOvernightRate.toString())
 
-        binding.etOpenWeekday.setText(branch.openTimeWeekday)
-        binding.etCloseWeekday.setText(branch.closeTimeWeekday)
-        binding.etOpenWeekend.setText(branch.openTimeWeekend)
-        binding.etCloseWeekend.setText(branch.closeTimeWeekend)
+        binding.tvOpenWeekdayBlock.text = branch.openTimeWeekday
+        binding.tvCloseWeekdayBlock.text = branch.closeTimeWeekday
+        binding.tvOpenWeekendBlock.text = branch.openTimeWeekend
+        binding.tvCloseWeekendBlock.text = branch.closeTimeWeekend
 
         val currencies = arrayOf("USD", "MXN", "GTQ")
         val currencyIndex = currencies.indexOf(branch.currency)
@@ -135,9 +211,9 @@ class BranchFormActivity : AppCompatActivity() {
 
         val address = binding.etAddress.text.toString().trim().ifEmpty { null }
 
-        val motoCapacity = binding.etMotoCapacity.text.toString().toIntOrNull() ?: 0
-        val lightCapacity = binding.etLightCapacity.text.toString().toIntOrNull() ?: 0
-        val heavyCapacity = binding.etHeavyCapacity.text.toString().toIntOrNull() ?: 0
+        val motoCapacity = binding.tvMotoCapacityValue.text.toString().toIntOrNull() ?: 0
+        val lightCapacity = binding.tvLightCapacityValue.text.toString().toIntOrNull() ?: 0
+        val heavyCapacity = binding.tvHeavyCapacityValue.text.toString().toIntOrNull() ?: 0
 
         val motoRate = binding.etMotoRate.text.toString().toDoubleOrNull() ?: 0.0
         val lightRate = binding.etLightRate.text.toString().toDoubleOrNull() ?: 0.0
@@ -147,10 +223,10 @@ class BranchFormActivity : AppCompatActivity() {
         val lightOvernight = binding.etLightOvernight.text.toString().toDoubleOrNull() ?: 0.0
         val heavyOvernight = binding.etHeavyOvernight.text.toString().toDoubleOrNull() ?: 0.0
 
-        val openWeekday = binding.etOpenWeekday.text.toString().trim().ifEmpty { "07:00" }
-        val closeWeekday = binding.etCloseWeekday.text.toString().trim().ifEmpty { "23:00" }
-        val openWeekend = binding.etOpenWeekend.text.toString().trim().ifEmpty { "09:00" }
-        val closeWeekend = binding.etCloseWeekend.text.toString().trim().ifEmpty { "22:00" }
+        val openWeekday = binding.tvOpenWeekdayBlock.text.toString().trim().ifEmpty { "07:00" }
+        val closeWeekday = binding.tvCloseWeekdayBlock.text.toString().trim().ifEmpty { "23:00" }
+        val openWeekend = binding.tvOpenWeekendBlock.text.toString().trim().ifEmpty { "09:00" }
+        val closeWeekend = binding.tvCloseWeekendBlock.text.toString().trim().ifEmpty { "22:00" }
 
         val currency = binding.spinnerCurrency.selectedItem.toString()
 

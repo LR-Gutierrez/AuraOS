@@ -60,4 +60,9 @@
 
     <!-- Photo overlay (glassmorphism gradient) -->
     <attr name="photoOverlayCustom" format="reference" />
+
+    <!-- Branch surfaces -->
+    <attr name="branchSurfaceCustom" format="color" />
+    <attr name="branchProgressTrackCustom" format="color" />
+    <attr name="branchSurfaceTextCustom" format="color" />
 </resources>

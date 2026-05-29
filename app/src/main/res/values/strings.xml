@@ -279,6 +279,18 @@
     <string name="dashboard_load_error">Error loading dashboard: %1$s</string>
     <string name="dashboard_branch_not_found">Branch not found</string>
 
+    <!-- Branch list new UI -->
+    <string name="branch_subtitle">Oversee 12 global parking hubs</string>
+    <string name="branch_search_hint">Search by location or terminal name.</string>
+    <string name="branch_kpi_active_fleet">ACTIVE FLEET</string>
+    <string name="branch_kpi_global_cap">GLOBAL CAP.</string>
+    <string name="branch_status_active">ACTIVE</string>
+    <string name="branch_status_inactive">INACTIVE</string>
+    <string name="branch_occupancy_format">Occupancy %1$d / %2$d</string>
+    <string name="branch_action_manage">MANAGE</string>
+    <string name="branch_action_activate">ACTIVATE ⚡</string>
+    <string name="branch_action_manage_desc">Manage branch</string>
+
     <!-- Branch specific -->
     <string name="branch_no_address">No address</string>
     <string name="branch_default_toast">Default branch: %1$s</string>

@@ -65,6 +65,11 @@
         <item name="liveBadgeTextCustom">@color/midnight_error</item>
 
         <item name="photoOverlayCustom">@drawable/bg_glass_photo_overlay_dark</item>
+
+        <!-- Branch surfaces (Midnight Edition) -->
+        <item name="branchSurfaceCustom">@color/branch_dark_card</item>
+        <item name="branchProgressTrackCustom">@color/branch_progress_track</item>
+        <item name="branchSurfaceTextCustom">@color/midnight_on_surface</item>
     </style>
 
     <style name="Theme.AuraOS.NoActionBar" parent="Theme.AuraOS">

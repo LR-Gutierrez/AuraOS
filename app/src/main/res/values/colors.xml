@@ -83,6 +83,20 @@
     <color name="glass_border_dark">#26FFFFFF</color>
     <color name="glass_border_light_dark">#1AFFFFFF</color>
 
+    <!-- Branch list UI -->
+    <color name="branch_green_neon">#00E676</color>
+    <color name="branch_gray_muted">#9CA3AF</color>
+    <color name="branch_dark_card">#1A1A1C</color>
+    <color name="branch_blue_manage">#A8C5FF</color>
+    <color name="branch_green_badge_bg">#1A00E676</color>
+    <color name="branch_gray_badge_bg">#1A9CA3AF</color>
+    <color name="branch_progress_track">#2A2A2D</color>
+    <color name="branch_progress_track_light">#D1D5DB</color>
+    <color name="branch_activate_bg">#2A2A2D</color>
+    <color name="branch_activate_text">#9CA3AF</color>
+    <color name="branch_green_light_text">#00E676</color>
+    <color name="branch_surface_light">#EEEEF0</color>
+
     <!-- Home screen specific -->
     <color name="ic_crystal_background">#FFFFFFFF</color>
     <color name="black">#FF000000</color>

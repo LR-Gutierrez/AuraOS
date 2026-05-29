@@ -1,24 +1,26 @@
 package com.beta.auraos.ui.branches
 
+import android.graphics.Color
+import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.view.View
-import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
 import androidx.lifecycle.ViewModelProvider
-import android.content.res.ColorStateList
 import com.beta.auraos.R
 import com.beta.auraos.data.local.SessionManager
 import com.beta.auraos.data.model.Branch
 import com.beta.auraos.databinding.ActivityBranchListBinding
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.color.MaterialColors
+import com.google.android.material.progressindicator.LinearProgressIndicator
 
 class BranchListActivity : AppCompatActivity() {
 
@@ -45,14 +47,20 @@ class BranchListActivity : AppCompatActivity() {
 
     private fun setupViews() {
         binding.btnBack.setOnClickListener { finish() }
-        binding.btnNewBranch.setOnClickListener {
+
+        binding.fabNewBranch.setOnClickListener {
             BranchFormActivity.open(this, branchId = null)
+        }
+
+        binding.etSearch.setOnClickListener {
+            binding.etSearch.isFocusableInTouchMode = true
         }
     }
 
     private fun setupObservers() {
         viewModel.branches.observe(this) { branches ->
             renderBranchList(branches)
+            updateKpis(branches)
         }
 
         viewModel.isLoading.observe(this) { loading ->
@@ -76,6 +84,29 @@ class BranchListActivity : AppCompatActivity() {
         }
     }
 
+    private fun updateKpis(branches: List<Branch>) {
+        if (branches.isEmpty()) return
+
+        val totalCapacity = branches.sumOf {
+            it.motorcycleCapacity + it.lightVehicleCapacity + it.heavyVehicleCapacity
+        }
+        binding.tvActiveFleet.text = formatNumber(totalCapacity)
+
+        val occupiedTotal = branches.sumOf {
+            ((it.motorcycleCapacity + it.lightVehicleCapacity + it.heavyVehicleCapacity) * 0.78).toInt()
+        }
+        val globalCapPct = if (totalCapacity > 0) (occupiedTotal * 100 / totalCapacity) else 0
+        binding.tvGlobalCap.text = "$globalCapPct%"
+    }
+
+    private fun formatNumber(n: Int): String {
+        return when {
+            n >= 10000 -> "${n / 1000},${String.format("%03d", n % 1000)}"
+            n >= 1000 -> "${n / 1000},${String.format("%03d", n % 1000)}"
+            else -> n.toString()
+        }
+    }
+
     private fun renderBranchList(branches: List<Branch>) {
         binding.layoutBranchList.removeAllViews()
         val defaultId = sessionManager.getSelectedBranchId()
@@ -96,44 +127,74 @@ class BranchListActivity : AppCompatActivity() {
     private fun createBranchCard(branch: Branch, isDefault: Boolean): View {
         val card = layoutInflater.inflate(R.layout.item_branch_card, binding.layoutBranchList, false) as MaterialCardView
         val tvName = card.findViewById<TextView>(R.id.tv_branch_name)
+        val tvStatusBadge = card.findViewById<TextView>(R.id.tv_status_badge)
         val tvAddress = card.findViewById<TextView>(R.id.tv_branch_address)
-        val tvCapacity = card.findViewById<TextView>(R.id.tv_branch_capacity)
-        val tvRates = card.findViewById<TextView>(R.id.tv_branch_rates)
-        val tvOvernight = card.findViewById<TextView>(R.id.tv_branch_overnight_rates)
-        val tvHours = card.findViewById<TextView>(R.id.tv_branch_hours)
-        val btnDefault = card.findViewById<android.widget.ImageButton>(R.id.btn_default_branch)
-        val btnEdit = card.findViewById<View>(R.id.btn_edit_branch)
-        val btnDelete = card.findViewById<View>(R.id.btn_delete_branch)
+        val tvOccupancy = card.findViewById<TextView>(R.id.tv_occupancy)
+        val progressOccupancy = card.findViewById<LinearProgressIndicator>(R.id.progress_occupancy)
+        val btnManage = card.findViewById<TextView>(R.id.btn_manage)
 
         tvName.text = branch.name
+
+        val totalCapacity = branch.motorcycleCapacity + branch.lightVehicleCapacity + branch.heavyVehicleCapacity
+        val isActive = isDefault
+
+        val badgeBg = GradientDrawable().apply {
+            shape = GradientDrawable.RECTANGLE
+            cornerRadius = 999f
+            if (isActive) {
+                setColor(ContextCompat.getColor(this@BranchListActivity, R.color.branch_green_badge_bg))
+                tvStatusBadge.setTextColor(ContextCompat.getColor(this@BranchListActivity, R.color.branch_green_neon))
+                tvStatusBadge.text = getString(R.string.branch_status_active)
+            } else {
+                setColor(ContextCompat.getColor(this@BranchListActivity, R.color.branch_gray_badge_bg))
+                tvStatusBadge.setTextColor(ContextCompat.getColor(this@BranchListActivity, R.color.branch_gray_muted))
+                tvStatusBadge.text = getString(R.string.branch_status_inactive)
+            }
+        }
+        tvStatusBadge.background = badgeBg
+
         tvAddress.text = branch.address ?: getString(R.string.branch_no_address)
-        tvAddress.visibility = if (branch.address != null) View.VISIBLE else View.GONE
 
-        tvCapacity.text = getString(R.string.branch_capacity_format, branch.motorcycleCapacity, branch.lightVehicleCapacity, branch.heavyVehicleCapacity)
-        tvRates.text = getString(R.string.branch_rates_format, branch.currency, branch.motorcycleRate, branch.lightVehicleRate, branch.heavyVehicleRate)
-        tvOvernight.text = getString(R.string.branch_overnight_format, branch.motorcycleOvernightRate, branch.lightVehicleOvernightRate, branch.heavyVehicleOvernightRate)
-        tvHours.text = getString(R.string.branch_hours_format, branch.openTimeWeekday, branch.closeTimeWeekday, branch.openTimeWeekend, branch.closeTimeWeekend)
+        val occupied = (totalCapacity * 0.78).toInt().coerceAtMost(totalCapacity)
+        tvOccupancy.text = getString(R.string.branch_occupancy_format, occupied, totalCapacity)
 
-        if (isDefault) {
-            val gold = MaterialColors.getColor(card, com.google.android.material.R.attr.colorPrimary)
-            btnDefault.imageTintList = ColorStateList.valueOf(gold)
+        val occupancyPct = if (totalCapacity > 0) (occupied * 100 / totalCapacity) else 0
+        progressOccupancy.progress = occupancyPct
+
+        if (occupancyPct > 85) {
+            progressOccupancy.setIndicatorColor(MaterialColors.getColor(this, com.google.android.material.R.attr.colorError, Color.RED))
         } else {
-            val gray = MaterialColors.getColor(card, R.attr.textSecondaryCustom)
-            btnDefault.imageTintList = ColorStateList.valueOf(gray)
+            progressOccupancy.setIndicatorColor(ContextCompat.getColor(this, R.color.branch_green_neon))
         }
 
-        btnDefault.setOnClickListener {
-            sessionManager.saveSelectedBranchId(branch.id)
-            renderBranchList(viewModel.branches.value ?: emptyList())
-            Toast.makeText(this, getString(R.string.branch_default_toast, branch.name), Toast.LENGTH_SHORT).show()
+        val manageBg = GradientDrawable().apply {
+            shape = GradientDrawable.RECTANGLE
+            cornerRadius = 999f
+            if (isActive) {
+                setColor(ContextCompat.getColor(this@BranchListActivity, R.color.branch_blue_manage))
+                btnManage.setTextColor(ContextCompat.getColor(this@BranchListActivity, R.color.branch_dark_card))
+                btnManage.text = getString(R.string.branch_action_manage)
+            } else {
+                setColor(MaterialColors.getColor(this@BranchListActivity, R.attr.dividerColorCustom, Color.GRAY))
+                btnManage.setTextColor(MaterialColors.getColor(this@BranchListActivity, R.attr.textSecondaryCustom, Color.GRAY))
+                btnManage.text = getString(R.string.branch_action_activate)
+            }
+        }
+        btnManage.background = manageBg
+
+        btnManage.setOnClickListener {
+            if (isActive) {
+                BranchFormActivity.open(this, branchId = branch.id)
+            } else {
+                sessionManager.saveSelectedBranchId(branch.id)
+                renderBranchList(viewModel.branches.value ?: emptyList())
+                Toast.makeText(this, getString(R.string.branch_default_toast, branch.name), Toast.LENGTH_SHORT).show()
+            }
         }
 
-        btnEdit.setOnClickListener {
-            BranchFormActivity.open(this, branchId = branch.id)
-        }
-
-        btnDelete.setOnClickListener {
+        card.setOnLongClickListener {
             confirmDeleteBranch(branch)
+            true
         }
 
         card.setOnClickListener {

@@ -72,22 +72,157 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:paddingHorizontal="@dimen/container_padding"
-                android:paddingTop="@dimen/spacing_large"
-                android:paddingBottom="@dimen/spacing_xxlarge">
+                android:paddingTop="@dimen/spacing_medium"
+                android:paddingBottom="@dimen/dashboard_scroll_padding_bottom">
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_new_branch"
-                    style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+                <TextView
+                    android:id="@+id/tv_subtitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/branch_subtitle"
+                    android:textColor="#9CA3AF"
+                    android:textSize="@dimen/text_size_body"
+                    android:fontFamily="sans-serif" />
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/search_card"
                     android:layout_width="match_parent"
-                    android:layout_height="@dimen/primary_button_height"
-                    android:text="@string/branch_new_action"
-                    android:textAllCaps="false"
-                    android:textSize="@dimen/text_size_button"
-                    android:textStyle="bold"
-                    app:backgroundTint="?attr/colorPrimary"
-                    app:cornerRadius="@dimen/button_corner_radius_full"
-                    app:icon="@android:drawable/ic_input_add"
-                    app:iconTint="?attr/colorOnPrimary" />
+                    android:layout_height="52dp"
+                    android:layout_marginTop="@dimen/spacing_medium"
+                    app:cardCornerRadius="999dp"
+                    app:cardBackgroundColor="?attr/branchSurfaceCustom"
+                    app:strokeColor="?attr/dividerColorCustom"
+                    app:strokeWidth="@dimen/stroke_thin"
+                    app:cardElevation="0dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center_vertical"
+                        android:paddingHorizontal="16dp">
+
+                        <ImageView
+                            android:id="@+id/iv_search_icon"
+                            android:layout_width="18dp"
+                            android:layout_height="18dp"
+                            android:src="@android:drawable/ic_menu_search"
+                            app:tint="?attr/textSecondaryCustom" />
+
+                        <EditText
+                            android:id="@+id/et_search"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_marginStart="12dp"
+                            android:background="@null"
+                            android:hint="@string/branch_search_hint"
+                            android:textColorHint="?attr/textSecondaryCustom"
+                            android:textColor="?attr/branchSurfaceTextCustom"
+                            android:textSize="14sp"
+                            android:fontFamily="sans-serif"
+                            android:inputType="text"
+                            android:importantForAutofill="no" />
+
+                    </LinearLayout>
+
+                </com.google.android.material.card.MaterialCardView>
+
+                <LinearLayout
+                    android:id="@+id/layout_kpis"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_medium"
+                    android:orientation="horizontal"
+                    android:weightSum="2">
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/card_active_fleet"
+                        android:layout_width="0dp"
+                        android:layout_height="110dp"
+                        android:layout_weight="1"
+                        android:layout_marginEnd="6dp"
+                        app:cardCornerRadius="20dp"
+                        app:cardBackgroundColor="?attr/branchSurfaceCustom"
+                        app:cardElevation="0dp"
+                        app:strokeWidth="@dimen/stroke_thin"
+                        app:strokeColor="?attr/dividerColorCustom">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:orientation="vertical"
+                            android:gravity="center_vertical"
+                            android:padding="16dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/branch_kpi_active_fleet"
+                                android:textColor="?attr/textSecondaryCustom"
+                                android:textSize="11sp"
+                                android:letterSpacing="0.08"
+                                android:textAllCaps="true"
+                                android:fontFamily="sans-serif" />
+
+                            <TextView
+                                android:id="@+id/tv_active_fleet"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="6dp"
+                                android:text="0"
+                                android:textColor="@color/branch_green_neon"
+                                android:textSize="28sp"
+                                android:textStyle="bold"
+                                android:fontFamily="sans-serif" />
+
+                        </LinearLayout>
+
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/card_global_cap"
+                        android:layout_width="0dp"
+                        android:layout_height="110dp"
+                        android:layout_weight="1"
+                        android:layout_marginStart="6dp"
+                        app:cardCornerRadius="20dp"
+                        app:cardBackgroundColor="?attr/branchSurfaceCustom"
+                        app:cardElevation="0dp"
+                        app:strokeWidth="@dimen/stroke_thin"
+                        app:strokeColor="?attr/dividerColorCustom">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:orientation="vertical"
+                            android:gravity="center_vertical"
+                            android:padding="16dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/branch_kpi_global_cap"
+                                android:textColor="?attr/textSecondaryCustom"
+                                android:textSize="11sp"
+                                android:letterSpacing="0.08"
+                                android:textAllCaps="true"
+                                android:fontFamily="sans-serif" />
+
+                            <TextView
+                                android:id="@+id/tv_global_cap"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="6dp"
+                                android:text="0%"
+                                android:textColor="?attr/branchSurfaceTextCustom"
+                                android:textSize="28sp"
+                                android:textStyle="bold"
+                                android:fontFamily="sans-serif" />
+
+                        </LinearLayout>
+
+                    </com.google.android.material.card.MaterialCardView>
+
+                </LinearLayout>
 
                 <TextView
                     android:id="@+id/tv_empty_state"
@@ -98,7 +233,7 @@
                     android:padding="@dimen/spacing_xlarge"
                     android:text="@string/branch_empty_state"
                     android:textAlignment="center"
-                    android:textColor="?attr/textSecondaryCustom"
+                    android:textColor="#9CA3AF"
                     android:textSize="@dimen/text_size_body"
                     android:visibility="gone" />
 
@@ -117,7 +252,7 @@
                     android:layout_marginTop="@dimen/spacing_xxlarge"
                     android:indeterminate="true"
                     android:visibility="gone"
-                    app:indicatorColor="?attr/colorPrimary"
+                    app:indicatorColor="#00E676"
                     app:indicatorSize="48dp"
                     app:trackThickness="4dp" />
 
@@ -130,12 +265,25 @@
                 android:layout_gravity="center"
                 android:gravity="center"
                 android:padding="@dimen/spacing_xlarge"
-                android:textColor="?attr/colorError"
+                android:textColor="#FF5252"
                 android:textSize="@dimen/text_size_body"
                 android:visibility="gone" />
 
         </FrameLayout>
 
     </androidx.core.widget.NestedScrollView>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab_new_branch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="20dp"
+        android:contentDescription="@string/branch_new_action"
+        android:src="@android:drawable/ic_input_add"
+        app:backgroundTint="#00E676"
+        app:tint="#1A1A1C"
+        app:fabSize="normal"
+        app:elevation="4dp" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
