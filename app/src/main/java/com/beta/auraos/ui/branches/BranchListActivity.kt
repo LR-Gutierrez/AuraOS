@@ -61,6 +61,13 @@ class BranchListActivity : AppCompatActivity() {
         viewModel.branches.observe(this) { branches ->
             renderBranchList(branches)
             updateKpis(branches)
+            viewModel.loadOccupancyData(branches)
+        }
+
+        viewModel.branchOccupancy.observe(this) { _ ->
+            val branches = viewModel.branches.value ?: return@observe
+            renderBranchList(branches)
+            updateKpis(branches)
         }
 
         viewModel.isLoading.observe(this) { loading ->
@@ -92,11 +99,11 @@ class BranchListActivity : AppCompatActivity() {
         }
         binding.tvActiveFleet.text = formatNumber(totalCapacity)
 
-        val occupiedTotal = branches.sumOf {
-            ((it.motorcycleCapacity + it.lightVehicleCapacity + it.heavyVehicleCapacity) * 0.78).toInt()
-        }
+        val occupancyMap = viewModel.branchOccupancy.value ?: emptyMap()
+        val occupiedTotal = branches.sumOf { occupancyMap[it.id] ?: 0 }
         val globalCapPct = if (totalCapacity > 0) (occupiedTotal * 100 / totalCapacity) else 0
-        binding.tvGlobalCap.text = "$globalCapPct%"
+        val globalCapText = if (occupancyMap.isEmpty()) "--%" else "$globalCapPct%"
+        binding.tvGlobalCap.text = globalCapText
     }
 
     private fun formatNumber(n: Int): String {
@@ -155,10 +162,13 @@ class BranchListActivity : AppCompatActivity() {
 
         tvAddress.text = branch.address ?: getString(R.string.branch_no_address)
 
-        val occupied = (totalCapacity * 0.78).toInt().coerceAtMost(totalCapacity)
-        tvOccupancy.text = getString(R.string.branch_occupancy_format, occupied, totalCapacity)
+        val occupancyMap = viewModel.branchOccupancy.value ?: emptyMap()
+        val occupied = (occupancyMap[branch.id] ?: 0).coerceAtMost(totalCapacity)
+        val occupancyText = if (occupancyMap.isEmpty()) "-- / $totalCapacity"
+            else getString(R.string.branch_occupancy_format, occupied, totalCapacity)
+        tvOccupancy.text = occupancyText
 
-        val occupancyPct = if (totalCapacity > 0) (occupied * 100 / totalCapacity) else 0
+        val occupancyPct = if (totalCapacity > 0 && occupancyMap.isNotEmpty()) (occupied * 100 / totalCapacity) else 0
         progressOccupancy.progress = occupancyPct
 
         if (occupancyPct > 85) {

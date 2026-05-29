@@ -5,6 +5,7 @@ import android.view.View
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import java.time.LocalDate
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
@@ -82,7 +83,7 @@ class MembershipFormActivity : AppCompatActivity() {
         val input = CreateMembershipInput(
             memberName = name,
             tier = tier.ifEmpty { getString(R.string.membership_tier_basic) },
-            endDate = endDate.ifEmpty { "2026-12-31" },
+            endDate = endDate.ifEmpty { LocalDate.now().plusMonths(1).toString() },
             branchId = branchId
         )
 

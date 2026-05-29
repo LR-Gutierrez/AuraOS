@@ -31,6 +31,10 @@ class BranchFormActivity : AppCompatActivity() {
 
     companion object {
         private const val EXTRA_BRANCH_ID = "extra_branch_id"
+        private const val DEFAULT_OPEN_WEEKDAY = "07:00"
+        private const val DEFAULT_CLOSE_WEEKDAY = "23:00"
+        private const val DEFAULT_OPEN_WEEKEND = "09:00"
+        private const val DEFAULT_CLOSE_WEEKEND = "22:00"
 
         fun open(context: Context, branchId: String?) {
             val intent = Intent(context, BranchFormActivity::class.java)
@@ -88,10 +92,10 @@ class BranchFormActivity : AppCompatActivity() {
             valueView = binding.tvHeavyCapacityValue
         )
 
-        setupTimeBlock(binding.tvOpenWeekdayBlock, "07:00")
-        setupTimeBlock(binding.tvCloseWeekdayBlock, "23:00")
-        setupTimeBlock(binding.tvOpenWeekendBlock, "09:00")
-        setupTimeBlock(binding.tvCloseWeekendBlock, "22:00")
+        setupTimeBlock(binding.tvOpenWeekdayBlock, DEFAULT_OPEN_WEEKDAY)
+        setupTimeBlock(binding.tvCloseWeekdayBlock, DEFAULT_CLOSE_WEEKDAY)
+        setupTimeBlock(binding.tvOpenWeekendBlock, DEFAULT_OPEN_WEEKEND)
+        setupTimeBlock(binding.tvCloseWeekendBlock, DEFAULT_CLOSE_WEEKEND)
 
         binding.switchApiSync.setOnCheckedChangeListener { _, isChecked ->
             Toast.makeText(
@@ -133,7 +137,7 @@ class BranchFormActivity : AppCompatActivity() {
                 .setTimeFormat(TimeFormat.CLOCK_24H)
                 .setHour(hour)
                 .setMinute(minute)
-                .setTitleText("Select time")
+                .setTitleText(getString(R.string.branch_time_picker_title))
                 .build()
 
             picker.addOnPositiveButtonClickListener {
@@ -223,10 +227,10 @@ class BranchFormActivity : AppCompatActivity() {
         val lightOvernight = binding.etLightOvernight.text.toString().toDoubleOrNull() ?: 0.0
         val heavyOvernight = binding.etHeavyOvernight.text.toString().toDoubleOrNull() ?: 0.0
 
-        val openWeekday = binding.tvOpenWeekdayBlock.text.toString().trim().ifEmpty { "07:00" }
-        val closeWeekday = binding.tvCloseWeekdayBlock.text.toString().trim().ifEmpty { "23:00" }
-        val openWeekend = binding.tvOpenWeekendBlock.text.toString().trim().ifEmpty { "09:00" }
-        val closeWeekend = binding.tvCloseWeekendBlock.text.toString().trim().ifEmpty { "22:00" }
+        val openWeekday = binding.tvOpenWeekdayBlock.text.toString().trim().ifEmpty { DEFAULT_OPEN_WEEKDAY }
+        val closeWeekday = binding.tvCloseWeekdayBlock.text.toString().trim().ifEmpty { DEFAULT_CLOSE_WEEKDAY }
+        val openWeekend = binding.tvOpenWeekendBlock.text.toString().trim().ifEmpty { DEFAULT_OPEN_WEEKEND }
+        val closeWeekend = binding.tvCloseWeekendBlock.text.toString().trim().ifEmpty { DEFAULT_CLOSE_WEEKEND }
 
         val currency = binding.spinnerCurrency.selectedItem.toString()
 

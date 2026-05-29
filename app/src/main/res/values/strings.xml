@@ -112,6 +112,7 @@
     <string name="branch_load_error">Error loading branches</string>
     <string name="branch_required_for_entry">You must configure at least one branch before registering entries</string>
     <string name="branch_registering_at">Registering at:</string>
+    <string name="branch_time_picker_title">Select time</string>
     <string name="branch_section_general">GENERAL INFO</string>
     <string name="branch_section_capacity">MAX CAPACITY</string>
     <string name="branch_section_rates">RATES</string>

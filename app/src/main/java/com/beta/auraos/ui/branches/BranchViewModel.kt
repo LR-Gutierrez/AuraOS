@@ -6,17 +6,26 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.beta.auraos.data.BranchRepository
 import com.beta.auraos.data.Result
+import com.beta.auraos.data.VehicleEntryRepository
 import com.beta.auraos.data.model.Branch
 import com.beta.auraos.data.model.CreateBranchInput
 import com.beta.auraos.data.model.UpdateBranchInput
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class BranchViewModel(private val repository: BranchRepository) : ViewModel() {
+class BranchViewModel(
+    private val repository: BranchRepository,
+    private val vehicleEntryRepository: VehicleEntryRepository = VehicleEntryRepository()
+) : ViewModel() {
 
     private val _branches = MutableLiveData<List<Branch>>()
     val branches: LiveData<List<Branch>> = _branches
+
+    private val _branchOccupancy = MutableLiveData<Map<String, Int>>(emptyMap())
+    val branchOccupancy: LiveData<Map<String, Int>> = _branchOccupancy
 
     private val _isLoading = MutableLiveData(false)
     val isLoading: LiveData<Boolean> = _isLoading
@@ -44,6 +53,24 @@ class BranchViewModel(private val repository: BranchRepository) : ViewModel() {
                 is Result.Success -> _branches.value = result.data
                 is Result.Error -> _error.value = result.exception.localizedMessage ?: "Error al cargar sucursales"
             }
+        }
+    }
+
+    fun loadOccupancyData(branches: List<Branch>) {
+        if (branches.isEmpty()) return
+        viewModelScope.launch {
+            val deferred = branches.map { branch ->
+                async(Dispatchers.IO) {
+                    val result = vehicleEntryRepository.getAnalyticsSummary(branch.id)
+                    val activeCount = when (result) {
+                        is Result.Success -> result.data.activeCount
+                        is Result.Error -> 0
+                    }
+                    branch.id to activeCount
+                }
+            }
+            val occupancyMap = deferred.awaitAll().toMap()
+            _branchOccupancy.value = occupancyMap
         }
     }
 

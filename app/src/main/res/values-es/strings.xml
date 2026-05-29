@@ -112,6 +112,7 @@
     <string name="branch_load_error">Error al cargar sucursales</string>
     <string name="branch_required_for_entry">Debes configurar al menos una sucursal antes de registrar ingresos</string>
     <string name="branch_registering_at">Registrando en:</string>
+    <string name="branch_time_picker_title">Seleccionar hora</string>
     <string name="branch_section_general">INFORMACIÓN GENERAL</string>
     <string name="branch_section_capacity">CAPACIDAD MÁXIMA</string>
     <string name="branch_section_rates">TARIFAS</string>
