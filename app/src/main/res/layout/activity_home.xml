@@ -86,6 +86,96 @@
             android:paddingTop="@dimen/spacing_large"
             android:paddingBottom="@dimen/spacing_xxlarge">
 
+            <FrameLayout
+                android:id="@+id/container_membership_selector"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="?attr/glassCardBackgroundCustom"
+                android:padding="@dimen/spacing_large"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:id="@+id/lbl_membership_section"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="sans-serif-medium"
+                        android:letterSpacing="0.06"
+                        android:text="@string/membership_section_label"
+                        android:textColor="?attr/textSecondaryCustom"
+                        android:textSize="@dimen/text_size_overline"
+                        android:textStyle="bold"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_select_member"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/primary_button_height"
+                        android:layout_marginTop="@dimen/spacing_small"
+                        android:text="@string/membership_select_member"
+                        android:textAllCaps="false"
+                        android:textSize="@dimen/text_size_body"
+                        app:backgroundTint="?attr/textPrimaryCustom"
+                        app:cornerRadius="@dimen/button_corner_radius_full"
+                        app:layout_constraintTop_toBottomOf="@id/lbl_membership_section" />
+
+                    <LinearLayout
+                        android:id="@+id/layout_member_info"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/spacing_small"
+                        android:orientation="vertical"
+                        android:visibility="gone"
+                        app:layout_constraintTop_toBottomOf="@id/lbl_membership_section">
+
+                        <TextView
+                            android:id="@+id/tv_member_name"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="sans-serif-black"
+                            android:textColor="?attr/textPrimaryCustom"
+                            android:textSize="@dimen/text_size_body"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/tv_member_tier"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/spacing_xsmall"
+                            android:fontFamily="sans-serif-medium"
+                            android:textColor="?attr/colorPrimary"
+                            android:textSize="@dimen/text_size_small" />
+
+                        <TextView
+                            android:id="@+id/tv_member_status"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/spacing_xsmall"
+                            android:fontFamily="sans-serif-medium"
+                            android:text="@string/membership_entry_free"
+                            android:textColor="@android:color/holo_green_dark"
+                            android:textSize="@dimen/text_size_small"
+                            android:textStyle="bold" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_clear_member"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/primary_button_height"
+                        android:layout_marginTop="@dimen/spacing_small"
+                        android:text="@string/membership_clear"
+                        android:textAllCaps="false"
+                        android:textSize="@dimen/text_size_body"
+                        app:backgroundTint="?attr/colorError"
+                        app:cornerRadius="@dimen/button_corner_radius_full" />
+                    </LinearLayout>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </FrameLayout>
+
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/card_plate_capture"
                 android:layout_width="match_parent"
@@ -94,7 +184,8 @@
                 android:clipToOutline="true"
                 app:cardCornerRadius="@dimen/card_corner_radius_large"
                 app:cardElevation="@dimen/elevation_none"
-                app:layout_constraintTop_toTopOf="parent"
+                android:layout_marginTop="@dimen/spacing_small"
+                app:layout_constraintTop_toBottomOf="@+id/container_membership_selector"
                 app:strokeWidth="@dimen/stroke_none">
 
                 <FrameLayout

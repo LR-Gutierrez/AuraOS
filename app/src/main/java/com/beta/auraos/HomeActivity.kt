@@ -18,8 +18,10 @@ import androidx.core.view.updatePadding
 import androidx.lifecycle.lifecycleScope
 import com.beta.auraos.data.BranchRepository
 import com.beta.auraos.data.Result
+import com.beta.auraos.data.MembershipRepository
 import com.beta.auraos.data.local.SessionManager
 import com.beta.auraos.data.model.Branch
+import com.beta.auraos.data.model.Membership
 import com.beta.auraos.data.remote.ApiClient
 import com.beta.auraos.data.remote.BranchApi
 import com.beta.auraos.data.remote.ParkingApi
@@ -45,6 +47,12 @@ class HomeActivity : AppCompatActivity() {
     private lateinit var sessionManager: SessionManager
     private var branches: List<Branch> = emptyList()
     private var selectedBranch: Branch? = null
+    private var selectedMembership: Membership? = null
+    private var memberships: List<Membership> = emptyList()
+
+    private val membershipRepository: MembershipRepository by lazy {
+        MembershipRepository()
+    }
 
     private val branchRepository: BranchRepository by lazy {
         BranchRepository(ApiClient.createApi<BranchApi>())
@@ -119,6 +127,7 @@ class HomeActivity : AppCompatActivity() {
         setupVehicleButtons()
         setupConfirmButton()
         setupBranchSelector()
+        setupMembershipSelector()
         setupBottomNav()
         setupWindowInsets()
         loadBranches()
@@ -317,6 +326,58 @@ class HomeActivity : AppCompatActivity() {
         binding.tvBranchName.setOnClickListener { showBranchSelector() }
     }
 
+    private fun setupMembershipSelector() {
+        binding.btnSelectMember.setOnClickListener { showMemberSelector() }
+        binding.btnClearMember.setOnClickListener { clearSelectedMember() }
+    }
+
+    private fun loadMemberships() {
+        val branchId = selectedBranch?.id ?: return
+        lifecycleScope.launch(Dispatchers.IO) {
+            val result = membershipRepository.getMemberships(branchId = branchId)
+            withContext(Dispatchers.Main) {
+                if (result is Result.Success) {
+                    memberships = result.data.filter { it.isActive }
+                }
+            }
+        }
+    }
+
+    private fun showMemberSelector() {
+        val activeMembers = memberships.filter { it.isActive }
+        if (activeMembers.isEmpty()) {
+            Toast.makeText(this, R.string.membership_dialog_empty, Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val names = activeMembers.map { "${it.memberName}  •  ${it.tier}" }.toTypedArray()
+
+        AlertDialog.Builder(this)
+            .setTitle(R.string.membership_dialog_title)
+            .setItems(names) { dialog, which ->
+                selectMember(activeMembers[which])
+                dialog.dismiss()
+            }
+            .setNegativeButton(R.string.dialog_cancel, null)
+            .show()
+    }
+
+    private fun selectMember(membership: Membership) {
+        selectedMembership = membership
+        binding.btnSelectMember.visibility = View.GONE
+        binding.layoutMemberInfo.visibility = View.VISIBLE
+        binding.tvMemberName.text = membership.memberName
+        binding.tvMemberTier.text = membership.tier
+    }
+
+    private fun clearSelectedMember() {
+        selectedMembership = null
+        binding.btnSelectMember.visibility = View.VISIBLE
+        binding.layoutMemberInfo.visibility = View.GONE
+        binding.tvMemberName.text = ""
+        binding.tvMemberTier.text = ""
+    }
+
     private fun showBranchSelector() {
         if (branches.isEmpty()) {
             AlertDialog.Builder(this)
@@ -340,6 +401,8 @@ class HomeActivity : AppCompatActivity() {
                 selectedBranch = branch
                 sessionManager.saveSelectedBranchId(branch.id)
                 binding.tvBranchName.text = branch.name
+                clearSelectedMember()
+                loadMemberships()
                 dialog.dismiss()
             }
             .setPositiveButton(getString(R.string.dialog_manage_branches)) { _, _ ->
@@ -380,6 +443,7 @@ class HomeActivity : AppCompatActivity() {
         } else {
             binding.tvBranchName.text = getString(R.string.branch_no_branch)
         }
+        loadMemberships()
     }
 
     private fun setupConfirmButton() {
@@ -441,6 +505,8 @@ class HomeActivity : AppCompatActivity() {
                     .toRequestBody("text/plain".toMediaTypeOrNull())
                 val branchId = (selectedBranch?.id ?: "")
                     .toRequestBody("text/plain".toMediaTypeOrNull())
+                val membershipIdPart = selectedMembership?.id
+                    ?.toRequestBody("text/plain".toMediaTypeOrNull())
 
                 val platePhotoPart = platePhotoUri?.toMultipartPart("platePhoto")
                 val frontPart = frontPhotoUri?.toMultipartPart("front")
@@ -452,6 +518,7 @@ class HomeActivity : AppCompatActivity() {
                     plate = plate,
                     vehicleType = vehicleType,
                     branchId = branchId,
+                    membershipId = membershipIdPart,
                     platePhoto = platePhotoPart,
                     front = frontPart,
                     rear = rearPart,
@@ -462,9 +529,14 @@ class HomeActivity : AppCompatActivity() {
                 withContext(Dispatchers.Main) {
                     if (response.isSuccessful) {
                         resetForm()
-                        Toast.makeText(this@HomeActivity, R.string.confirm_entry_success, Toast.LENGTH_SHORT).show()
+                        if (selectedMembership != null) {
+                            Toast.makeText(this@HomeActivity, getString(R.string.confirm_entry_membership_success, selectedMembership!!.memberName), Toast.LENGTH_SHORT).show()
+                        } else {
+                            Toast.makeText(this@HomeActivity, R.string.confirm_entry_success, Toast.LENGTH_SHORT).show()
+                        }
                     } else {
-                        Toast.makeText(this@HomeActivity, getString(R.string.confirm_entry_error, "${response.code()}: ${response.message()}"), Toast.LENGTH_LONG).show()
+                        val errorMsg = parseEntryError(response)
+                        Toast.makeText(this@HomeActivity, getString(R.string.confirm_entry_error, errorMsg), Toast.LENGTH_LONG).show()
                     }
                 }
             } catch (e: Exception) {
@@ -519,6 +591,23 @@ class HomeActivity : AppCompatActivity() {
         binding.btnDeleteLeft.visibility = View.GONE
         binding.btnRetakeRight.visibility = View.GONE
         binding.btnDeleteRight.visibility = View.GONE
+
+        clearSelectedMember()
+    }
+
+    private fun parseEntryError(response: retrofit2.Response<*>): String {
+        return try {
+            val errorBody = response.errorBody()?.string()
+            val json = com.google.gson.Gson().fromJson(errorBody, Map::class.java)
+            json["message"]?.toString() ?: "Error del servidor (${response.code()})"
+        } catch (_: Exception) {
+            when (response.code()) {
+                400 -> "Datos inválidos"
+                404 -> "No encontrado"
+                409 -> "Conflicto"
+                else -> "Error del servidor (${response.code()})"
+            }
+        }
     }
 
     private fun Uri.toMultipartPart(fieldName: String): MultipartBody.Part? {

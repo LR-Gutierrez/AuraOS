@@ -62,10 +62,11 @@
     <string name="action_retake">Volver a tomar foto</string>
     <string name="action_delete">Eliminar foto</string>
 
-    <string name="action_confirm_entry">✓ Confirmar Ingreso</string>
+    <string name="action_confirm_entry">Confirmar Ingreso</string>
     <string name="action_sending">Enviando…</string>
-    <string name="confirm_entry_success">✅ Ingreso registrado correctamente</string>
-    <string name="confirm_entry_error">❌ Error al registrar ingreso: %1$s</string>
+    <string name="confirm_entry_success">Ingreso registrado correctamente</string>
+    <string name="confirm_entry_membership_success">%1$s — Ingreso registrado mediante membresia</string>
+    <string name="confirm_entry_error">Error al registrar ingreso: %1$s</string>
     <string name="camera_permission_required">Se requiere permiso de cámara</string>
     <string name="plate_capture_hint">Toca para capturar placa</string>
     <string name="required_field_error">Campo obligatorio</string>
@@ -308,4 +309,13 @@
     <string name="membership_tier_basic">Básico</string>
     <string name="analytics_trend_up">+%1$d%%</string>
     <string name="analytics_trend_down">%1$d%%</string>
+
+    <!-- Selector de membresia -->
+    <string name="membership_section_label">MEMBRESIA</string>
+    <string name="membership_select_member">Seleccionar Socio</string>
+    <string name="membership_entry_free">Membresia activa – Ingreso gratuito</string>
+    <string name="membership_clear">Quitar Socio</string>
+    <string name="membership_dialog_title">Seleccionar Socio</string>
+    <string name="membership_dialog_empty">No hay socios activos en esta sucursal</string>
+    <string name="membership_tier_format">%1$s</string>
 </resources>

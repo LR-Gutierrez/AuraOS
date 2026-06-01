@@ -62,10 +62,11 @@
     <string name="action_retake">Retake photo</string>
     <string name="action_delete">Delete photo</string>
 
-    <string name="action_confirm_entry">✓ Confirm Entry</string>
+    <string name="action_confirm_entry">Confirm Entry</string>
     <string name="action_sending">Sending…</string>
-    <string name="confirm_entry_success">✅ Entry registered successfully</string>
-    <string name="confirm_entry_error">❌ Error registering entry: %1$s</string>
+    <string name="confirm_entry_success">Entry registered successfully</string>
+    <string name="confirm_entry_membership_success">%1$s — Entry registered via membership</string>
+    <string name="confirm_entry_error">Error registering entry: %1$s</string>
     <string name="camera_permission_required">Camera permission is required</string>
     <string name="plate_capture_hint">Tap to capture plate</string>
     <string name="required_field_error">Required field</string>
@@ -320,4 +321,13 @@
     <string name="membership_tier_basic">Basic</string>
     <string name="analytics_trend_up">+%1$d%%</string>
     <string name="analytics_trend_down">%1$d%%</string>
+
+    <!-- Membership entry selector -->
+    <string name="membership_section_label">MEMBERSHIP</string>
+    <string name="membership_select_member">Select Member</string>
+    <string name="membership_entry_free">Active membership – Free entry</string>
+    <string name="membership_clear">Remove member</string>
+    <string name="membership_dialog_title">Select Member</string>
+    <string name="membership_dialog_empty">No active members in this branch</string>
+    <string name="membership_tier_format">%1$s</string>
 </resources>

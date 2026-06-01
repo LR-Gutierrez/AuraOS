@@ -5,6 +5,7 @@ data class VehicleEntry(
     val plate: String,
     val vehicleType: String,
     val isVip: Boolean,
+    val membershipId: String? = null,
     val branchId: String,
     val platePhotoUrl: String?,
     val frontPhotoUrl: String?,
