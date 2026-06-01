@@ -24,6 +24,11 @@ interface MembershipApi {
         @Path("id") id: String
     ): Response<Membership>
 
+    @GET("api/v1/memberships/by-card/{cardUuid}")
+    suspend fun getMembershipByCardUuid(
+        @Path("cardUuid") cardUuid: String
+    ): Response<Membership>
+
     @POST("api/v1/memberships")
     suspend fun createMembership(
         @Body body: CreateMembershipInput
@@ -37,4 +42,15 @@ interface MembershipApi {
 
     @DELETE("api/v1/memberships/{id}")
     suspend fun deleteMembership(@Path("id") id: String): Response<Unit>
+
+    @POST("api/v1/memberships/{id}/register-card")
+    suspend fun registerCard(
+        @Path("id") id: String,
+        @Body body: Map<String, String>
+    ): Response<Membership>
+
+    @POST("api/v1/memberships/{id}/unregister-card")
+    suspend fun unregisterCard(
+        @Path("id") id: String
+    ): Response<Membership>
 }

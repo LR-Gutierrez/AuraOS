@@ -8,19 +8,23 @@ data class Membership(
     val endDate: String,
     val isActive: Boolean,
     val branchId: String,
-    val branch: Branch?
+    val branch: Branch?,
+    val cardUuid: String? = null
 )
 
 data class CreateMembershipInput(
     val memberName: String,
     val tier: String,
+    val startDate: String,
     val endDate: String,
-    val branchId: String
+    val branchId: String,
+    val cardUuid: String? = null
 )
 
 data class UpdateMembershipInput(
     val memberName: String? = null,
     val tier: String? = null,
+    val startDate: String? = null,
     val endDate: String? = null,
-    val isActive: Boolean? = null
+    val cardUuid: String? = null
 )

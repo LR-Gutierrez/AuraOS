@@ -1,8 +1,11 @@
 package com.beta.auraos.ui.memberships
 
-import android.content.res.ColorStateList
+import android.app.PendingIntent
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.graphics.Typeface
+import android.nfc.NfcAdapter
+import android.nfc.Tag
 import android.os.Bundle
 import android.view.View
 import android.widget.LinearLayout
@@ -31,6 +34,10 @@ class MembershipListActivity : AppCompatActivity() {
     private lateinit var viewModel: MembershipViewModel
     private lateinit var sessionManager: SessionManager
 
+    private var nfcAdapter: NfcAdapter? = null
+    private var isNfcScanning = false
+    private var pendingMemberForCard: Membership? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -42,6 +49,8 @@ class MembershipListActivity : AppCompatActivity() {
 
         binding = ActivityMembershipListBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        nfcAdapter = NfcAdapter.getDefaultAdapter(this)
 
         setupWindowInsets()
 
@@ -72,6 +81,37 @@ class MembershipListActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         loadMemberships()
+        if (isNfcScanning) {
+            enableNfcForegroundDispatch()
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        if (isNfcScanning) {
+            disableNfcForegroundDispatch()
+        }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        if (!isNfcScanning) return
+        if (NfcAdapter.ACTION_TECH_DISCOVERED == intent.action ||
+            NfcAdapter.ACTION_TAG_DISCOVERED == intent.action
+        ) {
+            val tag: Tag? = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG)
+            if (tag != null) {
+                val cardUuid = bytesToHex(tag.id)
+                val member = pendingMemberForCard
+                pendingMemberForCard = null
+                stopNfcScan()
+                if (member != null) {
+                    val branchId = sessionManager.getSelectedBranchId()
+                    viewModel.registerCard(member.id, cardUuid, branchId)
+                    Toast.makeText(this, R.string.membership_card_register_success, Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
     }
 
     private fun loadMemberships() {
@@ -99,10 +139,25 @@ class MembershipListActivity : AppCompatActivity() {
             }
 
             card.setOnClickListener {
+                val cardInfo = if (m.cardUuid != null) {
+                    "${getString(R.string.membership_card_uuid)}: ${m.cardUuid}"
+                } else {
+                    getString(R.string.membership_card_not_assigned)
+                }
                 AlertDialog.Builder(this)
                     .setTitle(m.memberName)
-                    .setMessage("${getString(R.string.membership_hint_tier)}: ${m.tier}\n${getString(R.string.membership_hint_end_date)}: ${formatDate(m.endDate)}\n${getString(R.string.membership_status_active)}: ${if (m.isActive) getString(R.string.membership_status_active) else getString(R.string.membership_status_inactive)}")
+                    .setMessage("${getString(R.string.membership_hint_tier)}: ${m.tier}\n${getString(R.string.membership_hint_end_date)}: ${formatDate(m.endDate)}\n${getString(R.string.membership_status_active)}: ${if (m.isActive) getString(R.string.membership_status_active) else getString(R.string.membership_status_inactive)}\n$cardInfo")
                     .setPositiveButton(getString(R.string.dialog_ok), null)
+                    .setNeutralButton(
+                        if (m.cardUuid != null) getString(R.string.membership_unregister_card)
+                        else getString(R.string.membership_register_card)
+                    ) { _, _ ->
+                        if (m.cardUuid != null) {
+                            confirmUnregisterCard(m)
+                        } else {
+                            startNfcCardRegistration(m)
+                        }
+                    }
                     .setNegativeButton(getString(R.string.membership_delete_title)) { _, _ ->
                         confirmDelete(m)
                     }
@@ -184,6 +239,86 @@ class MembershipListActivity : AppCompatActivity() {
             }
             .setNegativeButton(getString(R.string.action_cancel), null)
             .show()
+    }
+
+    private fun startNfcCardRegistration(m: Membership) {
+        if (nfcAdapter == null) {
+            Toast.makeText(this, R.string.nfc_not_available, Toast.LENGTH_SHORT).show()
+            return
+        }
+        if (!nfcAdapter!!.isEnabled) {
+            Toast.makeText(this, R.string.nfc_not_available, Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        pendingMemberForCard = m
+        isNfcScanning = true
+        enableNfcForegroundDispatch()
+
+        AlertDialog.Builder(this)
+            .setTitle(getString(R.string.membership_register_card_title))
+            .setMessage(getString(R.string.membership_register_card_nfc_hint))
+            .setNegativeButton(getString(R.string.action_cancel)) { _, _ ->
+                pendingMemberForCard = null
+                stopNfcScan()
+            }
+            .setOnCancelListener {
+                pendingMemberForCard = null
+                stopNfcScan()
+            }
+            .show()
+    }
+
+    private fun confirmUnregisterCard(m: Membership) {
+        AlertDialog.Builder(this)
+            .setTitle(getString(R.string.membership_unregister_card))
+            .setMessage(getString(R.string.membership_unregister_card_confirm, m.memberName))
+            .setPositiveButton(getString(R.string.membership_unregister_card)) { _, _ ->
+                val branchId = sessionManager.getSelectedBranchId()
+                viewModel.unregisterCard(m.id, branchId)
+            }
+            .setNegativeButton(getString(R.string.action_cancel), null)
+            .show()
+    }
+
+    private fun enableNfcForegroundDispatch() {
+        val intent = Intent(this, javaClass).apply {
+            addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
+        }
+        val pendingIntent = PendingIntent.getActivity(
+            this, 0, intent,
+            PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
+        val techLists = arrayOf(
+            arrayOf("android.nfc.tech.NfcA"),
+            arrayOf("android.nfc.tech.NfcB"),
+            arrayOf("android.nfc.tech.NfcF"),
+            arrayOf("android.nfc.tech.NfcV"),
+            arrayOf("android.nfc.tech.IsoDep"),
+            arrayOf("android.nfc.tech.MifareClassic"),
+            arrayOf("android.nfc.tech.MifareUltralight"),
+            arrayOf("android.nfc.tech.Ndef")
+        )
+        nfcAdapter?.enableForegroundDispatch(this, pendingIntent, null, techLists)
+    }
+
+    private fun disableNfcForegroundDispatch() {
+        nfcAdapter?.disableForegroundDispatch(this)
+    }
+
+    private fun stopNfcScan() {
+        isNfcScanning = false
+        disableNfcForegroundDispatch()
+    }
+
+    private fun bytesToHex(bytes: ByteArray): String {
+        val hexChars = CharArray(bytes.size * 2)
+        for (i in bytes.indices) {
+            val v = bytes[i].toInt() and 0xFF
+            hexChars[i * 2] = "0123456789ABCDEF"[v ushr 4]
+            hexChars[i * 2 + 1] = "0123456789ABCDEF"[v and 0x0F]
+        }
+        return String(hexChars)
     }
 
     private fun setupWindowInsets() {

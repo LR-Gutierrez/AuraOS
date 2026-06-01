@@ -164,6 +164,20 @@
     <string name="membership_hint_name">Nombre del miembro *</string>
     <string name="membership_hint_tier">Nivel (Elite, Premium, Básico)</string>
     <string name="membership_hint_end_date">Fecha de vencimiento</string>
+    <string name="membership_hint_card_uuid">UUID de tarjeta NFC (opcional)</string>
+    <string name="membership_scan_nfc">Escanear NFC</string>
+    <string name="membership_scanning">Escaneando\u2026</string>
+    <string name="membership_card_scanned">Tarjeta NFC escaneada</string>
+    <string name="membership_register_card_nfc_hint">Acerca la tarjeta NFC al lector para registrarla</string>
+    <string name="membership_card_uuid">UUID de tarjeta</string>
+    <string name="membership_card_not_assigned">Sin tarjeta asignada</string>
+    <string name="membership_register_card">Registrar tarjeta NFC</string>
+    <string name="membership_unregister_card">Desvincular tarjeta NFC</string>
+    <string name="membership_register_card_title">Ingresa el UUID de la tarjeta</string>
+    <string name="membership_register_card_hint">UUID de tarjeta</string>
+    <string name="membership_card_register_success">Tarjeta registrada correctamente</string>
+    <string name="membership_card_unregister_success">Tarjeta desvinculada correctamente</string>
+    <string name="membership_unregister_card_confirm">¿Estás seguro de desvincular la tarjeta NFC de %1$s?</string>
     <string name="membership_create_success">Membresía creada correctamente</string>
     <string name="membership_update_success">Membresía actualizada correctamente</string>
     <string name="membership_delete_confirm">¿Eliminar membresía de %1$s?</string>
@@ -315,7 +329,37 @@
     <string name="membership_select_member">Seleccionar Socio</string>
     <string name="membership_entry_free">Membresia activa – Ingreso gratuito</string>
     <string name="membership_clear">Quitar Socio</string>
+
+    <!-- Kiosko -->
+    <string name="kiosk_title">Modo Kiosko</string>
+    <string name="kiosk_entry_title">Ingreso de Vehiculo</string>
+    <string name="kiosk_select_mode">Seleccionar modo de ingreso</string>
+    <string name="kiosk_ticket">Ticket Diario</string>
+    <string name="kiosk_ticket_desc">Registrar un ingreso unico con tarifa diaria</string>
+    <string name="kiosk_membership">Membresia</string>
+    <string name="kiosk_membership_desc">Acceder con un plan de membresia activo</string>
+    <string name="permission_camera_denied">Permiso de camara denegado</string>
+    <string name="error_camera_unavailable">Camara no disponible</string>
+    <string name="error_generic">Ocurrio un error</string>
+    <string name="error_network">Error de red</string>
+    <string name="entry_success_title">Ingreso Registrado</string>
+    <string name="entry_success_plate">Placa</string>
+    <string name="entry_success_ticket">Ticket</string>
+    <string name="member_label">Miembro</string>
+    <string name="dashboard_kiosk_title">Modo Kiosko</string>
+    <string name="dashboard_kiosk_subtitle">Kiosko de ingreso autoservicio</string>
     <string name="membership_dialog_title">Seleccionar Socio</string>
     <string name="membership_dialog_empty">No hay socios activos en esta sucursal</string>
     <string name="membership_tier_format">%1$s</string>
+
+    <!-- NFC Kiosk -->
+    <string name="kiosk_nfc_scan_title">Acerca tu tarjeta o teléfono</string>
+    <string name="kiosk_nfc_scan_subtitle">Coloca tu tarjeta NFC o teléfono cerca del lector para identificar tu membresía</string>
+    <string name="kiosk_nfc_processing">Procesando\u2026</string>
+    <string name="kiosk_nfc_success">Acceso concedido</string>
+    <string name="kiosk_nfc_error_card_not_found">Esta tarjeta no está registrada en ninguna membresía</string>
+    <string name="kiosk_nfc_error_inactive">Esta membresía no está activa</string>
+    <string name="kiosk_nfc_entry_success_format">Ingreso registrado para %1$s</string>
+    <string name="kiosk_nfc_error_api">No se pudo registrar el ingreso. Intenta de nuevo.</string>
+    <string name="nfc_not_available">NFC no está disponible en este dispositivo</string>
 </resources>

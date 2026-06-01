@@ -5,6 +5,7 @@ import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import okhttp3.ResponseBody
 import retrofit2.Response
+import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Multipart
 import retrofit2.http.PATCH
@@ -61,7 +62,14 @@ data class AnalyticsSummaryResponse(
     val inboundThresholdMinutes: Int
 )
 
+data class NfcEntryRequest(val cardUuid: String)
+
 interface ParkingApi {
+
+    @POST("api/v1/vehicle-entries/nfc-entry")
+    suspend fun registerNfcEntry(
+        @Body body: NfcEntryRequest
+    ): Response<ApiResponse<VehicleEntry>>
 
     @Multipart
     @POST("api/v1/vehicle-entries")

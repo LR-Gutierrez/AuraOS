@@ -144,6 +144,10 @@ class DashboardActivity : AppCompatActivity() {
             startActivity(android.content.Intent(this, com.beta.auraos.ui.exit.ExitActivity::class.java))
         }
 
+        binding.cardKiosk.setOnClickListener {
+            startActivity(android.content.Intent(this, KioskActivity::class.java))
+        }
+
         setupViewModel()
         observeDashboard()
     }

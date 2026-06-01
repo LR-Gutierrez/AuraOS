@@ -72,4 +72,30 @@ class MembershipViewModel(
             }
         }
     }
+
+    fun registerCard(id: String, cardUuid: String, branchId: String?) {
+        _listState.value = MembershipListUiState.Loading
+        viewModelScope.launch {
+            val result = repository.registerCard(id, cardUuid)
+            when (result) {
+                is Result.Success -> loadMemberships(branchId)
+                is Result.Error -> _listState.value = MembershipListUiState.Error(
+                    result.exception.message ?: "Error al registrar tarjeta"
+                )
+            }
+        }
+    }
+
+    fun unregisterCard(id: String, branchId: String?) {
+        _listState.value = MembershipListUiState.Loading
+        viewModelScope.launch {
+            val result = repository.unregisterCard(id)
+            when (result) {
+                is Result.Success -> loadMemberships(branchId)
+                is Result.Error -> _listState.value = MembershipListUiState.Error(
+                    result.exception.message ?: "Error al desvincular tarjeta"
+                )
+            }
+        }
+    }
 }

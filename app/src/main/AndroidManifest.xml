@@ -4,8 +4,10 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.NFC" />
 
     <uses-feature android:name="android.hardware.camera" android:required="false" />
+    <uses-feature android:name="android.hardware.nfc" android:required="false" />
 
     <application
         android:usesCleartextTraffic="true"
@@ -67,6 +69,18 @@
             android:name=".ui.memberships.MembershipFormActivity"
             android:exported="false"
             android:label="@string/membership_new_title"
+            android:theme="@style/Theme.AuraOS.NoActionBar" />
+
+        <activity
+            android:name=".KioskActivity"
+            android:exported="false"
+            android:label="@string/kiosk_title"
+            android:theme="@style/Theme.AuraOS.NoActionBar" />
+
+        <activity
+            android:name=".KioskEntryActivity"
+            android:exported="false"
+            android:label="@string/kiosk_entry_title"
             android:theme="@style/Theme.AuraOS.NoActionBar" />
 
         <activity

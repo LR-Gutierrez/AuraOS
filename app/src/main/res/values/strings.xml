@@ -164,6 +164,20 @@
     <string name="membership_hint_name">Member name *</string>
     <string name="membership_hint_tier">Tier (Elite, Premium, Basic)</string>
     <string name="membership_hint_end_date">Expiration date</string>
+    <string name="membership_hint_card_uuid">NFC card UUID (optional)</string>
+    <string name="membership_scan_nfc">Scan NFC</string>
+    <string name="membership_scanning">Scanning\u2026</string>
+    <string name="membership_card_scanned">NFC card scanned</string>
+    <string name="membership_register_card_nfc_hint">Tap the NFC card near the reader to register it</string>
+    <string name="membership_card_uuid">Card UUID</string>
+    <string name="membership_card_not_assigned">No card assigned</string>
+    <string name="membership_register_card">Register NFC card</string>
+    <string name="membership_unregister_card">Unregister NFC card</string>
+    <string name="membership_register_card_title">Enter card UUID</string>
+    <string name="membership_register_card_hint">Card UUID</string>
+    <string name="membership_card_register_success">Card registered successfully</string>
+    <string name="membership_card_unregister_success">Card unregistered successfully</string>
+    <string name="membership_unregister_card_confirm">Are you sure you want to unregister the NFC card for %1$s?</string>
     <string name="membership_create_success">Membership created successfully</string>
     <string name="membership_update_success">Membership updated successfully</string>
     <string name="membership_delete_confirm">Delete membership for %1$s?</string>
@@ -327,7 +341,38 @@
     <string name="membership_select_member">Select Member</string>
     <string name="membership_entry_free">Active membership – Free entry</string>
     <string name="membership_clear">Remove member</string>
+
+    <!-- Kiosk Mode -->
+    <string name="kiosk_title">Kiosk Mode</string>
+    <string name="kiosk_entry_title">Vehicle Entry</string>
+    <string name="kiosk_select_mode">Select entry mode</string>
+    <string name="kiosk_ticket">Daily Ticket</string>
+    <string name="kiosk_ticket_desc">Register a one-time vehicle entry with daily rate</string>
+    <string name="kiosk_membership">Membership</string>
+    <string name="kiosk_membership_desc">Access with an active membership plan</string>
+    <string name="permission_camera_denied">Camera permission denied</string>
+    <string name="error_camera_unavailable">Camera is not available</string>
+    <string name="error_generic">An error occurred</string>
+    <string name="error_network">Network error</string>
+    <string name="entry_success_title">Entry Registered</string>
+    <string name="entry_success_plate">Plate</string>
+    <string name="entry_success_ticket">Ticket</string>
+    <string name="member_label">Member</string>
+    <string name="dashboard_kiosk_title">Kiosk Mode</string>
+    <string name="dashboard_kiosk_subtitle">Self-service vehicle entry kiosk</string>
     <string name="membership_dialog_title">Select Member</string>
     <string name="membership_dialog_empty">No active members in this branch</string>
     <string name="membership_tier_format">%1$s</string>
+
+    <!-- NFC Kiosk -->
+    <string name="kiosk_nfc_scan_title">Tap your card or phone</string>
+    <string name="kiosk_nfc_scan_subtitle">Place your NFC card or phone near the reader to identify your membership</string>
+    <string name="kiosk_nfc_scanning">Scanning\u2026</string>
+    <string name="kiosk_nfc_processing">Processing\u2026</string>
+    <string name="kiosk_nfc_success">Access granted!</string>
+    <string name="kiosk_nfc_error_card_not_found">This card is not registered to any membership</string>
+    <string name="kiosk_nfc_error_inactive">This membership is not active</string>
+    <string name="kiosk_nfc_entry_success_format">Entry registered for %1$s</string>
+    <string name="kiosk_nfc_error_api">Could not register entry. Please try again.</string>
+    <string name="nfc_not_available">NFC is not available on this device</string>
 </resources>
