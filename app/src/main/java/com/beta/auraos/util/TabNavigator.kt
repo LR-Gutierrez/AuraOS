@@ -6,6 +6,7 @@ import com.beta.auraos.AnalyticsActivity
 import com.beta.auraos.DashboardActivity
 import com.beta.auraos.HomeActivity
 import com.beta.auraos.MapActivity
+import com.beta.auraos.ProfileActivity
 import com.beta.auraos.R
 
 object TabNavigator {
@@ -17,6 +18,7 @@ object TabNavigator {
         R.id.nav_register,
         R.id.nav_map,
         R.id.nav_analytics,
+        R.id.nav_profile,
     )
 
     private val TAB_CLASS = mapOf(
@@ -24,6 +26,7 @@ object TabNavigator {
         R.id.nav_register to HomeActivity::class.java,
         R.id.nav_map to MapActivity::class.java,
         R.id.nav_analytics to AnalyticsActivity::class.java,
+        R.id.nav_profile to ProfileActivity::class.java,
     )
 
     private fun positionOf(itemId: Int): Int = TAB_ORDER.indexOf(itemId)

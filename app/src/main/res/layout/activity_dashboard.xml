@@ -216,6 +216,9 @@
                 android:layout_height="100dp"
                 android:layout_marginTop="@dimen/spacing_medium"
                 android:layout_marginStart="6dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
                 app:cardCornerRadius="@dimen/card_corner_radius_large"
                 app:cardBackgroundColor="?attr/cardGlassFillColorCustom"
                 app:strokeWidth="@dimen/stroke_none"
@@ -228,31 +231,47 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent" />
 
-                <RelativeLayout
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:padding="@dimen/spacing_medium"
-                    android:paddingStart="16dp">
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:padding="@dimen/spacing_medium">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/lbl_memberships"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/dashboard_memberships_label"
+                            android:textColor="?attr/textSecondaryCustom"
+                            android:textSize="@dimen/text_size_caption" />
+
+                        <TextView
+                            android:id="@+id/tv_memberships_count"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/dashboard_memberships_count"
+                            android:textColor="?attr/textPrimaryCustom"
+                            android:textSize="20sp"
+                            android:textStyle="bold"
+                            android:layout_marginTop="@dimen/spacing_xsmall" />
+                    </LinearLayout>
 
                     <TextView
-                        android:id="@+id/lbl_memberships"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/dashboard_memberships_label"
+                        android:text="›"
                         android:textColor="?attr/textSecondaryCustom"
-                        android:textSize="@dimen/text_size_caption" />
+                        android:textSize="18sp"
+                        android:alpha="0.5" />
 
-                    <TextView
-                        android:id="@+id/tv_memberships_count"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_below="@id/lbl_memberships"
-                        android:text="@string/dashboard_memberships_count"
-                        android:textColor="?attr/textPrimaryCustom"
-                        android:textSize="20sp"
-                        android:textStyle="bold"
-                        android:layout_marginTop="@dimen/spacing_xsmall" />
-                </RelativeLayout>
+                </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
             <com.google.android.material.card.MaterialCardView
@@ -271,25 +290,24 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent">
 
-                <RelativeLayout
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"
-                    android:padding="@dimen/spacing_medium"
-                    android:paddingStart="16dp">
+                    android:padding="@dimen/spacing_medium">
 
                     <ImageView
                         android:id="@+id/icon_branches"
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
-                        android:layout_centerVertical="true"
-                        android:src="@android:drawable/ic_menu_myplaces"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                    android:src="@drawable/parking_sign_24px"
                         app:tint="?attr/textPrimaryCustom" />
 
                     <LinearLayout
-                        android:layout_width="match_parent"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="56dp"
+                        android:layout_weight="1"
+                        android:layout_marginStart="@dimen/spacing_medium"
                         android:orientation="vertical">
 
                         <TextView
@@ -309,7 +327,16 @@
 
                     </LinearLayout>
 
-                </RelativeLayout>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/spacing_small"
+                        android:text="›"
+                        android:textColor="?attr/textSecondaryCustom"
+                        android:textSize="22sp"
+                        android:alpha="0.6" />
+
+                </LinearLayout>
 
             </com.google.android.material.card.MaterialCardView>
 
@@ -329,25 +356,24 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent">
 
-                <RelativeLayout
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"
-                    android:padding="@dimen/spacing_medium"
-                    android:paddingStart="16dp">
+                    android:padding="@dimen/spacing_medium">
 
                     <ImageView
                         android:id="@+id/icon_exit"
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
-                        android:layout_centerVertical="true"
-                        android:src="@android:drawable/ic_menu_revert"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:src="@drawable/door_sensor_24px"
                         app:tint="?attr/textPrimaryCustom" />
 
                     <LinearLayout
-                        android:layout_width="match_parent"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="56dp"
+                        android:layout_weight="1"
+                        android:layout_marginStart="@dimen/spacing_medium"
                         android:orientation="vertical">
 
                         <TextView
@@ -367,7 +393,16 @@
 
                     </LinearLayout>
 
-                </RelativeLayout>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/spacing_small"
+                        android:text="›"
+                        android:textColor="?attr/textSecondaryCustom"
+                        android:textSize="22sp"
+                        android:alpha="0.6" />
+
+                </LinearLayout>
 
             </com.google.android.material.card.MaterialCardView>
 

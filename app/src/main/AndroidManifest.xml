@@ -71,7 +71,6 @@
             android:label="@string/membership_new_title"
             android:theme="@style/Theme.AuraOS.NoActionBar" />
 
-        <activity
             android:name=".KioskActivity"
             android:exported="false"
             android:label="@string/kiosk_title"
@@ -83,6 +82,11 @@
             android:label="@string/kiosk_entry_title"
             android:theme="@style/Theme.AuraOS.NoActionBar" />
 
+        <activity
+            android:name=".ProfileActivity"
+            android:exported="false"
+            android:label="@string/title_activity_profile"
+            android:theme="@style/Theme.AuraOS.NoActionBar" />
         <activity
             android:name=".ui.login.LoginActivity"
             android:exported="true"

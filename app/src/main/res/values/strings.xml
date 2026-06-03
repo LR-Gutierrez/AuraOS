@@ -321,6 +321,10 @@
     <string name="history_filter_all_label">All</string>
     <string name="history_filter_range_label">Range</string>
     <string name="history_duration_placeholder">--</string>
+    <string name="profile_title">My Profile</string>
+    <string name="profile_placeholder">Profile content coming soon</string>
+    <string name="title_activity_profile">Profile</string>
+
     <string name="history_occupancy_format">%1$s%%</string>
     <string name="history_duration_zero">0m</string>
     <string name="history_duration_format_hours">%1$sh %2$sm</string>
