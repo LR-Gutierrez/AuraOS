@@ -22,6 +22,7 @@ import coil.load
 import coil.transform.RoundedCornersTransformation
 import com.beta.auraos.R
 import com.beta.auraos.data.BranchRepository
+import com.beta.auraos.data.MembershipRepository
 import com.beta.auraos.data.VehicleEntryRepository
 import com.beta.auraos.data.local.SessionManager
 import com.beta.auraos.data.model.Branch
@@ -47,6 +48,7 @@ class ExitActivity : AppCompatActivity() {
 
     private var allEntries: List<VehicleEntry> = emptyList()
     private var currentBranch: Branch? = null
+    private var membershipNameMap: Map<String, String> = emptyMap()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,7 +58,8 @@ class ExitActivity : AppCompatActivity() {
         val vehicleRepo = VehicleEntryRepository()
         val branchApi = ApiClient.createApi<BranchApi>()
         val branchRepo = BranchRepository(branchApi)
-        val factory = ExitViewModelFactory(vehicleRepo, branchRepo)
+        val membershipRepo = MembershipRepository()
+        val factory = ExitViewModelFactory(vehicleRepo, branchRepo, membershipRepo)
         viewModel = ViewModelProvider(this, factory)[ExitViewModel::class.java]
 
         binding = ActivityExitBinding.inflate(layoutInflater)
@@ -74,8 +77,9 @@ class ExitActivity : AppCompatActivity() {
                 val filtered = if (query.isEmpty()) {
                     allEntries
                 } else {
-                    allEntries.filter {
-                        it.plate.lowercase().contains(query)
+                    allEntries.filter { entry ->
+                        entry.plate.lowercase().contains(query) ||
+                        resolvePlateDisplayName(entry).lowercase().contains(query)
                     }
                 }
                 renderEntries(filtered, null)
@@ -90,6 +94,7 @@ class ExitActivity : AppCompatActivity() {
                 is ExitUiState.Success -> {
                     binding.loadingOverlay.visibility = View.GONE
                     allEntries = state.entries
+                    membershipNameMap = state.membershipNameMap
                     renderEntries(state.entries, state.exitingId)
                 }
                 is ExitUiState.Error -> {
@@ -140,7 +145,7 @@ class ExitActivity : AppCompatActivity() {
                 card.layoutParams = params
             }
 
-            itemBinding.tvPlate.text = entry.plate
+            itemBinding.tvPlate.text = resolvePlateDisplayName(entry)
 
             val typeLabel = entry.vehicleType.replaceFirstChar { it.uppercase() }
             val timeLabel = formatDateTime(entry.createdAt)
@@ -250,7 +255,7 @@ class ExitActivity : AppCompatActivity() {
         val secondaryText = MaterialColors.getColor(binding.root, R.attr.textSecondaryCustom)
 
         val msgText = TextView(this).apply {
-            text = getString(R.string.exit_confirm_message, entry.plate)
+            text = getString(R.string.exit_confirm_message, resolvePlateDisplayName(entry))
             setTextColor(primaryText)
             textSize = 14f
             setPadding(0, 0, 0, (12 * density).toInt())
@@ -302,6 +307,13 @@ class ExitActivity : AppCompatActivity() {
             }
             .setNegativeButton(getString(R.string.action_cancel), null)
             .show()
+    }
+
+    private fun resolvePlateDisplayName(entry: VehicleEntry): String {
+        if (entry.plate == "NFC" && entry.membershipId != null) {
+            membershipNameMap[entry.membershipId]?.let { return it }
+        }
+        return entry.plate
     }
 
     private fun setupWindowInsets() {

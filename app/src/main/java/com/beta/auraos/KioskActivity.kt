@@ -259,7 +259,6 @@ class KioskActivity : AppCompatActivity() {
             return
         }
 
-        disableNfcForegroundDispatch()
         showProcessingState(null)
 
         lifecycleScope.launch(Dispatchers.IO) {
@@ -276,7 +275,6 @@ class KioskActivity : AppCompatActivity() {
                             binding.tvNfcStatusSubtitle.visibility = View.GONE
                             binding.tvNfcMemberInfo.text = membership.memberName
                             binding.tvNfcMemberInfo.visibility = View.VISIBLE
-                            enableNfcForegroundDispatch()
                             return@withContext
                         }
                         registerMembershipEntry(membership, cardUuid)
@@ -287,7 +285,6 @@ class KioskActivity : AppCompatActivity() {
                         binding.tvNfcStatusTitle.text = getString(R.string.kiosk_nfc_error_card_not_found)
                         binding.tvNfcStatusSubtitle.visibility = View.GONE
                         binding.tvNfcMemberInfo.visibility = View.GONE
-                        enableNfcForegroundDispatch()
                     }
                 }
             }
@@ -312,7 +309,6 @@ class KioskActivity : AppCompatActivity() {
                         binding.tvNfcStatusSubtitle.visibility = View.GONE
                         binding.tvNfcMemberInfo.text = membership.memberName
                         binding.tvNfcMemberInfo.visibility = View.VISIBLE
-                        enableNfcForegroundDispatch()
                     }
                 }
             } catch (e: Exception) {
@@ -325,7 +321,6 @@ class KioskActivity : AppCompatActivity() {
                     binding.tvNfcStatusSubtitle.visibility = View.VISIBLE
                     binding.tvNfcMemberInfo.text = membership.memberName
                     binding.tvNfcMemberInfo.visibility = View.VISIBLE
-                    enableNfcForegroundDispatch()
                 }
             }
         }

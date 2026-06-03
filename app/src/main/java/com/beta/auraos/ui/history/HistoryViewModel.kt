@@ -5,11 +5,14 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.beta.auraos.data.HistoryResult
+import com.beta.auraos.data.MembershipRepository
 import com.beta.auraos.data.Result
 import com.beta.auraos.data.VehicleEntryRepository
 import com.beta.auraos.data.model.VehicleEntry
 import com.beta.auraos.data.remote.AnalyticsSummaryResponse
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -58,6 +61,7 @@ sealed class HistoryUiState {
     data class Success(
         val entries: List<HistoryEntry>,
         val summary: FilterSummary,
+        val membershipNameMap: Map<String, String> = emptyMap(),
         val filter: HistoryFilter = HistoryFilter.TODAY,
         val filterFrom: String? = null,
         val filterTo: String? = null,
@@ -72,7 +76,8 @@ sealed class HistoryUiState {
 }
 
 class HistoryViewModel(
-    private val repository: VehicleEntryRepository
+    private val repository: VehicleEntryRepository,
+    private val membershipRepository: MembershipRepository
 ) : ViewModel() {
 
     private val _uiState = MutableLiveData<HistoryUiState>(HistoryUiState.Loading)
@@ -88,6 +93,7 @@ class HistoryViewModel(
     private var exitedEntries: List<VehicleEntry> = emptyList()
     private var activeEntries: List<VehicleEntry> = emptyList()
     private var analyticsSummary: AnalyticsSummaryResponse? = null
+    private var membershipNameMap: Map<String, String> = emptyMap()
 
     private val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.US).apply {
         timeZone = TimeZone.getTimeZone("UTC")
@@ -104,10 +110,18 @@ class HistoryViewModel(
             val historyDeferred = repository.getHistoryEntries(branchId)
             val activeDeferred = repository.getActiveEntries(branchId)
             val analyticsDeferred = repository.getAnalyticsSummary(branchId)
+            val membershipsDeferred = withContext(Dispatchers.IO) {
+                membershipRepository.getMemberships(branchId = branchId)
+            }
 
             analyticsSummary = if (analyticsDeferred is Result.Success) {
                 analyticsDeferred.data
             } else null
+
+            membershipNameMap = when (membershipsDeferred) {
+                is Result.Success -> membershipsDeferred.data.associate { it.id to it.memberName }
+                is Result.Error -> emptyMap()
+            }
 
             val state = when {
                 historyDeferred is Result.Success -> {
@@ -254,6 +268,7 @@ class HistoryViewModel(
         return HistoryUiState.Success(
             entries = merged.take(shownCount),
             summary = summary,
+            membershipNameMap = membershipNameMap,
             filter = currentFilter,
             filterFrom = filterFrom,
             filterTo = filterTo,
@@ -335,7 +350,10 @@ class HistoryViewModel(
 
     private fun matchesSearch(entry: VehicleEntry): Boolean {
         if (searchQuery.isBlank()) return true
-        return entry.plate.contains(searchQuery, ignoreCase = true)
+        val displayName = if (entry.plate == "NFC" && !entry.membershipId.isNullOrBlank()) {
+            membershipNameMap[entry.membershipId] ?: entry.plate
+        } else entry.plate
+        return displayName.contains(searchQuery, ignoreCase = true) || entry.plate.contains(searchQuery, ignoreCase = true)
     }
 
     private fun comparator(): Comparator<HistoryEntry> {

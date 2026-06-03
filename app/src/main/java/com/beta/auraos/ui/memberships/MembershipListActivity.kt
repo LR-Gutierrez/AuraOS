@@ -104,7 +104,7 @@ class MembershipListActivity : AppCompatActivity() {
                 val cardUuid = bytesToHex(tag.id)
                 val member = pendingMemberForCard
                 pendingMemberForCard = null
-                stopNfcScan()
+                isNfcScanning = false
                 if (member != null) {
                     val branchId = sessionManager.getSelectedBranchId()
                     viewModel.registerCard(member.id, cardUuid, branchId)
@@ -308,7 +308,11 @@ class MembershipListActivity : AppCompatActivity() {
 
     private fun stopNfcScan() {
         isNfcScanning = false
-        disableNfcForegroundDispatch()
+        try {
+            disableNfcForegroundDispatch()
+        } catch (_: IllegalStateException) {
+            // Activity not resumed; dispatch will be disabled in onPause
+        }
     }
 
     private fun bytesToHex(bytes: ByteArray): String {

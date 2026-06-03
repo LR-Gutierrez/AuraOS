@@ -21,5 +21,6 @@ data class ExpiringMembership(
 
 data class VipArrival(
     val guestName: String,
-    val slot: String
+    val slot: String,
+    val membershipId: String? = null
 )

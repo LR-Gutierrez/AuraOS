@@ -12,6 +12,8 @@ import androidx.core.view.updatePadding
 import androidx.lifecycle.ViewModelProvider
 import com.beta.auraos.data.BranchRepository
 import com.beta.auraos.data.DashboardRepository
+import com.beta.auraos.data.MembershipRepository
+import com.beta.auraos.data.VehicleEntryRepository
 import com.beta.auraos.data.local.SessionManager
 import com.beta.auraos.data.model.Branch
 import com.beta.auraos.data.model.DashboardResponse
@@ -241,7 +243,9 @@ class DashboardActivity : AppCompatActivity() {
     private fun setupViewModel() {
         val token = sessionManager.getToken() ?: return
         val repository = DashboardRepository(token)
-        val factory = DashboardViewModelFactory(repository)
+        val membershipRepo = MembershipRepository()
+        val vehicleEntryRepo = VehicleEntryRepository()
+        val factory = DashboardViewModelFactory(repository, membershipRepo, vehicleEntryRepo)
         viewModel = ViewModelProvider(this, factory)[DashboardViewModel::class.java]
     }
 

@@ -22,6 +22,7 @@ import androidx.lifecycle.lifecycleScope
 import coil.load
 import coil.transform.RoundedCornersTransformation
 import com.beta.auraos.data.BranchRepository
+import com.beta.auraos.data.MembershipRepository
 import com.beta.auraos.data.Result
 import com.beta.auraos.data.VehicleEntryRepository
 import com.beta.auraos.data.local.SessionManager
@@ -61,6 +62,7 @@ class AnalyticsActivity : AppCompatActivity() {
 
     private var branches: List<Branch> = emptyList()
     private var selectedBranch: Branch? = null
+    private var membershipNameMap: Map<String, String> = emptyMap()
 
     private val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.US)
 
@@ -73,7 +75,8 @@ class AnalyticsActivity : AppCompatActivity() {
         branchRepository = BranchRepository(api)
 
         val repository = VehicleEntryRepository()
-        val factory = HistoryViewModelFactory(repository)
+        val membershipRepository = MembershipRepository()
+        val factory = HistoryViewModelFactory(repository, membershipRepository)
         viewModel = ViewModelProvider(this, factory)[HistoryViewModel::class.java]
 
         binding = ActivityAnalyticsBinding.inflate(layoutInflater)
@@ -364,6 +367,7 @@ class AnalyticsActivity : AppCompatActivity() {
     }
 
     private fun bindData(state: HistoryUiState.Success) {
+        membershipNameMap = state.membershipNameMap
         binding.tvTodayCount.text = state.summary.outboundCount.toString()
         binding.tvTodayRevenue.text = getString(R.string.history_revenue_amount, state.summary.revenue)
         binding.tvAvgDuration.text = state.summary.avgDurationLabel
@@ -419,6 +423,12 @@ class AnalyticsActivity : AppCompatActivity() {
         }
     }
 
+    private fun resolvePlateDisplayName(e: com.beta.auraos.data.model.VehicleEntry): String {
+        return if (e.plate == "NFC" && !e.membershipId.isNullOrBlank()) {
+            membershipNameMap[e.membershipId] ?: e.plate
+        } else e.plate
+    }
+
     private fun createHistoryCard(entry: HistoryEntry): View {
         val density = resources.displayMetrics.density
         val padding = (16 * density).toInt()
@@ -444,6 +454,8 @@ class AnalyticsActivity : AppCompatActivity() {
             )
         }
 
+        val displayName = resolvePlateDisplayName(e)
+
         val card = MaterialCardView(this).apply {
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
@@ -468,7 +480,7 @@ class AnalyticsActivity : AppCompatActivity() {
                     )
                     ContextCompat.getDrawable(this@AnalyticsActivity, tv.resourceId)
                 }()
-                setOnClickListener { showPhotoDialog(e.plate, photoFields) }
+                setOnClickListener { showPhotoDialog(displayName, photoFields) }
             }
         }
 
@@ -523,7 +535,7 @@ class AnalyticsActivity : AppCompatActivity() {
         val vipStr = if (e.isVip) " \u2605 VIP" else ""
 
         val plateText = TextView(this).apply {
-            text = "${e.plate}  $vipStr"
+            text = "$displayName  $vipStr"
             setTextColor(MaterialColors.getColor(binding.root, R.attr.textPrimaryCustom))
             textSize = 16f
             typeface = Typeface.MONOSPACE

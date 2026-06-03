@@ -5,12 +5,11 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.beta.auraos.data.BranchRepository
+import com.beta.auraos.data.MembershipRepository
 import com.beta.auraos.data.Result
 import com.beta.auraos.data.VehicleEntryRepository
 import com.beta.auraos.data.model.Branch
 import com.beta.auraos.data.model.VehicleEntry
-import com.beta.auraos.data.remote.ApiClient
-import com.beta.auraos.data.remote.BranchApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -19,6 +18,7 @@ sealed class ExitUiState {
     data object Loading : ExitUiState()
     data class Success(
         val entries: List<VehicleEntry>,
+        val membershipNameMap: Map<String, String> = emptyMap(),
         val exitingId: String? = null
     ) : ExitUiState()
     data class Error(val message: String) : ExitUiState()
@@ -26,7 +26,8 @@ sealed class ExitUiState {
 
 class ExitViewModel(
     private val vehicleEntryRepository: VehicleEntryRepository,
-    private val branchRepository: BranchRepository
+    private val branchRepository: BranchRepository,
+    private val membershipRepository: MembershipRepository
 ) : ViewModel() {
 
     private val _uiState = MutableLiveData<ExitUiState>(ExitUiState.Loading)
@@ -38,11 +39,23 @@ class ExitViewModel(
     fun loadEntries(branchId: String) {
         _uiState.value = ExitUiState.Loading
         viewModelScope.launch {
-            val result = vehicleEntryRepository.getActiveEntries(branchId)
-            _uiState.value = when (result) {
-                is Result.Success -> ExitUiState.Success(result.data)
+            val entriesResult = vehicleEntryRepository.getActiveEntries(branchId)
+            val membershipsResult = withContext(Dispatchers.IO) {
+                membershipRepository.getMemberships(branchId = branchId)
+            }
+
+            val membershipNameMap = when (membershipsResult) {
+                is Result.Success -> membershipsResult.data.associate { it.id to it.memberName }
+                is Result.Error -> emptyMap()
+            }
+
+            _uiState.value = when (entriesResult) {
+                is Result.Success -> ExitUiState.Success(
+                    entries = entriesResult.data,
+                    membershipNameMap = membershipNameMap
+                )
                 is Result.Error -> ExitUiState.Error(
-                    result.exception.message ?: "Error al cargar ingresos"
+                    entriesResult.exception.message ?: "Error al cargar ingresos"
                 )
             }
         }

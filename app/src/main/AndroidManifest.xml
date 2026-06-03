@@ -71,6 +71,7 @@
             android:label="@string/membership_new_title"
             android:theme="@style/Theme.AuraOS.NoActionBar" />
 
+        <activity
             android:name=".KioskActivity"
             android:exported="false"
             android:label="@string/kiosk_title"
