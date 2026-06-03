@@ -10,6 +10,7 @@ object BottomNavIndicator {
         com.beta.auraos.R.id.nav_register,
         com.beta.auraos.R.id.nav_map,
         com.beta.auraos.R.id.nav_analytics,
+        com.beta.auraos.R.id.nav_profile,
     )
 
     fun attach(

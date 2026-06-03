@@ -199,6 +199,15 @@ class AnalyticsActivity : AppCompatActivity() {
                     )
                     true
                 }
+                R.id.nav_profile -> {
+                    BottomNavIndicator.animateTo(
+                        bottomNav = binding.bottomNavigation,
+                        indicator = binding.bottomNavIndicator,
+                        itemId = R.id.nav_profile,
+                    )
+                    TabNavigator.navigate(this, R.id.nav_profile)
+                    true
+                }
                 else -> {
                     BottomNavIndicator.animateTo(
                         bottomNav = binding.bottomNavigation,
