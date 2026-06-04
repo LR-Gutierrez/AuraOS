@@ -8,7 +8,6 @@ object BottomNavIndicator {
     private val TAB_ORDER = listOf(
         com.beta.auraos.R.id.nav_dashboard,
         com.beta.auraos.R.id.nav_register,
-        com.beta.auraos.R.id.nav_map,
         com.beta.auraos.R.id.nav_analytics,
         com.beta.auraos.R.id.nav_profile,
     )

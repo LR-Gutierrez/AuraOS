@@ -6,13 +6,10 @@
     <string name="title_activity_login">Iniciar Sesión</string>
     <string name="title_activity_home">Registrar</string>
     <string name="title_activity_dashboard">Panel</string>
-    <string name="title_activity_map">Mapa</string>
     <string name="title_activity_analytics">Analíticas</string>
     <string name="dashboard_title">Panel</string>
-    <string name="map_title">Mapa</string>
     <string name="analytics_title">Analíticas</string>
     <string name="dashboard_placeholder">Contenido del panel próximamente</string>
-    <string name="map_placeholder">Contenido del mapa próximamente</string>
     <string name="analytics_placeholder">Contenido de analíticas próximamente</string>
     <string name="action_settings">Ajustes</string>
 

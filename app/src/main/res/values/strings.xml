@@ -6,13 +6,10 @@
     <string name="title_activity_login">Sign In</string>
     <string name="title_activity_home">Register</string>
     <string name="title_activity_dashboard">Dashboard</string>
-    <string name="title_activity_map">Map</string>
     <string name="title_activity_analytics">Analytics</string>
     <string name="dashboard_title">Dashboard</string>
-    <string name="map_title">Map</string>
     <string name="analytics_title">Analytics</string>
     <string name="dashboard_placeholder">Dashboard content coming soon</string>
-    <string name="map_placeholder">Map content coming soon</string>
     <string name="analytics_placeholder">Analytics content coming soon</string>
     <string name="action_settings">Settings</string>
 

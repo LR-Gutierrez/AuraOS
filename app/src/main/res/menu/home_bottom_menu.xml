@@ -9,10 +9,6 @@
         android:icon="@drawable/ic_nav_scan_selector"
         android:title="" />
     <item
-        android:id="@+id/nav_map"
-        android:icon="@drawable/ic_nav_map_selector"
-        android:title="" />
-    <item
         android:id="@+id/nav_analytics"
         android:icon="@drawable/ic_nav_chart_selector"
         android:title="" />

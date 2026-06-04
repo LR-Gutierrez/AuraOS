@@ -5,7 +5,6 @@ import android.content.Intent
 import com.beta.auraos.AnalyticsActivity
 import com.beta.auraos.DashboardActivity
 import com.beta.auraos.HomeActivity
-import com.beta.auraos.MapActivity
 import com.beta.auraos.ProfileActivity
 import com.beta.auraos.R
 
@@ -16,7 +15,6 @@ object TabNavigator {
     private val TAB_ORDER = listOf(
         R.id.nav_dashboard,
         R.id.nav_register,
-        R.id.nav_map,
         R.id.nav_analytics,
         R.id.nav_profile,
     )
@@ -24,7 +22,6 @@ object TabNavigator {
     private val TAB_CLASS = mapOf(
         R.id.nav_dashboard to DashboardActivity::class.java,
         R.id.nav_register to HomeActivity::class.java,
-        R.id.nav_map to MapActivity::class.java,
         R.id.nav_analytics to AnalyticsActivity::class.java,
         R.id.nav_profile to ProfileActivity::class.java,
     )
