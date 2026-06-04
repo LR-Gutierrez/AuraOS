@@ -415,4 +415,38 @@
     <string name="kiosk_nfc_entry_success_format">Entry registered for %1$s</string>
     <string name="kiosk_nfc_error_api">Could not register entry. Please try again.</string>
     <string name="nfc_not_available">NFC is not available on this device</string>
+
+    <!-- Audit / Closure -->
+    <string name="audit_title">Audit</string>
+    <string name="title_activity_audit">Audit</string>
+    <string name="audit_period_label">CURRENT PERIOD</string>
+    <string name="audit_period_since">Since %1$s</string>
+    <string name="audit_period_first">First period — no prior closures</string>
+    <string name="audit_pending_entries">Pending</string>
+    <string name="audit_period_revenue">Period Revenue</string>
+    <string name="audit_revenue_format">$%.2f</string>
+    <string name="audit_execute_closure">Execute Cash Closure</string>
+    <string name="audit_closure_history">Closure History</string>
+    <string name="audit_no_closures">No closures recorded yet</string>
+    <string name="audit_closure_confirm_title">Confirm Closure</string>
+    <string name="audit_closure_confirm_message">Close the current period with %1$s pending records?</string>
+    <string name="audit_closure_confirm_action">Execute Closure</string>
+    <string name="audit_closure_detail">Closure Details</string>
+    <string name="audit_result_title">Closure Complete</string>
+    <string name="audit_result_date">Date: %1$s</string>
+    <string name="audit_result_entries">Entries: %1$d</string>
+    <string name="audit_result_exits">Exits: %1$d</string>
+    <string name="audit_result_vehicle_revenue">Vehicle revenue: $%.2f</string>
+    <string name="audit_result_membership_revenue">Membership revenue: $%.2f</string>
+    <string name="audit_result_total">Total: $%.2f</string>
+    <string name="audit_result_discrepancies">%1$d fee discrepancies found — review required</string>
+    <string name="audit_result_expiring">%1$d memberships expiring within 7 days</string>
+    <string name="audit_verified">Verified</string>
+    <string name="audit_pending_verify">Pending</string>
+    <string name="audit_exit_count">%1$d exits</string>
+    <string name="audit_error_no_branch">Select a branch first</string>
+    <string name="audit_branch_default">Current branch</string>
+    <string name="audit_dashboard_subtitle">Cash closure and revenue audit</string>
+    <string name="audit_share_action">Share</string>
+    <string name="audit_share_subject">Cash Closure Report</string>
 </resources>

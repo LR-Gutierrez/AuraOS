@@ -84,6 +84,11 @@
             android:label="@string/title_activity_profile"
             android:theme="@style/Theme.AuraOS.NoActionBar" />
         <activity
+            android:name=".ui.audit.AuditActivity"
+            android:exported="false"
+            android:label="@string/title_activity_audit"
+            android:theme="@style/Theme.AuraOS.NoActionBar" />
+        <activity
             android:name=".ui.login.LoginActivity"
             android:exported="true"
             android:screenOrientation="portrait"

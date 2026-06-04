@@ -24,6 +24,8 @@ import com.beta.auraos.R
 import com.beta.auraos.data.BranchRepository
 import com.beta.auraos.data.MembershipRepository
 import com.beta.auraos.data.VehicleEntryRepository
+import com.beta.auraos.data.audit.AuditEngine
+import com.beta.auraos.data.audit.FeeCalculator
 import com.beta.auraos.data.local.SessionManager
 import com.beta.auraos.data.model.Branch
 import com.beta.auraos.data.model.VehicleEntry
@@ -34,11 +36,6 @@ import com.beta.auraos.databinding.ItemExitVehicleBinding
 import com.beta.auraos.util.PhotoUrlBuilder
 import com.beta.auraos.util.formatDateTime
 import com.google.android.material.color.MaterialColors
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
-import java.util.TimeZone
-import kotlin.math.max
 
 class ExitActivity : AppCompatActivity() {
 
@@ -59,7 +56,8 @@ class ExitActivity : AppCompatActivity() {
         val branchApi = ApiClient.createApi<BranchApi>()
         val branchRepo = BranchRepository(branchApi)
         val membershipRepo = MembershipRepository()
-        val factory = ExitViewModelFactory(vehicleRepo, branchRepo, membershipRepo)
+        val auditEngine = AuditEngine(applicationContext)
+        val factory = ExitViewModelFactory(vehicleRepo, branchRepo, membershipRepo, auditEngine)
         viewModel = ViewModelProvider(this, factory)[ExitViewModel::class.java]
 
         binding = ActivityExitBinding.inflate(layoutInflater)
@@ -152,14 +150,14 @@ class ExitActivity : AppCompatActivity() {
             val vipLabel = if (entry.isVip) " \u2605 VIP" else ""
             itemBinding.tvEntryInfo.text = "$typeLabel  \u2022  $timeLabel$vipLabel"
 
-            val duration = entry.duration ?: computeDuration(entry.createdAt)
+            val duration = entry.duration ?: FeeCalculator.computeDuration(entry.createdAt)
             itemBinding.tvDurationValue.text = duration
 
             if (entry.id == exitingId) {
                 itemBinding.tvCurrentFeeValue.text = getString(R.string.exit_registering)
                 itemBinding.btnProcessCheckout.visibility = View.GONE
             } else {
-                val fee = entry.fee ?: computeFee(entry.createdAt, entry.vehicleType, currentBranch)
+                val fee = entry.fee ?: FeeCalculator.computeFee(entry.createdAt, entry.vehicleType, currentBranch)
                 itemBinding.tvCurrentFeeValue.text = if (fee != null) {
                     "$ ${String.format("%.2f", fee)}"
                 } else {
@@ -190,52 +188,6 @@ class ExitActivity : AppCompatActivity() {
             }
 
             binding.contentContainer.addView(card)
-        }
-    }
-
-    private fun computeDuration(createdAt: String): String {
-        return try {
-            val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US)
-            sdf.timeZone = TimeZone.getTimeZone("UTC")
-            val created = sdf.parse(createdAt.substringBefore(".").substringBefore("Z")) ?: return "--"
-            val diffMs = Date().time - created.time
-            val hours = diffMs / (1000 * 60 * 60)
-            val minutes = (diffMs % (1000 * 60 * 60)) / (1000 * 60)
-            "${hours}h ${minutes}m"
-        } catch (e: Exception) {
-            "--"
-        }
-    }
-
-    private fun computeFee(createdAt: String, vehicleType: String, branch: Branch?): Double? {
-        if (branch == null) return null
-        val days = elapsedDays(createdAt)
-        val nights = max(0, days - 1)
-        val rate = when (vehicleType) {
-            "motorcycle" -> branch.motorcycleRate
-            "light" -> branch.lightVehicleRate
-            "heavy" -> branch.heavyVehicleRate
-            else -> return null
-        }
-        val overnightRate = when (vehicleType) {
-            "motorcycle" -> branch.motorcycleOvernightRate
-            "light" -> branch.lightVehicleOvernightRate
-            "heavy" -> branch.heavyVehicleOvernightRate
-            else -> return null
-        }
-        return (days * rate) + (nights * overnightRate)
-    }
-
-    private fun elapsedDays(createdAt: String): Int {
-        return try {
-            val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US)
-            sdf.timeZone = TimeZone.getTimeZone("UTC")
-            val created = sdf.parse(createdAt.substringBefore(".").substringBefore("Z")) ?: return 1
-            val diffMs = Date().time - created.time
-            val days = diffMs / (1000 * 60 * 60 * 24)
-            max(1, days.toInt() + 1)
-        } catch (e: Exception) {
-            1
         }
     }
 

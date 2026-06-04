@@ -8,11 +8,16 @@ import com.beta.auraos.data.BranchRepository
 import com.beta.auraos.data.MembershipRepository
 import com.beta.auraos.data.Result
 import com.beta.auraos.data.VehicleEntryRepository
+import com.beta.auraos.data.audit.AuditEngine
 import com.beta.auraos.data.model.Branch
 import com.beta.auraos.data.model.VehicleEntry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import java.util.TimeZone
 
 sealed class ExitUiState {
     data object Loading : ExitUiState()
@@ -27,7 +32,8 @@ sealed class ExitUiState {
 class ExitViewModel(
     private val vehicleEntryRepository: VehicleEntryRepository,
     private val branchRepository: BranchRepository,
-    private val membershipRepository: MembershipRepository
+    private val membershipRepository: MembershipRepository,
+    private val auditEngine: AuditEngine?
 ) : ViewModel() {
 
     private val _uiState = MutableLiveData<ExitUiState>(ExitUiState.Loading)
@@ -83,7 +89,20 @@ class ExitViewModel(
             val result = vehicleEntryRepository.registerExit(entryId)
             when (result) {
                 is Result.Success -> {
-                    val entries = (_uiState.value as? ExitUiState.Success)?.entries?.filter {
+                    val exited = result.data
+                    val state = _uiState.value as? ExitUiState.Success
+                    if (auditEngine != null && state != null) {
+                        val entry = state.entries.find { it.id == entryId }
+                        if (entry != null) {
+                            auditEngine.recordVehicleExit(
+                                entry = entry,
+                                branch = _branch.value,
+                                feePaid = exited.fee,
+                                exitTime = nowUtcString()
+                            )
+                        }
+                    }
+                    val entries = state?.entries?.filter {
                         it.id != entryId
                     } ?: emptyList()
                     _uiState.value = ExitUiState.Success(entries)
@@ -99,5 +118,11 @@ class ExitViewModel(
                 }
             }
         }
+    }
+
+    private fun nowUtcString(): String {
+        val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US)
+        sdf.timeZone = TimeZone.getTimeZone("UTC")
+        return sdf.format(Date())
     }
 }

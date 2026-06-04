@@ -403,4 +403,38 @@
     <string name="kiosk_nfc_entry_success_format">Ingreso registrado para %1$s</string>
     <string name="kiosk_nfc_error_api">No se pudo registrar el ingreso. Intenta de nuevo.</string>
     <string name="nfc_not_available">NFC no está disponible en este dispositivo</string>
+
+    <!-- Auditoría / Cierre -->
+    <string name="audit_title">Auditoría</string>
+    <string name="title_activity_audit">Auditoría</string>
+    <string name="audit_period_label">PERIODO ACTUAL</string>
+    <string name="audit_period_since">Desde %1$s</string>
+    <string name="audit_period_first">Primer periodo — sin cierres previos</string>
+    <string name="audit_pending_entries">Pendientes</string>
+    <string name="audit_period_revenue">Ingresos del periodo</string>
+    <string name="audit_revenue_format">$%.2f</string>
+    <string name="audit_execute_closure">Ejecutar Cierre de Caja</string>
+    <string name="audit_closure_history">Historial de Cierres</string>
+    <string name="audit_no_closures">Aún no hay cierres registrados</string>
+    <string name="audit_closure_confirm_title">Confirmar Cierre</string>
+    <string name="audit_closure_confirm_message">¿Cerrar el periodo actual con %1$s registros pendientes?</string>
+    <string name="audit_closure_confirm_action">Ejecutar Cierre</string>
+    <string name="audit_closure_detail">Detalles del Cierre</string>
+    <string name="audit_result_title">Cierre Completado</string>
+    <string name="audit_result_date">Fecha: %1$s</string>
+    <string name="audit_result_entries">Ingresos: %1$d</string>
+    <string name="audit_result_exits">Salidas: %1$d</string>
+    <string name="audit_result_vehicle_revenue">Ingresos vehículos: $%.2f</string>
+    <string name="audit_result_membership_revenue">Ingresos membresías: $%.2f</string>
+    <string name="audit_result_total">Total: $%.2f</string>
+    <string name="audit_result_discrepancies">%1$d discrepancias de tarifa encontradas — revisión requerida</string>
+    <string name="audit_result_expiring">%1$d membresías por vencer en 7 días</string>
+    <string name="audit_verified">Verificado</string>
+    <string name="audit_pending_verify">Pendiente</string>
+    <string name="audit_exit_count">%1$d salidas</string>
+    <string name="audit_error_no_branch">Selecciona una sucursal primero</string>
+    <string name="audit_branch_default">Sucursal actual</string>
+    <string name="audit_dashboard_subtitle">Cierre de caja y auditoría de ingresos</string>
+    <string name="audit_share_action">Compartir</string>
+    <string name="audit_share_subject">Reporte de Cierre de Caja</string>
 </resources>
