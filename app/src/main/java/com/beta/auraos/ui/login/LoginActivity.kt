@@ -1,6 +1,7 @@
 package com.beta.auraos.ui.login
 
 import android.content.Intent
+import android.view.ViewGroup
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
@@ -20,9 +21,12 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import android.widget.EditText
 import android.widget.Toast
+import coil.load
+import coil.transform.CircleCropTransformation
 import com.beta.auraos.DashboardActivity
 import com.beta.auraos.R
 import com.beta.auraos.data.local.BiometricKeyManager
+import com.beta.auraos.util.PhotoUrlBuilder
 import com.beta.auraos.util.TabNavigator
 import com.beta.auraos.databinding.ActivityLoginBinding
 import java.security.Signature
@@ -241,6 +245,35 @@ class LoginActivity : AppCompatActivity() {
         binding.formCard?.visibility = View.VISIBLE
         binding.quickLoginContainer?.visibility = View.VISIBLE
         binding.fullLoginContainer?.visibility = View.GONE
+
+        loadAvatarForQuickLogin()
+    }
+
+    private fun loadAvatarForQuickLogin() {
+        val avatarUrl = loginViewModel.getAvatarUrl()
+        val displayName = loginViewModel.getStoredDisplayName()
+        val fullUrl = PhotoUrlBuilder.build(avatarUrl)
+        val initial = displayName?.firstOrNull()?.uppercase() ?: "?"
+
+        if (fullUrl != null) {
+            binding.avatarContainerLogin?.visibility = View.VISIBLE
+            binding.ivAvatarLogin?.visibility = View.VISIBLE
+            binding.tvAvatarLoginInitial?.visibility = View.GONE
+            binding.ivAvatarLogin?.load(fullUrl) {
+                crossfade(true)
+                transformations(CircleCropTransformation())
+                listener(onError = { _, _ ->
+                    binding.ivAvatarLogin?.visibility = View.GONE
+                    binding.tvAvatarLoginInitial?.visibility = View.VISIBLE
+                    binding.tvAvatarLoginInitial?.text = initial
+                })
+            }
+        } else {
+            binding.avatarContainerLogin?.visibility = if (displayName != null) View.VISIBLE else View.GONE
+            binding.ivAvatarLogin?.visibility = View.GONE
+            binding.tvAvatarLoginInitial?.visibility = View.VISIBLE
+            binding.tvAvatarLoginInitial?.text = initial
+        }
     }
 
     private fun switchToFullLogin() {

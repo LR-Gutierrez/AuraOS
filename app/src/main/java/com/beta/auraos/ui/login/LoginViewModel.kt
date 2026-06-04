@@ -54,11 +54,13 @@ class LoginViewModel(private val loginRepository: LoginRepository) : ViewModel()
                 loginRepository.saveUserId(result.data.userId)
                 loginRepository.saveLastEmail(result.data.email)
                 loginRepository.saveLastDisplayName(result.data.displayName)
+                result.data.avatarUrl?.let { loginRepository.saveAvatarUrl(it) }
                 _loginResult.value = LoginResult(
                     success = LoggedInUserView(
                         displayName = result.data.displayName,
                         email = result.data.email,
-                        userId = result.data.userId
+                        userId = result.data.userId,
+                        avatarUrl = result.data.avatarUrl
                     )
                 )
             } else {
@@ -84,11 +86,16 @@ class LoginViewModel(private val loginRepository: LoginRepository) : ViewModel()
             _isLoading.value = false
 
             if (result is Result.Success) {
+                loginRepository.saveUserId(result.data.userId)
+                loginRepository.saveLastEmail(result.data.email)
+                loginRepository.saveLastDisplayName(result.data.displayName)
+                result.data.avatarUrl?.let { loginRepository.saveAvatarUrl(it) }
                 _loginResult.value = LoginResult(
                     success = LoggedInUserView(
                         displayName = result.data.displayName,
                         email = result.data.email,
-                        userId = result.data.userId
+                        userId = result.data.userId,
+                        avatarUrl = result.data.avatarUrl
                     )
                 )
             } else {
@@ -112,6 +119,8 @@ class LoginViewModel(private val loginRepository: LoginRepository) : ViewModel()
     fun getStoredEmail(): String? = loginRepository.getLastEmail()
 
     fun getStoredDisplayName(): String? = loginRepository.getLastDisplayName()
+
+    fun getAvatarUrl(): String? = loginRepository.getAvatarUrl()
 
     fun loginDataChanged(username: String, password: String) {
         if (!isUserNameValid(username)) {

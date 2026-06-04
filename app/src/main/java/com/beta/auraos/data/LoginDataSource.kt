@@ -2,14 +2,20 @@ package com.beta.auraos.data
 
 import com.beta.auraos.data.local.BiometricKeyManager
 import com.beta.auraos.data.local.SessionManager
+import android.content.ContentResolver
+import android.net.Uri
 import com.beta.auraos.data.model.BiometricEnrollRequest
 import com.beta.auraos.data.model.BiometricLoginRequest
 import com.beta.auraos.data.model.LoggedInUser
 import com.beta.auraos.data.model.LoginResponse
 import com.beta.auraos.data.remote.AuthApi
 import com.beta.auraos.data.remote.ApiClient
+import com.beta.auraos.data.remote.AvatarUploadResponse
 import com.beta.auraos.data.remote.LoginRequest
 import com.google.gson.Gson
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.IOException
 
 /**
@@ -50,9 +56,13 @@ class LoginDataSource(
             val user = LoggedInUser(
                 userId = loginData.user.id,
                 displayName = loginData.user.name,
-                email = loginData.user.email
+                email = loginData.user.email,
+                avatarUrl = loginData.user.avatarUrl
             )
             sessionManager.saveToken(loginData.token)
+
+            loginData.user.avatarUrl?.let { sessionManager.saveAvatarUrl(it) }
+
             Result.Success(user)
         } catch (e: retrofit2.HttpException) {
             val msg = parseApiError(e)
@@ -98,10 +108,42 @@ class LoginDataSource(
             val user = LoggedInUser(
                 userId = loginData.user.id,
                 displayName = loginData.user.name,
-                email = loginData.user.email
+                email = loginData.user.email,
+                avatarUrl = loginData.user.avatarUrl
             )
             sessionManager.saveToken(loginData.token)
+
+            loginData.user.avatarUrl?.let { sessionManager.saveAvatarUrl(it) }
+
             Result.Success(user)
+        } catch (e: retrofit2.HttpException) {
+            val msg = parseApiError(e)
+            Result.Error(IOException(msg))
+        } catch (e: IOException) {
+            Result.Error(IOException("No se pudo conectar con el servidor"))
+        } catch (e: Exception) {
+            Result.Error(IOException("Error inesperado: ${e.localizedMessage}"))
+        }
+    }
+
+    suspend fun uploadAvatar(token: String, uri: Uri, contentResolver: ContentResolver): Result<String> {
+        return try {
+            val bytes = contentResolver.openInputStream(uri)?.use { it.readBytes() }
+                ?: return Result.Error(IOException("No se pudo leer la imagen"))
+
+            val requestBody = bytes.toRequestBody("image/jpeg".toMediaTypeOrNull())
+            val part = MultipartBody.Part.createFormData("avatar", "avatar.jpg", requestBody)
+
+            val response = api.uploadAvatar(
+                authHeader = "Bearer $token",
+                avatar = part
+            )
+
+            if (!response.success || response.data == null) {
+                Result.Error(IOException(response.message ?: "Error al subir avatar"))
+            } else {
+                Result.Success(response.data.avatarUrl)
+            }
         } catch (e: retrofit2.HttpException) {
             val msg = parseApiError(e)
             Result.Error(IOException(msg))

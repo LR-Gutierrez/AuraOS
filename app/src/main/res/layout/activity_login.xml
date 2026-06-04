@@ -91,6 +91,34 @@
             android:orientation="vertical"
             android:visibility="gone">
 
+            <FrameLayout
+                android:id="@+id/avatar_container_login"
+                android:layout_width="72dp"
+                android:layout_height="72dp"
+                android:layout_gravity="center"
+                android:layout_marginBottom="@dimen/spacing_medium"
+                android:background="@drawable/bg_avatar_circle"
+                android:visibility="gone">
+
+                <ImageView
+                    android:id="@+id/iv_avatar_login"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    android:contentDescription="@string/cd_user_profile" />
+
+                <TextView
+                    android:id="@+id/tv_avatar_login_initial"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:fontFamily="sans-serif-black"
+                    android:textColor="?attr/colorOnPrimaryContainer"
+                    android:textSize="28sp"
+                    android:textStyle="bold"
+                    tools:text="E" />
+            </FrameLayout>
+
             <TextView
                 android:id="@+id/tv_quick_greeting"
                 android:layout_width="match_parent"
@@ -318,7 +346,7 @@
                     android:background="?attr/glassCardBackgroundCustom"
                     android:contentDescription="@string/biometric_login_icon"
                     android:scaleType="centerInside"
-                    android:src="@drawable/baseline_fingerprint_24"
+                    android:src="@drawable/ic_fingerprint_24"
                     app:tint="?attr/textPrimaryCustom" />
 
                 <TextView

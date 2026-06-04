@@ -1,5 +1,7 @@
 package com.beta.auraos.data
 
+import android.content.ContentResolver
+import android.net.Uri
 import com.beta.auraos.data.local.SessionManager
 import com.beta.auraos.data.model.LoggedInUser
 
@@ -96,6 +98,16 @@ class LoginRepository(
     fun hasPreviousLogin(): Boolean {
         return sessionManager.hasPreviousLogin()
     }
+
+    suspend fun uploadAvatar(token: String, uri: Uri, contentResolver: ContentResolver): Result<String> {
+        return dataSource.uploadAvatar(token, uri, contentResolver)
+    }
+
+    fun saveAvatarUrl(url: String) {
+        sessionManager.saveAvatarUrl(url)
+    }
+
+    fun getAvatarUrl(): String? = sessionManager.getAvatarUrl()
 
     fun logout() {
         user = null

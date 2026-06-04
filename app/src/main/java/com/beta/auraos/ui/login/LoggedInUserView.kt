@@ -10,5 +10,6 @@ package com.beta.auraos.ui.login
 data class LoggedInUserView(
     val displayName: String,
     val email: String,
-    val userId: String
+    val userId: String,
+    val avatarUrl: String? = null
 )

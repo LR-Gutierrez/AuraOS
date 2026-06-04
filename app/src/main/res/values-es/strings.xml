@@ -304,6 +304,50 @@
     <!-- Toast Bienvenida -->
     <string name="welcome_toast">Bienvenido %1$s</string>
 
+    <!-- Perfil -->
+    <string name="profile_title">Mi Perfil</string>
+    <string name="title_activity_profile">Perfil</string>
+    <string name="profile_section_security">SEGURIDAD</string>
+    <string name="profile_section_appearance">APARIENCIA</string>
+    <string name="profile_section_app_info">INFO APP</string>
+    <string name="profile_section_preferences">Preferencias</string>
+    <string name="profile_section_about">Acerca de</string>
+    <string name="profile_security">Seguridad</string>
+    <string name="profile_security_desc">Administrar acceso con huella</string>
+    <string name="profile_biometric_auth">Autenticación Biométrica</string>
+    <string name="profile_biometric_enabled">Huella activada</string>
+    <string name="profile_biometric_disabled">No activada</string>
+    <string name="profile_biometric_enroll_hint">Activar huella para acceso rápido</string>
+    <string name="profile_biometric_enroll_password_message">Ingresa tu contraseña para activar el acceso biométrico</string>
+    <string name="profile_biometric_enroll_password_hint">Contraseña</string>
+    <string name="profile_biometric_enrolling">Registrando biometría…</string>
+    <string name="profile_biometric_enroll_success">Acceso biométrico activado</string>
+    <string name="profile_biometric_enroll_error">Error al activar biometría: %1$s</string>
+    <string name="profile_biometric_disable_confirm">¿Desactivar acceso biométrico?</string>
+    <string name="profile_biometric_disable_message">Las credenciales guardadas se eliminarán. Deberás iniciar sesión manualmente la próxima vez.</string>
+    <string name="profile_theme_crystal">Crystal Edition</string>
+    <string name="profile_theme_midnight">Midnight Edition</string>
+    <string name="profile_theme_crystal_label">Crystal</string>
+    <string name="profile_theme_midnight_label">Midnight</string>
+    <string name="profile_theme_desc">Toca para cambiar de apariencia</string>
+    <string name="profile_about">Acerca de</string>
+    <string name="profile_about_desc">AuraOS Parking Edition</string>
+    <string name="profile_app_version">Versión App</string>
+    <string name="profile_version_format">%1$s (Build %2$d)</string>
+    <string name="profile_edit_avatar">Editar Avatar</string>
+    <string name="profile_icon_security">Icono de seguridad</string>
+    <string name="profile_icon_about">Icono de información</string>
+    <string name="profile_logout">Cerrar Sesión</string>
+    <string name="profile_logout_desc">Limpiar sesión y volver al inicio</string>
+    <string name="profile_logout_confirm_title">Cerrar Sesión</string>
+    <string name="profile_logout_confirm_message">¿Estás seguro de cerrar sesión? Todos los datos locales se eliminarán.</string>
+    <string name="profile_logout_confirm_action">Cerrar Sesión</string>
+    <string name="profile_avatar_title">Foto de Perfil</string>
+    <string name="profile_avatar_take_photo">Tomar Foto</string>
+    <string name="profile_avatar_choose_gallery">Elegir de la Galería</string>
+    <string name="profile_avatar_upload_success">Foto de perfil actualizada</string>
+    <string name="profile_avatar_upload_error">Error al actualizar la foto de perfil</string>
+
     <!-- Historial -->
     <string name="history_filter_today_label">Hoy</string>
     <string name="history_filter_all_label">Todos</string>

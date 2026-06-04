@@ -129,6 +129,12 @@ class SessionManager(context: Context) {
         return getToken() != null && getUserId() != null
     }
 
+    fun saveAvatarUrl(url: String) {
+        prefs.edit().putString(KEY_AVATAR_URL, url).apply()
+    }
+
+    fun getAvatarUrl(): String? = prefs.getString(KEY_AVATAR_URL, null)
+
     fun clearSession() {
         clearToken()
         clearCredentials()
@@ -138,7 +144,14 @@ class SessionManager(context: Context) {
             .remove(KEY_SELECTED_BRANCH_ID)
             .remove(KEY_LAST_EMAIL)
             .remove(KEY_LAST_DISPLAY_NAME)
+            .remove(KEY_AVATAR_URL)
             .apply()
+    }
+
+    fun isDarkModeEnabled(): Boolean = prefs.getBoolean(KEY_DARK_MODE, false)
+
+    fun setDarkModeEnabled(enabled: Boolean) {
+        prefs.edit().putBoolean(KEY_DARK_MODE, enabled).apply()
     }
 
     companion object {
@@ -152,5 +165,7 @@ class SessionManager(context: Context) {
         private const val KEY_SELECTED_BRANCH_ID = "selected_branch_id"
         private const val KEY_LAST_EMAIL = "last_email"
         private const val KEY_LAST_DISPLAY_NAME = "last_display_name"
+        private const val KEY_DARK_MODE = "dark_mode"
+        private const val KEY_AVATAR_URL = "avatar_url"
     }
 }
