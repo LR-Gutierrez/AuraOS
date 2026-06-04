@@ -5,6 +5,8 @@ import androidx.lifecycle.ViewModelProvider
 import com.beta.auraos.data.DashboardRepository
 import com.beta.auraos.data.MembershipRepository
 import com.beta.auraos.data.VehicleEntryRepository
+import com.beta.auraos.data.local.DashboardLocalDataSource
+import com.beta.auraos.data.local.room.AppDatabase
 
 class DashboardViewModelFactory(
     private val repository: DashboardRepository,

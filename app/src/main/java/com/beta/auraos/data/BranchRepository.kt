@@ -1,25 +1,84 @@
 package com.beta.auraos.data
 
+import com.beta.auraos.data.local.room.AppDatabase
+import com.beta.auraos.data.local.room.BranchEntity
 import com.beta.auraos.data.model.Branch
 import com.beta.auraos.data.model.CreateBranchInput
 import com.beta.auraos.data.model.UpdateBranchInput
 import com.beta.auraos.data.remote.BranchApi
 import java.io.IOException
 
-class BranchRepository(private val api: BranchApi) {
+class BranchRepository(
+    private val api: BranchApi,
+    private val database: AppDatabase? = null
+) {
 
     suspend fun getBranches(): Result<List<Branch>> {
         return try {
             val response = api.getBranches()
             if (response.isSuccessful) {
-                Result.Success(response.body() ?: emptyList())
+                val branches = response.body() ?: emptyList()
+                database?.branchDao()?.let { dao ->
+                    dao.deleteAll()
+                    dao.insertAll(branches.map { it.toEntity() })
+                }
+                Result.Success(branches)
             } else {
                 Result.Error(IOException("Error al cargar sucursales: ${response.code()} ${response.message()}"))
             }
         } catch (e: Exception) {
-            Result.Error(IOException("Error de conexión: ${e.localizedMessage ?: "Error desconocido"}"))
+            val cached = database?.branchDao()?.getAll()
+            if (cached != null && cached.isNotEmpty()) {
+                Result.Success(cached.map { it.toModel() })
+            } else {
+                Result.Error(IOException("Error de conexión: ${e.localizedMessage ?: "Error desconocido"}"))
+            }
         }
     }
+
+    private fun Branch.toEntity() = BranchEntity(
+        id = id,
+        name = name,
+        address = address,
+        motorcycleCapacity = motorcycleCapacity,
+        lightVehicleCapacity = lightVehicleCapacity,
+        heavyVehicleCapacity = heavyVehicleCapacity,
+        motorcycleRate = motorcycleRate,
+        lightVehicleRate = lightVehicleRate,
+        heavyVehicleRate = heavyVehicleRate,
+        motorcycleOvernightRate = motorcycleOvernightRate,
+        lightVehicleOvernightRate = lightVehicleOvernightRate,
+        heavyVehicleOvernightRate = heavyVehicleOvernightRate,
+        openTimeWeekday = openTimeWeekday,
+        closeTimeWeekday = closeTimeWeekday,
+        openTimeWeekend = openTimeWeekend,
+        closeTimeWeekend = closeTimeWeekend,
+        currency = currency,
+        createdAt = createdAt,
+        updatedAt = updatedAt
+    )
+
+    private fun BranchEntity.toModel() = Branch(
+        id = id,
+        name = name,
+        address = address,
+        motorcycleCapacity = motorcycleCapacity,
+        lightVehicleCapacity = lightVehicleCapacity,
+        heavyVehicleCapacity = heavyVehicleCapacity,
+        motorcycleRate = motorcycleRate,
+        lightVehicleRate = lightVehicleRate,
+        heavyVehicleRate = heavyVehicleRate,
+        motorcycleOvernightRate = motorcycleOvernightRate,
+        lightVehicleOvernightRate = lightVehicleOvernightRate,
+        heavyVehicleOvernightRate = heavyVehicleOvernightRate,
+        openTimeWeekday = openTimeWeekday,
+        closeTimeWeekday = closeTimeWeekday,
+        openTimeWeekend = openTimeWeekend,
+        closeTimeWeekend = closeTimeWeekend,
+        currency = currency,
+        createdAt = createdAt,
+        updatedAt = updatedAt
+    )
 
     suspend fun getBranch(id: String): Result<Branch> {
         return try {

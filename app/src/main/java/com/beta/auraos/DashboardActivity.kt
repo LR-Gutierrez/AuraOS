@@ -31,6 +31,9 @@ import com.google.android.material.color.MaterialColors
 import com.beta.auraos.data.LoginDataSource
 import com.beta.auraos.data.Result
 import com.beta.auraos.data.local.BiometricKeyManager
+import com.beta.auraos.data.local.DashboardLocalDataSource
+import com.beta.auraos.data.local.room.AppDatabase
+import com.beta.auraos.data.local.room.BranchDao
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -111,8 +114,9 @@ class DashboardActivity : AppCompatActivity() {
             }
         }
 
+        val db = AppDatabase.getInstance(this)
         val branchApi = ApiClient.createApi<BranchApi>()
-        branchRepository = BranchRepository(branchApi)
+        branchRepository = BranchRepository(branchApi, db)
 
         setupBranchSelector()
         loadBranches()
@@ -246,7 +250,9 @@ class DashboardActivity : AppCompatActivity() {
 
     private fun setupViewModel() {
         val token = sessionManager.getToken() ?: return
-        val repository = DashboardRepository(token)
+        val db = AppDatabase.getInstance(this)
+        val localDataSource = DashboardLocalDataSource(db)
+        val repository = DashboardRepository(token, localDataSource)
         val membershipRepo = MembershipRepository()
         val vehicleEntryRepo = VehicleEntryRepository()
         val factory = DashboardViewModelFactory(repository, membershipRepo, vehicleEntryRepo)
@@ -257,7 +263,7 @@ class DashboardActivity : AppCompatActivity() {
         val vm = viewModel ?: return
         vm.uiState.observe(this) { state ->
             when (state) {
-                is DashboardUiState.Success -> bindData(state.data)
+                is DashboardUiState.Success -> bindData(state.data, state.isFromCache)
                 is DashboardUiState.Error -> showError(state.message)
                 is DashboardUiState.Loading -> { }
             }
@@ -276,14 +282,14 @@ class DashboardActivity : AppCompatActivity() {
         }
     }
 
-    private fun bindData(data: DashboardResponse) {
+    private fun bindData(data: DashboardResponse, isFromCache: Boolean = false) {
         val percent = data.occupancyPercent.toInt()
         binding.tvOccupancyTitle.text = getString(R.string.dashboard_occupancy_title, percent)
-        binding.tvBaysCounter.text = getString(
-            R.string.dashboard_bays_counter,
-            data.occupiedBays,
-            data.totalBays
-        )
+        binding.tvBaysCounter.text = if (data.totalBays > 0) {
+            getString(R.string.dashboard_bays_counter, data.occupiedBays, data.totalBays)
+        } else {
+            getString(R.string.dashboard_bays_counter, data.occupiedBays, 0)
+        }
         binding.pbOccupancy.progress = percent
 
         val trend = data.trendPercent
@@ -308,6 +314,8 @@ class DashboardActivity : AppCompatActivity() {
 
         binding.badgeCritical.text = getString(R.string.dashboard_badge_critical, data.criticalAlertsCount)
         binding.badgeCritical.visibility = if (data.criticalAlertsCount > 0) View.VISIBLE else View.GONE
+
+        binding.cachedBadge?.visibility = if (isFromCache) View.VISIBLE else View.GONE
 
         if (data.expiringMemberships.isNotEmpty()) {
             val m = data.expiringMemberships[0]

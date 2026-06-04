@@ -1,5 +1,6 @@
 package com.beta.auraos.data
 
+import com.beta.auraos.data.local.DashboardLocalDataSource
 import com.beta.auraos.data.model.DashboardResponse
 import com.beta.auraos.data.remote.ApiClient
 import com.beta.auraos.data.remote.DashboardApi
@@ -8,7 +9,13 @@ import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-class DashboardRepository(private val token: String) {
+class DashboardRepository(
+    private val token: String,
+    private val localDataSource: DashboardLocalDataSource
+) {
+
+    var lastResultFromCache: Boolean = false
+        private set
 
     private val api: DashboardApi by lazy {
         val authInterceptor = Interceptor { chain ->
@@ -36,6 +43,8 @@ class DashboardRepository(private val token: String) {
             if (response.isSuccessful) {
                 val body = response.body()
                 if (body != null) {
+                    localDataSource.save(branchId, body)
+                    lastResultFromCache = false
                     Result.Success(body)
                 } else {
                     Result.Error(Exception("Respuesta vacía del servidor"))
@@ -49,7 +58,17 @@ class DashboardRepository(private val token: String) {
                 Result.Error(Exception(errorMsg))
             }
         } catch (e: Exception) {
-            Result.Error(Exception("Error de conexión: ${e.localizedMessage}"))
+            if (localDataSource.isNetworkError(e)) {
+                val cached = localDataSource.load(branchId)
+                if (cached != null) {
+                    lastResultFromCache = true
+                    Result.Success(cached)
+                } else {
+                    Result.Error(Exception("Sin conexión y sin datos locales"))
+                }
+            } else {
+                Result.Error(Exception("Error de conexión: ${e.localizedMessage}"))
+            }
         }
     }
 }

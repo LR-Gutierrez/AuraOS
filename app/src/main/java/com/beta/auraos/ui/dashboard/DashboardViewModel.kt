@@ -18,6 +18,7 @@ sealed class DashboardUiState {
     data object Loading : DashboardUiState()
     data class Success(
         val data: DashboardResponse,
+        val isFromCache: Boolean = false
     ) : DashboardUiState()
     data class Error(val message: String) : DashboardUiState()
 }
@@ -55,18 +56,26 @@ class DashboardViewModel(
                 is Result.Error -> emptyList()
             }
 
+            val isFromCache = repository.lastResultFromCache
+
             _uiState.value = when (dashboardResult) {
                 is Result.Success -> {
-                    val resolvedArrivals = dashboardResult.data.vipArrivals.mapIndexed { index, arrival ->
-                        if (arrival.guestName == "NFC") {
-                            val resolvedName = nfcMemberNames.getOrNull(index) ?: arrival.guestName
-                            arrival.copy(guestName = resolvedName)
-                        } else {
-                            arrival
+                    val data = dashboardResult.data
+                    val resolvedArrivals = if (isFromCache) {
+                        data.vipArrivals
+                    } else {
+                        data.vipArrivals.mapIndexed { index, arrival ->
+                            if (arrival.guestName == "NFC") {
+                                val resolvedName = nfcMemberNames.getOrNull(index) ?: arrival.guestName
+                                arrival.copy(guestName = resolvedName)
+                            } else {
+                                arrival
+                            }
                         }
                     }
                     DashboardUiState.Success(
-                        data = dashboardResult.data.copy(vipArrivals = resolvedArrivals)
+                        data = data.copy(vipArrivals = resolvedArrivals),
+                        isFromCache = isFromCache
                     )
                 }
                 is Result.Error -> DashboardUiState.Error(
