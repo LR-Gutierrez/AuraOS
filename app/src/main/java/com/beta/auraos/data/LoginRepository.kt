@@ -2,25 +2,14 @@ package com.beta.auraos.data
 
 import android.content.ContentResolver
 import android.net.Uri
+import com.beta.auraos.data.local.LocalAuthDataSource
 import com.beta.auraos.data.local.SessionManager
 import com.beta.auraos.data.model.LoggedInUser
 
-/**
- * Single source of truth for authentication state in the app.
- *
- * Mediates between the remote [LoginDataSource] and the local
- * [SessionManager]. After a successful login the result is cached
- * in-memory via [user] so other layers can check `isLoggedIn`
- * without a disk read.
- *
- ## Why a Repository?
- * - Keeps the ViewModel unaware of where data comes from (API vs. local).
- * - Centralises side-effects such as saving the JWT token and clearing
- *   session state on logout.
- */
 class LoginRepository(
     val dataSource: LoginDataSource,
-    private val sessionManager: SessionManager
+    private val sessionManager: SessionManager,
+    private val localAuthDataSource: LocalAuthDataSource
 ) {
 
     var user: LoggedInUser? = null
@@ -34,13 +23,27 @@ class LoginRepository(
     }
 
     suspend fun login(email: String, password: String): Result<LoggedInUser> {
-        val result = dataSource.login(email, password)
+        val remoteResult = dataSource.login(email, password)
 
-        if (result is Result.Success) {
-            setLoggedInUser(result.data)
+        return when (remoteResult) {
+            is Result.Success -> {
+                setLoggedInUser(remoteResult.data)
+                val token = sessionManager.getToken() ?: ""
+                localAuthDataSource.cacheUser(remoteResult.data, password, token)
+                remoteResult
+            }
+            is Result.Error -> {
+                if (localAuthDataSource.isNetworkError(remoteResult.exception)) {
+                    val localResult = localAuthDataSource.login(email, password)
+                    if (localResult is Result.Success) {
+                        setLoggedInUser(localResult.data)
+                    }
+                    localResult
+                } else {
+                    remoteResult
+                }
+            }
         }
-
-        return result
     }
 
     fun hasBiometricCredentials(): Boolean {
@@ -64,11 +67,25 @@ class LoginRepository(
     }
 
     suspend fun biometricLogin(userId: String, challenge: String, signature: String): Result<LoggedInUser> {
-        val result = dataSource.biometricLogin(userId, challenge, signature)
-        if (result is Result.Success) {
-            setLoggedInUser(result.data)
+        val remoteResult = dataSource.biometricLogin(userId, challenge, signature)
+
+        return when (remoteResult) {
+            is Result.Success -> {
+                setLoggedInUser(remoteResult.data)
+                remoteResult
+            }
+            is Result.Error -> {
+                if (localAuthDataSource.isNetworkError(remoteResult.exception)) {
+                    val localResult = localAuthDataSource.biometricLogin(userId)
+                    if (localResult is Result.Success) {
+                        setLoggedInUser(localResult.data)
+                    }
+                    localResult
+                } else {
+                    remoteResult
+                }
+            }
         }
-        return result
     }
 
     fun isBiometricEnrolled(): Boolean = sessionManager.isBiometricEnrolled()

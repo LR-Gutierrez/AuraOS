@@ -4,6 +4,8 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
+import com.beta.auraos.data.model.LoggedInUser
+import com.google.gson.Gson
 
 /**
  * Persists session data and biometric credentials with different security levels.
@@ -138,6 +140,7 @@ class SessionManager(context: Context) {
     fun clearSession() {
         clearToken()
         clearCredentials()
+        clearLocalCache()
         prefs.edit()
             .remove(KEY_USER_ID)
             .remove(KEY_BIOMETRIC_ENROLLED)
@@ -154,6 +157,35 @@ class SessionManager(context: Context) {
         prefs.edit().putBoolean(KEY_DARK_MODE, enabled).apply()
     }
 
+    // ── Local offline cache ────────────────────────────────────────────
+
+    fun saveLocalUserProfile(user: LoggedInUser) {
+        val json = Gson().toJson(user)
+        encryptedPrefs.edit().putString(KEY_LOCAL_USER_PROFILE, json).apply()
+    }
+
+    fun getLocalUserProfile(): LoggedInUser? {
+        val json = encryptedPrefs.getString(KEY_LOCAL_USER_PROFILE, null) ?: return null
+        return try {
+            Gson().fromJson(json, LoggedInUser::class.java)
+        } catch (_: Exception) { null }
+    }
+
+    fun saveLocalPasswordHash(hash: String) {
+        encryptedPrefs.edit().putString(KEY_LOCAL_PASSWORD_HASH, hash).apply()
+    }
+
+    fun getLocalPasswordHash(): String? {
+        return encryptedPrefs.getString(KEY_LOCAL_PASSWORD_HASH, null)
+    }
+
+    fun clearLocalCache() {
+        encryptedPrefs.edit()
+            .remove(KEY_LOCAL_USER_PROFILE)
+            .remove(KEY_LOCAL_PASSWORD_HASH)
+            .apply()
+    }
+
     companion object {
         private const val PREFS_NAME = "aura_prefs"
         private const val ENCRYPTED_PREFS_NAME = "aura_encrypted_prefs"
@@ -167,5 +199,7 @@ class SessionManager(context: Context) {
         private const val KEY_LAST_DISPLAY_NAME = "last_display_name"
         private const val KEY_DARK_MODE = "dark_mode"
         private const val KEY_AVATAR_URL = "avatar_url"
+        private const val KEY_LOCAL_USER_PROFILE = "local_user_profile"
+        private const val KEY_LOCAL_PASSWORD_HASH = "local_password_hash"
     }
 }
