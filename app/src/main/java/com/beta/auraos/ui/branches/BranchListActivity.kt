@@ -36,7 +36,8 @@ class BranchListActivity : AppCompatActivity() {
         binding = ActivityBranchListBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        viewModel = ViewModelProvider(this, BranchViewModelFactory())[BranchViewModel::class.java]
+        val db = com.beta.auraos.data.local.room.AppDatabase.getInstance(this)
+        viewModel = ViewModelProvider(this, BranchViewModelFactory(db))[BranchViewModel::class.java]
 
         setupViews()
         setupObservers()

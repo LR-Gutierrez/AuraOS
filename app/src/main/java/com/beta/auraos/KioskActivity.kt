@@ -17,9 +17,13 @@ import androidx.lifecycle.lifecycleScope
 import com.beta.auraos.data.BranchRepository
 import com.beta.auraos.data.MembershipRepository
 import com.beta.auraos.data.Result
+import com.beta.auraos.data.VehicleEntryRepository
+import com.beta.auraos.data.local.NfcSyncManager
 import com.beta.auraos.data.local.SessionManager
+import com.beta.auraos.data.local.room.AppDatabase
 import com.beta.auraos.data.model.Branch
 import com.beta.auraos.data.model.Membership
+import com.beta.auraos.data.model.VehicleEntry
 import com.beta.auraos.data.remote.ApiClient
 import com.beta.auraos.data.remote.BranchApi
 import com.beta.auraos.data.remote.NfcEntryRequest
@@ -31,6 +35,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import java.util.TimeZone
+import java.util.UUID
 
 class KioskActivity : AppCompatActivity() {
 
@@ -43,17 +52,26 @@ class KioskActivity : AppCompatActivity() {
 
     private var nfcAdapter: NfcAdapter? = null
     private var isNfcScanning = false
+    private var isProcessingNfc = false
 
     private val branchRepository: BranchRepository by lazy {
-        BranchRepository(ApiClient.createApi<BranchApi>())
+        BranchRepository(ApiClient.createApi<BranchApi>(), AppDatabase.getInstance(this@KioskActivity))
     }
 
     private val membershipRepository: MembershipRepository by lazy {
-        MembershipRepository()
+        MembershipRepository(AppDatabase.getInstance(this@KioskActivity))
     }
 
     private val parkingApi: ParkingApi by lazy {
         ApiClient.createApi<ParkingApi>()
+    }
+
+    private val nfcSyncManager: NfcSyncManager by lazy {
+        NfcSyncManager(AppDatabase.getInstance(this@KioskActivity))
+    }
+
+    private val vehicleEntryRepository: VehicleEntryRepository by lazy {
+        VehicleEntryRepository(AppDatabase.getInstance(this@KioskActivity))
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -71,6 +89,34 @@ class KioskActivity : AppCompatActivity() {
         setupClickHandlers()
         setupWindowInsets()
         loadBranches()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (isNfcScanning) {
+            enableNfcForegroundDispatch()
+        }
+        syncPendingEntries()
+    }
+
+    override fun onPause() {
+        disableNfcForegroundDispatch()
+        super.onPause()
+    }
+
+    private fun syncPendingEntries() {
+        lifecycleScope.launch(Dispatchers.IO) {
+            val result = nfcSyncManager.syncPending()
+            if (result is NfcSyncManager.SyncResult.Success && result.count > 0) {
+                withContext(Dispatchers.Main) {
+                    android.widget.Toast.makeText(
+                        this@KioskActivity,
+                        "${result.count} entrada(s) NFC sincronizada(s)",
+                        android.widget.Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+        }
     }
 
     private fun setupBranchSelector() {
@@ -196,6 +242,7 @@ class KioskActivity : AppCompatActivity() {
 
     private fun stopNfcScanning() {
         isNfcScanning = false
+        isProcessingNfc = false
         disableNfcForegroundDispatch()
         binding.cardNfcScanning.visibility = View.GONE
         binding.cardNfcProcessing.visibility = View.GONE
@@ -252,8 +299,12 @@ class KioskActivity : AppCompatActivity() {
     }
 
     private fun onNfcTagDetected(cardUuid: String) {
+        if (isProcessingNfc) return
+        isProcessingNfc = true
+
         val branchId = selectedBranch?.id
         if (branchId == null) {
+            isProcessingNfc = false
             Toast.makeText(this, R.string.branch_required_for_entry, Toast.LENGTH_SHORT).show()
             stopNfcScanning()
             return
@@ -269,6 +320,7 @@ class KioskActivity : AppCompatActivity() {
                     is Result.Success -> {
                         val membership = result.data
                         if (!membership.isActive) {
+                            isProcessingNfc = false
                             binding.cardNfcProcessing.visibility = View.GONE
                             binding.cardNfcScanning.visibility = View.VISIBLE
                             binding.tvNfcStatusTitle.text = getString(R.string.kiosk_nfc_error_inactive)
@@ -280,6 +332,7 @@ class KioskActivity : AppCompatActivity() {
                         registerMembershipEntry(membership, cardUuid)
                     }
                     is Result.Error -> {
+                        isProcessingNfc = false
                         binding.cardNfcProcessing.visibility = View.GONE
                         binding.cardNfcScanning.visibility = View.VISIBLE
                         binding.tvNfcStatusTitle.text = getString(R.string.kiosk_nfc_error_card_not_found)
@@ -292,37 +345,80 @@ class KioskActivity : AppCompatActivity() {
     }
 
     private fun registerMembershipEntry(membership: Membership, cardUuid: String) {
+        val localEntryId = UUID.randomUUID().toString()
+        val now = nowUtcString()
+        val branchId = selectedBranch?.id ?: ""
+
+        val localEntry = VehicleEntry(
+            id = localEntryId,
+            plate = "NFC",
+            vehicleType = DEFAULT_NFC_VEHICLE_TYPE,
+            isVip = true,
+            membershipId = membership.id,
+            branchId = branchId,
+            platePhotoUrl = null,
+            frontPhotoUrl = null,
+            rearPhotoUrl = null,
+            leftPhotoUrl = null,
+            rightPhotoUrl = null,
+            createdAt = now,
+            exitedAt = null,
+            duration = null,
+            fee = null,
+            branch = null
+        )
+
         lifecycleScope.launch(Dispatchers.IO) {
+            vehicleEntryRepository.updateCachedEntry(localEntry)
+
             try {
                 val response = parkingApi.registerNfcEntry(NfcEntryRequest(cardUuid = cardUuid))
-
                 withContext(Dispatchers.Main) {
                     if (response.isSuccessful) {
                         showEntrySuccess(membership)
                     } else {
-                        val errorBody = response.errorBody()?.string() ?: "unknown"
-                        val errorMsg = parseEntryError(response.code(), errorBody)
-                        android.util.Log.e("KioskActivity", "registerNfcEntry failed: $errorMsg body=$errorBody")
-                        binding.cardNfcProcessing.visibility = View.GONE
-                        binding.cardNfcScanning.visibility = View.VISIBLE
-                        binding.tvNfcStatusTitle.text = errorMsg
-                        binding.tvNfcStatusSubtitle.visibility = View.GONE
-                        binding.tvNfcMemberInfo.text = membership.memberName
-                        binding.tvNfcMemberInfo.visibility = View.VISIBLE
+                        nfcSyncManager.enqueue(cardUuid, branchId, membership.memberName, membership.id, localEntryId)
+                        showEntryQueued(membership)
                     }
                 }
             } catch (e: Exception) {
+                android.util.Log.e("KioskActivity", "registerNfcEntry exception: ${e.message}", e)
+                nfcSyncManager.enqueue(cardUuid, branchId, membership.memberName, membership.id, localEntryId)
                 withContext(Dispatchers.Main) {
-                    android.util.Log.e("KioskActivity", "registerNfcEntry exception: ${e.message}", e)
-                    binding.cardNfcProcessing.visibility = View.GONE
-                    binding.cardNfcScanning.visibility = View.VISIBLE
-                    binding.tvNfcStatusTitle.text = getString(R.string.kiosk_nfc_error_api)
-                    binding.tvNfcStatusSubtitle.text = e.message
-                    binding.tvNfcStatusSubtitle.visibility = View.VISIBLE
-                    binding.tvNfcMemberInfo.text = membership.memberName
-                    binding.tvNfcMemberInfo.visibility = View.VISIBLE
+                    showEntryQueued(membership)
                 }
             }
+        }
+    }
+
+    private fun showEntryError(errorMsg: String, membership: Membership) {
+        isProcessingNfc = false
+        binding.cardNfcProcessing.visibility = View.GONE
+        binding.cardNfcScanning.visibility = View.VISIBLE
+        binding.tvNfcStatusTitle.text = errorMsg
+        binding.tvNfcStatusSubtitle.visibility = View.GONE
+        binding.tvNfcMemberInfo.text = membership.memberName
+        binding.tvNfcMemberInfo.visibility = View.VISIBLE
+
+        lifecycleScope.launch(Dispatchers.Main) {
+            delay(3000)
+            stopNfcScanning()
+        }
+    }
+
+    private fun showEntryQueued(membership: Membership) {
+        isProcessingNfc = false
+        binding.cardNfcProcessing.visibility = View.GONE
+        binding.cardNfcScanning.visibility = View.VISIBLE
+        binding.tvNfcStatusTitle.text = getString(R.string.kiosk_nfc_queued)
+        binding.tvNfcStatusSubtitle.text = getString(R.string.kiosk_nfc_queued_subtitle)
+        binding.tvNfcStatusSubtitle.visibility = View.VISIBLE
+        binding.tvNfcMemberInfo.text = membership.memberName
+        binding.tvNfcMemberInfo.visibility = View.VISIBLE
+
+        lifecycleScope.launch(Dispatchers.Main) {
+            delay(3000)
+            stopNfcScanning()
         }
     }
 
@@ -376,11 +472,21 @@ class KioskActivity : AppCompatActivity() {
         return String(hexChars)
     }
 
+    private fun nowUtcString(): String {
+        val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US)
+        sdf.timeZone = TimeZone.getTimeZone("UTC")
+        return sdf.format(Date())
+    }
+
     private fun setupWindowInsets() {
         ViewCompat.setOnApplyWindowInsetsListener(binding.headerBar) { view, insets ->
             val statusBarInsets = insets.getInsets(WindowInsetsCompat.Type.statusBars())
             view.updatePadding(top = statusBarInsets.top)
             insets
         }
+    }
+
+    companion object {
+        private const val DEFAULT_NFC_VEHICLE_TYPE = "light"
     }
 }

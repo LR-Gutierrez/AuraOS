@@ -253,8 +253,8 @@ class DashboardActivity : AppCompatActivity() {
         val db = AppDatabase.getInstance(this)
         val localDataSource = DashboardLocalDataSource(db)
         val repository = DashboardRepository(token, localDataSource)
-        val membershipRepo = MembershipRepository()
-        val vehicleEntryRepo = VehicleEntryRepository()
+        val membershipRepo = MembershipRepository(db)
+        val vehicleEntryRepo = VehicleEntryRepository(db)
         val factory = DashboardViewModelFactory(repository, membershipRepo, vehicleEntryRepo)
         viewModel = ViewModelProvider(this, factory)[DashboardViewModel::class.java]
     }

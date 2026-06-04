@@ -71,11 +71,12 @@ class AnalyticsActivity : AppCompatActivity() {
         enableEdgeToEdge()
 
         sessionManager = SessionManager(this)
+        val db = com.beta.auraos.data.local.room.AppDatabase.getInstance(this)
         val api = ApiClient.createApi<BranchApi>()
-        branchRepository = BranchRepository(api)
+        branchRepository = BranchRepository(api, db)
 
-        val repository = VehicleEntryRepository()
-        val membershipRepository = MembershipRepository()
+        val repository = VehicleEntryRepository(db)
+        val membershipRepository = MembershipRepository(db)
         val factory = HistoryViewModelFactory(repository, membershipRepository)
         viewModel = ViewModelProvider(this, factory)[HistoryViewModel::class.java]
 

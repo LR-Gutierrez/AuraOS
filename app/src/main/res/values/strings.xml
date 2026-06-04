@@ -415,6 +415,8 @@
     <string name="kiosk_nfc_entry_success_format">Entry registered for %1$s</string>
     <string name="kiosk_nfc_error_api">Could not register entry. Please try again.</string>
     <string name="nfc_not_available">NFC is not available on this device</string>
+    <string name="kiosk_nfc_queued">Entry saved for later</string>
+    <string name="kiosk_nfc_queued_subtitle">No internet connection. The entry will be registered automatically when connection is restored.</string>
 
     <!-- Audit / Closure -->
     <string name="audit_title">Audit</string>

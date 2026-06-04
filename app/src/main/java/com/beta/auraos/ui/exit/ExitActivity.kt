@@ -26,6 +26,7 @@ import com.beta.auraos.data.MembershipRepository
 import com.beta.auraos.data.VehicleEntryRepository
 import com.beta.auraos.data.audit.AuditEngine
 import com.beta.auraos.data.audit.FeeCalculator
+import com.beta.auraos.data.local.ExitSyncManager
 import com.beta.auraos.data.local.SessionManager
 import com.beta.auraos.data.model.Branch
 import com.beta.auraos.data.model.VehicleEntry
@@ -52,12 +53,14 @@ class ExitActivity : AppCompatActivity() {
         enableEdgeToEdge()
 
         sessionManager = SessionManager(this)
-        val vehicleRepo = VehicleEntryRepository()
+        val db = com.beta.auraos.data.local.room.AppDatabase.getInstance(this)
+        val vehicleRepo = VehicleEntryRepository(db)
         val branchApi = ApiClient.createApi<BranchApi>()
-        val branchRepo = BranchRepository(branchApi)
-        val membershipRepo = MembershipRepository()
+        val branchRepo = BranchRepository(branchApi, db)
+        val membershipRepo = MembershipRepository(db)
         val auditEngine = AuditEngine(applicationContext)
-        val factory = ExitViewModelFactory(vehicleRepo, branchRepo, membershipRepo, auditEngine)
+        val exitSyncManager = ExitSyncManager(db)
+        val factory = ExitViewModelFactory(vehicleRepo, branchRepo, membershipRepo, auditEngine, exitSyncManager)
         viewModel = ViewModelProvider(this, factory)[ExitViewModel::class.java]
 
         binding = ActivityExitBinding.inflate(layoutInflater)

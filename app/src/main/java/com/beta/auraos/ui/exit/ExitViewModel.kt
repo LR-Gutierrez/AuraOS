@@ -9,6 +9,8 @@ import com.beta.auraos.data.MembershipRepository
 import com.beta.auraos.data.Result
 import com.beta.auraos.data.VehicleEntryRepository
 import com.beta.auraos.data.audit.AuditEngine
+import com.beta.auraos.data.audit.FeeCalculator
+import com.beta.auraos.data.local.ExitSyncManager
 import com.beta.auraos.data.model.Branch
 import com.beta.auraos.data.model.VehicleEntry
 import kotlinx.coroutines.Dispatchers
@@ -33,7 +35,8 @@ class ExitViewModel(
     private val vehicleEntryRepository: VehicleEntryRepository,
     private val branchRepository: BranchRepository,
     private val membershipRepository: MembershipRepository,
-    private val auditEngine: AuditEngine?
+    private val auditEngine: AuditEngine?,
+    private val exitSyncManager: ExitSyncManager?
 ) : ViewModel() {
 
     private val _uiState = MutableLiveData<ExitUiState>(ExitUiState.Loading)
@@ -86,37 +89,62 @@ class ExitViewModel(
         }
 
         viewModelScope.launch {
+            val branch = _branch.value
+            val state = _uiState.value as? ExitUiState.Success
+            val entry = state?.entries?.find { it.id == entryId }
+
+            val exitTime = nowUtcString()
+            val fee = entry?.let {
+                FeeCalculator.computeFee(it.createdAt, it.vehicleType, branch)
+            } ?: 0.0
+            val duration = entry?.let {
+                FeeCalculator.computeDuration(it.createdAt)
+            }
+
+            val cachedEntry = entry?.copy(
+                fee = fee,
+                duration = duration,
+                exitedAt = exitTime
+            )
+            if (cachedEntry != null) {
+                vehicleEntryRepository.updateCachedEntry(cachedEntry)
+            }
+
+            if (auditEngine != null && entry != null) {
+                auditEngine.recordVehicleExit(
+                    entry = entry,
+                    branch = branch,
+                    feePaid = fee,
+                    exitTime = exitTime
+                )
+            }
+
             val result = vehicleEntryRepository.registerExit(entryId)
             when (result) {
                 is Result.Success -> {
                     val exited = result.data
-                    val state = _uiState.value as? ExitUiState.Success
-                    if (auditEngine != null && state != null) {
-                        val entry = state.entries.find { it.id == entryId }
-                        if (entry != null) {
-                            auditEngine.recordVehicleExit(
-                                entry = entry,
-                                branch = _branch.value,
-                                feePaid = exited.fee,
-                                exitTime = nowUtcString()
-                            )
-                        }
-                    }
-                    val entries = state?.entries?.filter {
-                        it.id != entryId
-                    } ?: emptyList()
-                    _uiState.value = ExitUiState.Success(entries)
+                    val serverEntry = exited.copy(
+                        fee = exited.fee ?: fee,
+                        duration = exited.duration ?: duration,
+                        exitedAt = exited.exitedAt ?: exitTime
+                    )
+                    vehicleEntryRepository.updateCachedEntry(serverEntry)
                 }
                 is Result.Error -> {
-                    val state = _uiState.value
-                    if (state is ExitUiState.Success) {
-                        _uiState.value = state.copy(exitingId = null)
+                    if (exitSyncManager != null && entry != null) {
+                        exitSyncManager.enqueue(
+                            entryId = entryId,
+                            exitTime = exitTime,
+                            duration = duration,
+                            fee = fee,
+                            branchId = entry.branchId
+                        )
                     }
-                    _uiState.value = ExitUiState.Error(
-                        result.exception.message ?: "Error al registrar salida"
-                    )
                 }
             }
+
+            val entries = state?.entries?.filter { it.id != entryId } ?: emptyList()
+            _uiState.value = ExitUiState.Success(entries)
         }
     }
 

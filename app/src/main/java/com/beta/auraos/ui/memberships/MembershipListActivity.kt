@@ -37,13 +37,15 @@ class MembershipListActivity : AppCompatActivity() {
     private var nfcAdapter: NfcAdapter? = null
     private var isNfcScanning = false
     private var pendingMemberForCard: Membership? = null
+    private var nfcCardDialog: androidx.appcompat.app.AlertDialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
         sessionManager = SessionManager(this)
-        val repository = MembershipRepository()
+        val db = com.beta.auraos.data.local.room.AppDatabase.getInstance(this)
+        val repository = MembershipRepository(db)
         val factory = MembershipViewModelFactory(repository)
         viewModel = ViewModelProvider(this, factory)[MembershipViewModel::class.java]
 
@@ -106,6 +108,9 @@ class MembershipListActivity : AppCompatActivity() {
                 pendingMemberForCard = null
                 isNfcScanning = false
                 if (member != null) {
+                    nfcCardDialog?.dismiss()
+                    nfcCardDialog = null
+                    stopNfcScan()
                     val branchId = sessionManager.getSelectedBranchId()
                     viewModel.registerCard(member.id, cardUuid, branchId)
                     Toast.makeText(this, R.string.membership_card_register_success, Toast.LENGTH_SHORT).show()
@@ -255,15 +260,17 @@ class MembershipListActivity : AppCompatActivity() {
         isNfcScanning = true
         enableNfcForegroundDispatch()
 
-        AlertDialog.Builder(this)
+        nfcCardDialog = AlertDialog.Builder(this)
             .setTitle(getString(R.string.membership_register_card_title))
             .setMessage(getString(R.string.membership_register_card_nfc_hint))
             .setNegativeButton(getString(R.string.action_cancel)) { _, _ ->
                 pendingMemberForCard = null
+                nfcCardDialog = null
                 stopNfcScan()
             }
             .setOnCancelListener {
                 pendingMemberForCard = null
+                nfcCardDialog = null
                 stopNfcScan()
             }
             .show()

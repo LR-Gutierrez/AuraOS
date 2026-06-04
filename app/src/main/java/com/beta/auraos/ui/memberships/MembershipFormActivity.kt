@@ -37,7 +37,8 @@ class MembershipFormActivity : AppCompatActivity() {
         enableEdgeToEdge()
 
         sessionManager = SessionManager(this)
-        val repository = MembershipRepository()
+        val db = com.beta.auraos.data.local.room.AppDatabase.getInstance(this)
+        val repository = MembershipRepository(db)
         val factory = MembershipViewModelFactory(repository)
         viewModel = ViewModelProvider(this, factory)[MembershipViewModel::class.java]
 

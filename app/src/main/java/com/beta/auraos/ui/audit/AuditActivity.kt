@@ -37,8 +37,9 @@ class AuditActivity : AppCompatActivity() {
 
         sessionManager = SessionManager(this)
 
+        val db = com.beta.auraos.data.local.room.AppDatabase.getInstance(this)
         val auditEngine = AuditEngine(applicationContext)
-        val membershipRepo = MembershipRepository()
+        val membershipRepo = MembershipRepository(db)
         val userId = sessionManager.getUserId() ?: ""
         val factory = AuditViewModelFactory(auditEngine, membershipRepo, userId)
         viewModel = ViewModelProvider(this, factory)[AuditViewModel::class.java]

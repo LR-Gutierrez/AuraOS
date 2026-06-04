@@ -20,6 +20,7 @@ import com.beta.auraos.data.BranchRepository
 import com.beta.auraos.data.Result
 import com.beta.auraos.data.MembershipRepository
 import com.beta.auraos.data.local.SessionManager
+import com.beta.auraos.data.local.room.AppDatabase
 import com.beta.auraos.data.model.Branch
 import com.beta.auraos.data.model.Membership
 import com.beta.auraos.data.remote.ApiClient
@@ -51,11 +52,11 @@ class HomeActivity : AppCompatActivity() {
     private var memberships: List<Membership> = emptyList()
 
     private val membershipRepository: MembershipRepository by lazy {
-        MembershipRepository()
+        MembershipRepository(AppDatabase.getInstance(this@HomeActivity))
     }
 
     private val branchRepository: BranchRepository by lazy {
-        BranchRepository(ApiClient.createApi<BranchApi>())
+        BranchRepository(ApiClient.createApi<BranchApi>(), AppDatabase.getInstance(this@HomeActivity))
     }
 
     private var frontPhotoUri: Uri? = null

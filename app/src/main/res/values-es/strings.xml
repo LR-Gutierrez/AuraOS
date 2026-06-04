@@ -403,6 +403,8 @@
     <string name="kiosk_nfc_entry_success_format">Ingreso registrado para %1$s</string>
     <string name="kiosk_nfc_error_api">No se pudo registrar el ingreso. Intenta de nuevo.</string>
     <string name="nfc_not_available">NFC no está disponible en este dispositivo</string>
+    <string name="kiosk_nfc_queued">Ingreso guardado para después</string>
+    <string name="kiosk_nfc_queued_subtitle">Sin conexión a internet. El ingreso se registrará automáticamente cuando se restablezca la conexión.</string>
 
     <!-- Auditoría / Cierre -->
     <string name="audit_title">Auditoría</string>
