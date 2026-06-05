@@ -19,7 +19,9 @@ import androidx.lifecycle.lifecycleScope
 import com.beta.auraos.data.BranchRepository
 import com.beta.auraos.data.Result
 import com.beta.auraos.data.MembershipRepository
+import com.beta.auraos.data.VehicleEntryRepository
 import com.beta.auraos.data.local.SessionManager
+import com.beta.auraos.data.local.SyncManager
 import com.beta.auraos.data.local.room.AppDatabase
 import com.beta.auraos.data.model.Branch
 import com.beta.auraos.data.model.Membership
@@ -37,6 +39,8 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.File
+import java.io.IOException
+import java.util.UUID
 
 class HomeActivity : AppCompatActivity() {
 
@@ -57,6 +61,10 @@ class HomeActivity : AppCompatActivity() {
 
     private val branchRepository: BranchRepository by lazy {
         BranchRepository(ApiClient.createApi<BranchApi>(), AppDatabase.getInstance(this@HomeActivity))
+    }
+
+    private val vehicleEntryRepository: VehicleEntryRepository by lazy {
+        VehicleEntryRepository(AppDatabase.getInstance(this@HomeActivity))
     }
 
     private var frontPhotoUri: Uri? = null
@@ -132,6 +140,13 @@ class HomeActivity : AppCompatActivity() {
         setupBottomNav()
         setupWindowInsets()
         loadBranches()
+
+        lifecycleScope.launch(Dispatchers.IO) {
+            val token = sessionManager.getToken()
+            if (token != null) {
+                SyncManager(this@HomeActivity, AppDatabase.getInstance(this@HomeActivity), token).sync()
+            }
+        }
     }
 
     override fun onDestroy() {
@@ -454,18 +469,32 @@ class HomeActivity : AppCompatActivity() {
         binding.btnConfirmEntry.setOnClickListener { validateAndSend() }
     }
 
-    private fun validateAndSend() {
+    private fun validateAndSend(): Boolean {
         var firstErrorView: View? = null
 
         if (selectedBranch == null) {
             Toast.makeText(this, getString(R.string.branch_required_for_entry), Toast.LENGTH_LONG).show()
             showBranchSelector()
-            return
+            return false
         }
 
-        if (binding.etPlateNumber.text.isNullOrBlank()) {
+        val rawPlate = binding.etPlateNumber.text?.toString()?.trim() ?: ""
+        binding.etPlateNumber.setText(rawPlate)
+
+        if (rawPlate.isEmpty()) {
             binding.etPlateNumber.error = getString(R.string.field_required_plain)
             if (firstErrorView == null) firstErrorView = binding.etPlateNumber
+        } else if (rawPlate.length < 3) {
+            binding.etPlateNumber.error = getString(R.string.plate_too_short)
+            if (firstErrorView == null) firstErrorView = binding.etPlateNumber
+        } else if (rawPlate.length > 15) {
+            binding.etPlateNumber.error = getString(R.string.plate_too_long)
+            if (firstErrorView == null) firstErrorView = binding.etPlateNumber
+        }
+
+        val allowedTypes = listOf("motorcycle", "light", "heavy")
+        if (selectedVehicleType !in allowedTypes) {
+            selectedVehicleType = "motorcycle"
         }
 
         if (!hasPlatePhoto) {
@@ -477,9 +506,10 @@ class HomeActivity : AppCompatActivity() {
 
         if (firstErrorView != null) {
             scrollToView(firstErrorView)
-            return
+            return false
         }
         sendToApi()
+        return true
     }
 
     private fun scrollToView(view: View) {
@@ -492,6 +522,26 @@ class HomeActivity : AppCompatActivity() {
         if (isSending) return
         isSending = true
 
+        val plate = binding.etPlateNumber.text?.toString()?.trim()?.uppercase() ?: ""
+        binding.etPlateNumber.setText(plate)
+        val vehicleType = selectedVehicleType
+        val branchId = selectedBranch?.id ?: ""
+
+        val now = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", java.util.Locale.US).apply {
+            timeZone = java.util.TimeZone.getTimeZone("UTC")
+        }.format(java.util.Date())
+
+        val localId = UUID.randomUUID().toString()
+
+        val localEntry = com.beta.auraos.data.model.VehicleEntry(
+            id = localId, plate = plate, vehicleType = vehicleType,
+            isVip = selectedMembership != null,
+            membershipId = selectedMembership?.id, branchId = branchId,
+            platePhotoUrl = null, frontPhotoUrl = null,
+            rearPhotoUrl = null, leftPhotoUrl = null, rightPhotoUrl = null,
+            createdAt = now, exitedAt = null, duration = null, fee = null, branch = null
+        )
+
         with(binding) {
             btnConfirmEntry.isEnabled = false
             btnConfirmEntry.text = getString(R.string.action_sending)
@@ -499,13 +549,12 @@ class HomeActivity : AppCompatActivity() {
         }
 
         lifecycleScope.launch(Dispatchers.IO) {
+            vehicleEntryRepository.updateCachedEntry(localEntry)
+
             try {
-                val plate = binding.etPlateNumber.text.toString()
-                    .toRequestBody("text/plain".toMediaTypeOrNull())
-                val vehicleType = selectedVehicleType
-                    .toRequestBody("text/plain".toMediaTypeOrNull())
-                val branchId = (selectedBranch?.id ?: "")
-                    .toRequestBody("text/plain".toMediaTypeOrNull())
+                val plateBody = plate.toRequestBody("text/plain".toMediaTypeOrNull())
+                val typeBody = vehicleType.toRequestBody("text/plain".toMediaTypeOrNull())
+                val branchBody = branchId.toRequestBody("text/plain".toMediaTypeOrNull())
                 val membershipIdPart = selectedMembership?.id
                     ?.toRequestBody("text/plain".toMediaTypeOrNull())
 
@@ -516,15 +565,10 @@ class HomeActivity : AppCompatActivity() {
                 val rightPart = rightPhotoUri?.toMultipartPart("right")
 
                 val response = parkingApi.registerEntry(
-                    plate = plate,
-                    vehicleType = vehicleType,
-                    branchId = branchId,
-                    membershipId = membershipIdPart,
-                    platePhoto = platePhotoPart,
-                    front = frontPart,
-                    rear = rearPart,
-                    left = leftPart,
-                    right = rightPart,
+                    plate = plateBody, vehicleType = typeBody,
+                    branchId = branchBody, membershipId = membershipIdPart,
+                    platePhoto = platePhotoPart, front = frontPart,
+                    rear = rearPart, left = leftPart, right = rightPart,
                 )
 
                 withContext(Dispatchers.Main) {
@@ -538,11 +582,17 @@ class HomeActivity : AppCompatActivity() {
                     } else {
                         val errorMsg = parseEntryError(response)
                         Toast.makeText(this@HomeActivity, getString(R.string.confirm_entry_error, errorMsg), Toast.LENGTH_LONG).show()
+                        resetForm()
                     }
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
-                    Toast.makeText(this@HomeActivity, getString(R.string.confirm_entry_error, e.message ?: "Unknown error"), Toast.LENGTH_LONG).show()
+                    if (e is IOException) {
+                        Toast.makeText(this@HomeActivity, R.string.confirm_entry_queued, Toast.LENGTH_LONG).show()
+                    } else {
+                        Toast.makeText(this@HomeActivity, getString(R.string.confirm_entry_error, e.message ?: "Unknown error"), Toast.LENGTH_LONG).show()
+                    }
+                    resetForm()
                 }
             } finally {
                 withContext(Dispatchers.Main) {

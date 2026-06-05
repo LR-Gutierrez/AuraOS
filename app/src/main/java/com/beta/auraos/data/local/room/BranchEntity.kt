@@ -24,5 +24,6 @@ data class BranchEntity(
     val closeTimeWeekend: String,
     val currency: String,
     val createdAt: String,
-    val updatedAt: String
+    val updatedAt: String,
+    val favorite: Boolean = false
 )

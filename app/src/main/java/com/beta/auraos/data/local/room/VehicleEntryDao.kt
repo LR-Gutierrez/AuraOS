@@ -14,6 +14,15 @@ interface VehicleEntryDao {
     @Query("SELECT * FROM vehicle_entries WHERE branchId = :branchId AND exitedAt IS NOT NULL ORDER BY createdAt DESC")
     suspend fun getHistoryByBranch(branchId: String): List<VehicleEntryEntity>
 
+    @Query("SELECT * FROM vehicle_entries WHERE branchId = :branchId AND exitedAt IS NOT NULL AND exitedAt >= :fromDate AND exitedAt < :toDate ORDER BY createdAt DESC")
+    suspend fun getExitsInRange(branchId: String, fromDate: String, toDate: String): List<VehicleEntryEntity>
+
+    @Query("SELECT * FROM vehicle_entries WHERE branchId = :branchId AND createdAt >= :fromDate AND createdAt < :toDate ORDER BY createdAt DESC")
+    suspend fun getEntriesInRange(branchId: String, fromDate: String, toDate: String): List<VehicleEntryEntity>
+
+    @Query("SELECT * FROM vehicle_entries WHERE membershipId = :membershipId AND exitedAt IS NULL LIMIT 1")
+    suspend fun getActiveByMembershipId(membershipId: String): VehicleEntryEntity?
+
     @Query("SELECT * FROM vehicle_entries WHERE id = :id")
     suspend fun getById(id: String): VehicleEntryEntity?
 
@@ -28,6 +37,9 @@ interface VehicleEntryDao {
 
     @Query("DELETE FROM vehicle_entries WHERE branchId = :branchId AND exitedAt IS NOT NULL")
     suspend fun deleteHistoryByBranch(branchId: String)
+
+    @Query("DELETE FROM vehicle_entries")
+    suspend fun deleteAll()
 
     @Query("DELETE FROM vehicle_entries WHERE id = :id")
     suspend fun deleteById(id: String)

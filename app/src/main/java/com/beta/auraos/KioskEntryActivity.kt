@@ -17,7 +17,10 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
 import androidx.lifecycle.lifecycleScope
+import com.beta.auraos.data.VehicleEntryRepository
 import com.beta.auraos.data.local.SessionManager
+import com.beta.auraos.data.local.room.AppDatabase
+import com.beta.auraos.data.model.VehicleEntry
 import com.beta.auraos.data.remote.ApiClient
 import com.beta.auraos.data.remote.ParkingApi
 import com.beta.auraos.databinding.ActivityKioskEntryBinding
@@ -31,9 +34,12 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
+import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import java.util.TimeZone
+import java.util.UUID
 
 class KioskEntryActivity : AppCompatActivity() {
 
@@ -49,6 +55,10 @@ class KioskEntryActivity : AppCompatActivity() {
     private var platePhotoPath: String? = null
 
     private var currentVehicleType: String = "light"
+
+    private val vehicleEntryRepository: VehicleEntryRepository by lazy {
+        VehicleEntryRepository(AppDatabase.getInstance(this@KioskEntryActivity))
+    }
 
     private val permissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
@@ -177,7 +187,8 @@ class KioskEntryActivity : AppCompatActivity() {
     }
 
     private fun confirmEntry() {
-        val plateText = binding.etPlateNumber.text.toString().trim()
+        val plateText = binding.etPlateNumber.text.toString().trim().uppercase()
+        binding.etPlateNumber.setText(plateText)
 
         if (plateText.isEmpty()) {
             binding.tvPlateError.visibility = android.view.View.VISIBLE
@@ -186,9 +197,36 @@ class KioskEntryActivity : AppCompatActivity() {
         }
         binding.tvPlateError.visibility = android.view.View.GONE
 
+        val now = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US).apply {
+            timeZone = TimeZone.getTimeZone("UTC")
+        }.format(Date())
+
+        val localId = UUID.randomUUID().toString()
+
+        val localEntry = VehicleEntry(
+            id = localId,
+            plate = plateText,
+            vehicleType = currentVehicleType,
+            isVip = membershipId != null,
+            membershipId = membershipId,
+            branchId = branchId,
+            platePhotoUrl = null,
+            frontPhotoUrl = null,
+            rearPhotoUrl = null,
+            leftPhotoUrl = null,
+            rightPhotoUrl = null,
+            createdAt = now,
+            exitedAt = null,
+            duration = null,
+            fee = null,
+            branch = null
+        )
+
         showLoading(true)
 
         lifecycleScope.launch(Dispatchers.IO) {
+            vehicleEntryRepository.updateCachedEntry(localEntry)
+
             try {
                 val api = ApiClient.createApi<ParkingApi>()
 
@@ -237,16 +275,29 @@ class KioskEntryActivity : AppCompatActivity() {
                             .show()
                     } else {
                         val errorBody = response.errorBody()?.string() ?: getString(R.string.error_generic)
-                        Toast.makeText(this@KioskEntryActivity, errorBody, Toast.LENGTH_LONG).show()
+                        Toast.makeText(this@KioskEntryActivity, getString(R.string.confirm_entry_error, errorBody), Toast.LENGTH_LONG).show()
+                        resetForm()
                     }
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
                     showLoading(false)
-                    Toast.makeText(this@KioskEntryActivity, "${getString(R.string.error_network)}: ${e.message}", Toast.LENGTH_LONG).show()
+                    if (e is IOException) {
+                        Toast.makeText(this@KioskEntryActivity, R.string.confirm_entry_queued, Toast.LENGTH_LONG).show()
+                    } else {
+                        Toast.makeText(this@KioskEntryActivity, getString(R.string.confirm_entry_error, e.message ?: getString(R.string.error_network)), Toast.LENGTH_LONG).show()
+                    }
+                    resetForm()
                 }
             }
         }
+    }
+
+    private fun resetForm() {
+        binding.etPlateNumber.setText("")
+        binding.tvPlateError.visibility = android.view.View.GONE
+        binding.tvDbStatus.text = getString(R.string.plate_validation_status)
+        deletePlatePhoto()
     }
 
     private fun showLoading(show: Boolean) {

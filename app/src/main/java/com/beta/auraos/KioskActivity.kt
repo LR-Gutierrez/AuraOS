@@ -345,30 +345,38 @@ class KioskActivity : AppCompatActivity() {
     }
 
     private fun registerMembershipEntry(membership: Membership, cardUuid: String) {
-        val localEntryId = UUID.randomUUID().toString()
-        val now = nowUtcString()
-        val branchId = selectedBranch?.id ?: ""
-
-        val localEntry = VehicleEntry(
-            id = localEntryId,
-            plate = "NFC",
-            vehicleType = DEFAULT_NFC_VEHICLE_TYPE,
-            isVip = true,
-            membershipId = membership.id,
-            branchId = branchId,
-            platePhotoUrl = null,
-            frontPhotoUrl = null,
-            rearPhotoUrl = null,
-            leftPhotoUrl = null,
-            rightPhotoUrl = null,
-            createdAt = now,
-            exitedAt = null,
-            duration = null,
-            fee = null,
-            branch = null
-        )
-
         lifecycleScope.launch(Dispatchers.IO) {
+            val activeEntry = vehicleEntryRepository.getActiveEntryByMembership(membership.id)
+            if (activeEntry != null) {
+                withContext(Dispatchers.Main) {
+                    showEntryError(getString(R.string.kiosk_nfc_error_active_entry), membership)
+                }
+                return@launch
+            }
+
+            val localEntryId = UUID.randomUUID().toString()
+            val now = nowUtcString()
+            val branchId = selectedBranch?.id ?: ""
+
+            val localEntry = VehicleEntry(
+                id = localEntryId,
+                plate = "NFC",
+                vehicleType = DEFAULT_NFC_VEHICLE_TYPE,
+                isVip = true,
+                membershipId = membership.id,
+                branchId = branchId,
+                platePhotoUrl = null,
+                frontPhotoUrl = null,
+                rearPhotoUrl = null,
+                leftPhotoUrl = null,
+                rightPhotoUrl = null,
+                createdAt = now,
+                exitedAt = null,
+                duration = null,
+                fee = null,
+                branch = null
+            )
+
             vehicleEntryRepository.updateCachedEntry(localEntry)
 
             try {

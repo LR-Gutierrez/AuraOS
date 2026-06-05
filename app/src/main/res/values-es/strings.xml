@@ -64,6 +64,9 @@
     <string name="confirm_entry_success">Ingreso registrado correctamente</string>
     <string name="confirm_entry_membership_success">%1$s — Ingreso registrado mediante membresia</string>
     <string name="confirm_entry_error">Error al registrar ingreso: %1$s</string>
+    <string name="confirm_entry_queued">Ingreso guardado localmente — se sincronizará al restaurar la conexión</string>
+    <string name="plate_too_short">La placa debe tener al menos 3 caracteres</string>
+    <string name="plate_too_long">La placa debe tener máximo 15 caracteres</string>
     <string name="camera_permission_required">Se requiere permiso de cámara</string>
     <string name="plate_capture_hint">Toca para capturar placa</string>
     <string name="required_field_error">Campo obligatorio</string>
@@ -402,6 +405,7 @@
     <string name="kiosk_nfc_error_inactive">Esta membresía no está activa</string>
     <string name="kiosk_nfc_entry_success_format">Ingreso registrado para %1$s</string>
     <string name="kiosk_nfc_error_api">No se pudo registrar el ingreso. Intenta de nuevo.</string>
+    <string name="kiosk_nfc_error_active_entry">Esta membresía ya tiene un ingreso activo</string>
     <string name="nfc_not_available">NFC no está disponible en este dispositivo</string>
     <string name="kiosk_nfc_queued">Ingreso guardado para después</string>
     <string name="kiosk_nfc_queued_subtitle">Sin conexión a internet. El ingreso se registrará automáticamente cuando se restablezca la conexión.</string>

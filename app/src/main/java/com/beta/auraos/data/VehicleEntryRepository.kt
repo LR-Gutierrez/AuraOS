@@ -8,6 +8,11 @@ import com.beta.auraos.data.remote.ApiClient
 import com.beta.auraos.data.remote.ParkingApi
 import com.beta.auraos.data.remote.TodaySummary
 import java.io.IOException
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
+import java.util.TimeZone
 
 data class HistoryResult(
     val entries: List<VehicleEntry>,
@@ -25,10 +30,7 @@ class VehicleEntryRepository(
             val response = api.getVehicleEntries(branchId = branchId, exited = false)
             if (response.isSuccessful) {
                 val list = response.body()?.data ?: emptyList()
-                database?.vehicleEntryDao()?.let { dao ->
-                    dao.deleteActiveByBranch(branchId)
-                    dao.insertAll(list.map { it.toEntity() })
-                }
+                database?.vehicleEntryDao()?.insertAll(list.map { it.toEntity() })
                 Result.Success(list)
             } else {
                 Result.Error(Exception("Error al cargar ingresos: ${response.code()}"))
@@ -67,6 +69,10 @@ class VehicleEntryRepository(
             }
             Result.Error(Exception("Error de conexión: ${e.localizedMessage}"))
         }
+    }
+
+    suspend fun getActiveEntryByMembership(membershipId: String): VehicleEntry? {
+        return database?.vehicleEntryDao()?.getActiveByMembershipId(membershipId)?.toModel()
     }
 
     suspend fun getHistoryEntries(
@@ -167,11 +173,90 @@ class VehicleEntryRepository(
                 response.body()?.let { Result.Success(it) }
                     ?: Result.Error(Exception("Respuesta vacía del servidor"))
             } else {
-                Result.Error(Exception("Error al cargar resumen: ${response.code()}"))
+                computeAnalyticsLocal(branchId, date, inboundThresholdMinutes)
             }
         } catch (e: Exception) {
-            Result.Error(Exception("Error de conexión: ${e.localizedMessage}"))
+            if (isNetworkError(e)) {
+                computeAnalyticsLocal(branchId, date, inboundThresholdMinutes)
+            } else {
+                Result.Error(Exception("Error de conexión: ${e.localizedMessage}"))
+            }
         }
+    }
+
+    private suspend fun computeAnalyticsLocal(
+        branchId: String,
+        date: String?,
+        inboundThresholdMinutes: Int? = null
+    ): Result<AnalyticsSummaryResponse> {
+        val db = database ?: return Result.Error(Exception("Sin datos locales"))
+        val utcFormat = SimpleDateFormat("yyyy-MM-dd", Locale.US).apply {
+            timeZone = TimeZone.getTimeZone("UTC")
+        }
+        val targetDate = date ?: utcFormat.format(Date())
+        val cal = java.util.Calendar.getInstance(TimeZone.getTimeZone("UTC"))
+        if (date != null) {
+            cal.time = utcFormat.parse(date) ?: Date()
+        }
+        val fromDate = "${targetDate}T00:00:00"
+        cal.add(java.util.Calendar.DAY_OF_MONTH, 1)
+        val nextDay = utcFormat.format(cal.time)
+        val toDate = "${nextDay}T00:00:00"
+
+        val active = db.vehicleEntryDao().getActiveByBranch(branchId)
+        val todayExits = db.vehicleEntryDao().getExitsInRange(branchId, fromDate, toDate)
+        val todayEntries = db.vehicleEntryDao().getEntriesInRange(branchId, fromDate, toDate)
+        val allHistory = db.vehicleEntryDao().getHistoryByBranch(branchId)
+        val branch = db.branchDao().getById(branchId)
+
+        val outboundCount = todayExits.size
+        val inboundCount = todayEntries.size
+        val activeCount = active.size
+        val totalCapacity = branch?.let {
+            it.lightVehicleCapacity + it.heavyVehicleCapacity + it.motorcycleCapacity
+        } ?: maxOf(activeCount, 1)
+        val totalRevenue = todayExits.sumOf { it.fee ?: 0.0 }
+        val avgMinutes = allHistory
+            .filter { it.duration != null }
+            .mapNotNull { parseDurationMinutes(it.duration!!) }
+            .let { mins -> if (mins.isEmpty()) 0 else mins.average().toInt() }
+
+        return Result.Success(
+            AnalyticsSummaryResponse(
+                branchId = branchId,
+                date = targetDate,
+                totalCapacity = totalCapacity,
+                inboundCount = inboundCount,
+                activeCount = activeCount,
+                outboundCount = outboundCount,
+                totalRevenue = totalRevenue,
+                avgDurationMinutes = avgMinutes.toDouble(),
+                inboundTrendPercent = 0,
+                activeTrendPercent = 0,
+                outboundTrendPercent = 0,
+                revenueTrendPercent = 0,
+                peakHourRevenue = 0.0,
+                peakHourLabel = "",
+                inboundThresholdMinutes = inboundThresholdMinutes ?: 0
+            )
+        )
+    }
+
+    private fun parseDurationMinutes(duration: String): Int? {
+        val hRegex = Regex("""(?:(\d+)\s*h)?\s*(?:(\d+)\s*m)?""")
+        val m = hRegex.matchEntire(duration.trim())?.groupValues
+        if (m != null && (m[1].isNotEmpty() || m[2].isNotEmpty())) {
+            val hours = m[1].toIntOrNull() ?: 0
+            val mins = m[2].toIntOrNull() ?: 0
+            return hours * 60 + mins
+        }
+        val hm = duration.trim().split(":")
+        if (hm.size == 2) {
+            val h = hm[0].toIntOrNull() ?: return null
+            val min = hm[1].toIntOrNull() ?: return null
+            return h * 60 + min
+        }
+        return null
     }
 
     private fun VehicleEntry.toEntity() = VehicleEntryEntity(

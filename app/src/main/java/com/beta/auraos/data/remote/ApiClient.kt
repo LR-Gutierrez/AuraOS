@@ -8,8 +8,8 @@ import java.util.concurrent.TimeUnit
 
 object ApiClient {
 
-    //const val BASE_URL = "http://192.168.0.143:3000/"
-    const val BASE_URL = "http://192.168.2.2:3000/"
+    const val BASE_URL = "http://192.168.0.143:3000/"
+    //const val BASE_URL = "http://192.168.2.2:3000/"
 
     val retrofit: Retrofit by lazy {
         val logging = HttpLoggingInterceptor().apply {

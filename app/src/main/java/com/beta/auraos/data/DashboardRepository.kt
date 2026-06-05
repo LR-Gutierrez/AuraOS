@@ -1,5 +1,6 @@
 package com.beta.auraos.data
 
+import com.beta.auraos.data.local.DashboardCalculator
 import com.beta.auraos.data.local.DashboardLocalDataSource
 import com.beta.auraos.data.model.DashboardResponse
 import com.beta.auraos.data.remote.ApiClient
@@ -11,7 +12,8 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 class DashboardRepository(
     private val token: String,
-    private val localDataSource: DashboardLocalDataSource
+    private val localDataSource: DashboardLocalDataSource,
+    private val calculator: DashboardCalculator
 ) {
 
     var lastResultFromCache: Boolean = false
@@ -38,6 +40,12 @@ class DashboardRepository(
     }
 
     suspend fun getDashboard(branchId: String): Result<DashboardResponse> {
+        val local = calculator.compute(branchId)
+        if (local != null) {
+            lastResultFromCache = true
+            return Result.Success(local)
+        }
+
         return try {
             val response = api.getDashboard(branchId)
             if (response.isSuccessful) {
@@ -47,28 +55,29 @@ class DashboardRepository(
                     lastResultFromCache = false
                     Result.Success(body)
                 } else {
-                    Result.Error(Exception("Respuesta vacía del servidor"))
+                    Result.Error(Exception("Sin datos del servidor"))
                 }
             } else {
-                val errorMsg = when (response.code()) {
-                    401 -> "Sesión expirada. Inicia sesión nuevamente."
-                    404 -> "Sucursal no encontrada"
-                    else -> "Error del servidor: ${response.code()}"
-                }
-                Result.Error(Exception(errorMsg))
+                Result.Error(Exception("Error del servidor: ${response.code()}"))
             }
         } catch (e: Exception) {
-            if (localDataSource.isNetworkError(e)) {
-                val cached = localDataSource.load(branchId)
-                if (cached != null) {
-                    lastResultFromCache = true
-                    Result.Success(cached)
-                } else {
-                    Result.Error(Exception("Sin conexión y sin datos locales"))
-                }
+            val cached = localDataSource.load(branchId)
+            if (cached != null) {
+                lastResultFromCache = true
+                Result.Success(cached)
             } else {
-                Result.Error(Exception("Error de conexión: ${e.localizedMessage}"))
+                Result.Error(Exception("Sin conexión: ${e.localizedMessage ?: "Error desconocido"}"))
             }
+        }
+    }
+
+    private suspend fun computeLocal(branchId: String): Result<DashboardResponse> {
+        val computed = calculator.compute(branchId)
+        return if (computed != null) {
+            lastResultFromCache = true
+            Result.Success(computed)
+        } else {
+            Result.Error(Exception("Sin conexión y sin datos locales"))
         }
     }
 }

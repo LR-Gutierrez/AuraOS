@@ -64,6 +64,9 @@
     <string name="confirm_entry_success">Entry registered successfully</string>
     <string name="confirm_entry_membership_success">%1$s — Entry registered via membership</string>
     <string name="confirm_entry_error">Error registering entry: %1$s</string>
+    <string name="confirm_entry_queued">Entry saved locally — will sync when connection is restored</string>
+    <string name="plate_too_short">Plate must be at least 3 characters</string>
+    <string name="plate_too_long">Plate must be at most 15 characters</string>
     <string name="camera_permission_required">Camera permission is required</string>
     <string name="plate_capture_hint">Tap to capture plate</string>
     <string name="required_field_error">Required field</string>
@@ -414,6 +417,7 @@
     <string name="kiosk_nfc_error_inactive">This membership is not active</string>
     <string name="kiosk_nfc_entry_success_format">Entry registered for %1$s</string>
     <string name="kiosk_nfc_error_api">Could not register entry. Please try again.</string>
+    <string name="kiosk_nfc_error_active_entry">This membership already has an active entry</string>
     <string name="nfc_not_available">NFC is not available on this device</string>
     <string name="kiosk_nfc_queued">Entry saved for later</string>
     <string name="kiosk_nfc_queued_subtitle">No internet connection. The entry will be registered automatically when connection is restored.</string>

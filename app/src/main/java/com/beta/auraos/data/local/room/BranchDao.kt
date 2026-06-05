@@ -11,6 +11,12 @@ interface BranchDao {
     @Query("SELECT * FROM branches ORDER BY name ASC")
     suspend fun getAll(): List<BranchEntity>
 
+    @Query("SELECT * FROM branches WHERE id = :id")
+    suspend fun getById(id: String): BranchEntity?
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(branch: BranchEntity)
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(branches: List<BranchEntity>)
 

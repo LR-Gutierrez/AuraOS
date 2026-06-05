@@ -26,6 +26,9 @@ interface MembershipDao {
     @Query("DELETE FROM memberships WHERE branchId = :branchId")
     suspend fun deleteByBranch(branchId: String)
 
+    @Query("DELETE FROM memberships")
+    suspend fun deleteAll()
+
     @Query("DELETE FROM memberships WHERE id = :id")
     suspend fun deleteById(id: String)
 }

@@ -84,13 +84,23 @@ class BranchRepository(
         return try {
             val response = api.getBranch(id)
             if (response.isSuccessful) {
-                response.body()?.let { Result.Success(it) }
-                    ?: Result.Error(IOException("Sucursal no encontrada"))
+                val branch = response.body()
+                if (branch != null) {
+                    database?.branchDao()?.insert(branch.toEntity())
+                    Result.Success(branch)
+                } else {
+                    Result.Error(IOException("Sucursal no encontrada"))
+                }
             } else {
                 Result.Error(IOException("Error al cargar sucursal: ${response.code()}"))
             }
         } catch (e: Exception) {
-            Result.Error(IOException("Error de conexión: ${e.localizedMessage ?: "Error desconocido"}"))
+            val cached = database?.branchDao()?.getById(id)
+            if (cached != null) {
+                Result.Success(cached.toModel())
+            } else {
+                Result.Error(IOException("Error de conexión: ${e.localizedMessage ?: "Error desconocido"}"))
+            }
         }
     }
 

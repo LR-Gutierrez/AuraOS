@@ -31,7 +31,9 @@ import com.google.android.material.color.MaterialColors
 import com.beta.auraos.data.LoginDataSource
 import com.beta.auraos.data.Result
 import com.beta.auraos.data.local.BiometricKeyManager
+import com.beta.auraos.data.local.DashboardCalculator
 import com.beta.auraos.data.local.DashboardLocalDataSource
+import com.beta.auraos.data.local.SyncManager
 import com.beta.auraos.data.local.room.AppDatabase
 import com.beta.auraos.data.local.room.BranchDao
 import kotlinx.coroutines.Dispatchers
@@ -169,6 +171,13 @@ class DashboardActivity : AppCompatActivity() {
 
         setupViewModel()
         observeDashboard()
+
+        lifecycleScope.launch(Dispatchers.IO) {
+            val token = sessionManager.getToken()
+            if (token != null) {
+                SyncManager(this@DashboardActivity, AppDatabase.getInstance(this@DashboardActivity), token).sync()
+            }
+        }
     }
 
     override fun onResume() {
@@ -252,7 +261,8 @@ class DashboardActivity : AppCompatActivity() {
         val token = sessionManager.getToken() ?: return
         val db = AppDatabase.getInstance(this)
         val localDataSource = DashboardLocalDataSource(db)
-        val repository = DashboardRepository(token, localDataSource)
+        val calculator = DashboardCalculator(db)
+        val repository = DashboardRepository(token, localDataSource, calculator)
         val membershipRepo = MembershipRepository(db)
         val vehicleEntryRepo = VehicleEntryRepository(db)
         val factory = DashboardViewModelFactory(repository, membershipRepo, vehicleEntryRepo)
