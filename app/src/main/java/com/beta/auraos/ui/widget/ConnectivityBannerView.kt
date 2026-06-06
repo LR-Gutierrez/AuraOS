@@ -54,6 +54,7 @@ class ConnectivityBannerView @JvmOverloads constructor(
         removeCallbacks(hideRunnable)
         heightAnimator?.cancel()
 
+        visibility = VISIBLE
         bannerContent.setBackgroundColor(offlineColor)
         bannerText.text = context.getString(R.string.connectivity_offline_text)
 
@@ -69,6 +70,7 @@ class ConnectivityBannerView @JvmOverloads constructor(
         removeCallbacks(hideRunnable)
         heightAnimator?.cancel()
 
+        visibility = VISIBLE
         bannerContent.setBackgroundColor(onlineColor)
         bannerText.text = context.getString(R.string.connectivity_online_text)
 

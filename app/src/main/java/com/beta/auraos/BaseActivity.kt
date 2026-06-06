@@ -11,6 +11,7 @@ import com.beta.auraos.data.local.ConnectivityObserver
 import com.beta.auraos.data.local.SyncCoordinator
 import com.beta.auraos.data.local.room.AppDatabase
 import com.beta.auraos.ui.widget.ConnectivityBannerView
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -18,6 +19,7 @@ abstract class BaseActivity : AppCompatActivity() {
 
     private lateinit var connectivityObserver: ConnectivityObserver
     private var connectivityBannerView: ConnectivityBannerView? = null
+    private var connectivityJob: Job? = null
     private lateinit var syncCoordinator: SyncCoordinator
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -57,21 +59,19 @@ abstract class BaseActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        observeConnectivity()
-    }
-
-    override fun onStop() {
-        super.onStop()
-        connectivityBannerView?.cleanup()
-    }
-
-    private fun observeConnectivity() {
-        lifecycleScope.launch {
+        connectivityJob?.cancel()
+        connectivityJob = lifecycleScope.launch {
             connectivityObserver.isOnline.collectLatest { online ->
                 connectivityBannerView?.let { banner ->
                     if (online) banner.showOnline() else banner.showOffline()
                 }
             }
         }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        connectivityJob?.cancel()
+        connectivityBannerView?.cleanup()
     }
 }
