@@ -79,4 +79,6 @@
     <dimen name="text_size_headline">28sp</dimen>
     <dimen name="text_size_display">34sp</dimen>
     <dimen name="text_size_plate">44sp</dimen>
+    <!-- Connectivity banner -->
+    <dimen name="connectivity_banner_height">38dp</dimen>
 </resources>

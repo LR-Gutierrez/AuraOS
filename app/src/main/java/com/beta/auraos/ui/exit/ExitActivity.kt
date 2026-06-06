@@ -13,7 +13,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
+import com.beta.auraos.BaseActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
@@ -38,7 +38,7 @@ import com.beta.auraos.util.PhotoUrlBuilder
 import com.beta.auraos.util.formatDateTime
 import com.google.android.material.color.MaterialColors
 
-class ExitActivity : AppCompatActivity() {
+class ExitActivity : BaseActivity() {
 
     private lateinit var binding: ActivityExitBinding
     private lateinit var viewModel: ExitViewModel

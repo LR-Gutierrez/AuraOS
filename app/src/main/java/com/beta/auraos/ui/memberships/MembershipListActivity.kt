@@ -13,7 +13,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
+import com.beta.auraos.BaseActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -28,7 +28,7 @@ import com.beta.auraos.databinding.ActivityMembershipListBinding
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.color.MaterialColors
 
-class MembershipListActivity : AppCompatActivity() {
+class MembershipListActivity : BaseActivity() {
 
     private lateinit var binding: ActivityMembershipListBinding
     private lateinit var viewModel: MembershipViewModel

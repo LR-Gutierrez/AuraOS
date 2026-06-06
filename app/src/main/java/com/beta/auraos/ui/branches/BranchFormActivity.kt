@@ -8,7 +8,7 @@ import android.widget.ArrayAdapter
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
+import com.beta.auraos.BaseActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
@@ -21,7 +21,7 @@ import com.beta.auraos.databinding.ActivityBranchFormBinding
 import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.TimeFormat
 
-class BranchFormActivity : AppCompatActivity() {
+class BranchFormActivity : BaseActivity() {
 
     private lateinit var binding: ActivityBranchFormBinding
     private lateinit var viewModel: BranchViewModel

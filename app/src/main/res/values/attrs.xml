@@ -65,4 +65,8 @@
     <attr name="branchSurfaceCustom" format="color" />
     <attr name="branchProgressTrackCustom" format="color" />
     <attr name="branchSurfaceTextCustom" format="color" />
+
+    <!-- Connectivity banner -->
+    <attr name="connectivityOfflineCustom" format="color" />
+    <attr name="connectivityOnlineCustom" format="color" />
 </resources>

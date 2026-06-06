@@ -78,6 +78,10 @@
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:windowLightStatusBar">false</item>
+
+        <!-- Connectivity banner -->
+        <item name="connectivityOfflineCustom">@color/connectivity_offline_midnight</item>
+        <item name="connectivityOnlineCustom">@color/connectivity_online_midnight</item>
     </style>
 
     <style name="Theme.AuraOS.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />

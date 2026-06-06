@@ -409,6 +409,8 @@
     <string name="nfc_not_available">NFC no está disponible en este dispositivo</string>
     <string name="kiosk_nfc_queued">Ingreso guardado para después</string>
     <string name="kiosk_nfc_queued_subtitle">Sin conexión a internet. El ingreso se registrará automáticamente cuando se restablezca la conexión.</string>
+    <string name="connectivity_offline_text">Sin conexión</string>
+    <string name="connectivity_online_text">Conexión restablecida</string>
 
     <!-- Auditoría / Cierre -->
     <string name="audit_title">Auditoría</string>

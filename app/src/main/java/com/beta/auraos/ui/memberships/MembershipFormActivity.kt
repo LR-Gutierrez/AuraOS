@@ -9,7 +9,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
+import com.beta.auraos.BaseActivity
 import java.time.LocalDate
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
@@ -23,7 +23,7 @@ import com.beta.auraos.data.local.SessionManager
 import com.beta.auraos.data.model.CreateMembershipInput
 import com.beta.auraos.databinding.ActivityMembershipFormBinding
 
-class MembershipFormActivity : AppCompatActivity() {
+class MembershipFormActivity : BaseActivity() {
 
     private lateinit var binding: ActivityMembershipFormBinding
     private lateinit var viewModel: MembershipViewModel

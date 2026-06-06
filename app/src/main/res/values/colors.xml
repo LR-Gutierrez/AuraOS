@@ -117,4 +117,10 @@
     <color name="top_app_bar_bg_light">#CCFFFFFF</color>
     <color name="bottom_nav_bg_light">#CCFFFFFF</color>
 
+    <!-- Connectivity banner -->
+    <color name="connectivity_offline_crystal">#272727</color>
+    <color name="connectivity_online_crystal">#2E7D32</color>
+    <color name="connectivity_offline_midnight">#383838</color>
+    <color name="connectivity_online_midnight">#4CAF50</color>
+
 </resources>
