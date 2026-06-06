@@ -1,5 +1,7 @@
 package com.beta.auraos.data
 
+import com.beta.auraos.data.local.ChangeJournal
+import com.beta.auraos.data.local.ChangeJournalProvider
 import com.beta.auraos.data.local.room.AppDatabase
 import com.beta.auraos.data.local.room.VehicleEntryEntity
 import com.beta.auraos.data.model.VehicleEntry
@@ -20,8 +22,10 @@ data class HistoryResult(
 )
 
 class VehicleEntryRepository(
-    private val database: AppDatabase? = null
+    private val database: AppDatabase? = null,
+    private val changeJournal: ChangeJournal? = null
 ) {
+    private val journal: ChangeJournal? get() = changeJournal ?: ChangeJournalProvider.get()
 
     private val api = ApiClient.createApi<ParkingApi>()
 
@@ -128,6 +132,12 @@ class VehicleEntryRepository(
                     database?.vehicleEntryDao()?.let { dao ->
                         dao.insert(entry.toEntity())
                     }
+                    val changedFields = mapOf(
+                        "exitedAt" to entry.exitedAt,
+                        "duration" to entry.duration,
+                        "fee" to entry.fee
+                    )
+                    journal?.recordUpdate("vehicle_entry", id, entry.toJournalMap(), changedFields)
                     Result.Success(entry)
                 } else {
                     Result.Error(Exception("Error al registrar salida"))
@@ -151,7 +161,11 @@ class VehicleEntryRepository(
     }
 
     suspend fun updateCachedEntry(entry: VehicleEntry) {
+        val existing = database?.vehicleEntryDao()?.getById(entry.id)
         database?.vehicleEntryDao()?.insert(entry.toEntity())
+        if (existing == null) {
+            journal?.recordCreate("vehicle_entry", entry.id, entry.toJournalMap())
+        }
     }
 
     suspend fun deleteCachedEntry(id: String) {
@@ -274,7 +288,44 @@ class VehicleEntryRepository(
         createdAt = createdAt,
         exitedAt = exitedAt,
         duration = duration,
-        fee = fee
+        fee = fee,
+        lastModifiedAt = System.currentTimeMillis()
+    )
+
+    private fun VehicleEntry.toJournalMap(): Map<String, Any?> = mapOf(
+        "id" to id,
+        "plate" to plate,
+        "vehicleType" to vehicleType,
+        "isVip" to isVip,
+        "membershipId" to membershipId,
+        "branchId" to branchId,
+        "platePhotoUrl" to platePhotoUrl,
+        "frontPhotoUrl" to frontPhotoUrl,
+        "rearPhotoUrl" to rearPhotoUrl,
+        "leftPhotoUrl" to leftPhotoUrl,
+        "rightPhotoUrl" to rightPhotoUrl,
+        "createdAt" to createdAt,
+        "exitedAt" to exitedAt,
+        "duration" to duration,
+        "fee" to fee
+    )
+
+    private fun VehicleEntryEntity.toJournalMap(): Map<String, Any?> = mapOf(
+        "id" to id,
+        "plate" to plate,
+        "vehicleType" to vehicleType,
+        "isVip" to isVip,
+        "membershipId" to membershipId,
+        "branchId" to branchId,
+        "platePhotoUrl" to platePhotoUrl,
+        "frontPhotoUrl" to frontPhotoUrl,
+        "rearPhotoUrl" to rearPhotoUrl,
+        "leftPhotoUrl" to leftPhotoUrl,
+        "rightPhotoUrl" to rightPhotoUrl,
+        "createdAt" to createdAt,
+        "exitedAt" to exitedAt,
+        "duration" to duration,
+        "fee" to fee
     )
 
     private fun VehicleEntryEntity.toModel() = VehicleEntry(

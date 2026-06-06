@@ -16,9 +16,10 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         MembershipEntity::class,
         VehicleEntryEntity::class,
         PendingNfcEntryEntity::class,
-        PendingExitEntity::class
+        PendingExitEntity::class,
+        ChangeJournalEntity::class
     ],
-    version = 7,
+    version = 8,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -29,6 +30,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun vehicleEntryDao(): VehicleEntryDao
     abstract fun pendingNfcEntryDao(): PendingNfcEntryDao
     abstract fun pendingExitDao(): PendingExitDao
+    abstract fun changeJournalDao(): ChangeJournalDao
 
     companion object {
         @Volatile
@@ -174,13 +176,40 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_7_8 = object : Migration(7, 8) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS `change_journal` (
+                        `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        `entityType` TEXT NOT NULL,
+                        `entityId` TEXT NOT NULL,
+                        `operation` TEXT NOT NULL,
+                        `data` TEXT NOT NULL,
+                        `changedFields` TEXT,
+                        `timestamp` INTEGER NOT NULL,
+                        `deviceId` TEXT NOT NULL,
+                        `synced` INTEGER NOT NULL DEFAULT 0
+                    )
+                    """.trimIndent()
+                )
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_change_journal_entityType` ON `change_journal` (`entityType`)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_change_journal_entityId` ON `change_journal` (`entityId`)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_change_journal_synced` ON `change_journal` (`synced`)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_change_journal_timestamp` ON `change_journal` (`timestamp`)")
+                db.execSQL("ALTER TABLE `branches` ADD COLUMN `lastModifiedAt` INTEGER")
+                db.execSQL("ALTER TABLE `memberships` ADD COLUMN `lastModifiedAt` INTEGER")
+                db.execSQL("ALTER TABLE `vehicle_entries` ADD COLUMN `lastModifiedAt` INTEGER")
+            }
+        }
+
         fun getInstance(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
                 INSTANCE ?: Room.databaseBuilder(
                     context.applicationContext,
                     AppDatabase::class.java,
                     "auraos_dashboard.db"
-                ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7)
+                ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8)
                     .build().also { INSTANCE = it }
             }
         }

@@ -27,5 +27,6 @@ data class VehicleEntryEntity(
     val createdAt: String,
     val exitedAt: String? = null,
     val duration: String? = null,
-    val fee: Double? = null
+    val fee: Double? = null,
+    val lastModifiedAt: Long? = null
 )

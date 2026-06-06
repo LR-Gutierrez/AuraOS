@@ -6,7 +6,10 @@ import android.view.ViewGroup
 import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import com.beta.auraos.data.local.ChangeJournalProvider
 import com.beta.auraos.data.local.ConnectivityObserver
+import com.beta.auraos.data.local.SyncCoordinator
+import com.beta.auraos.data.local.room.AppDatabase
 import com.beta.auraos.ui.widget.ConnectivityBannerView
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -15,10 +18,16 @@ abstract class BaseActivity : AppCompatActivity() {
 
     private lateinit var connectivityObserver: ConnectivityObserver
     private var connectivityBannerView: ConnectivityBannerView? = null
+    private lateinit var syncCoordinator: SyncCoordinator
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         connectivityObserver = ConnectivityObserver(this)
+        ChangeJournalProvider.initialize(this, AppDatabase.getInstance(this))
+        syncCoordinator = SyncCoordinator(this, connectivityObserver, lifecycleScope)
+        ChangeJournalProvider.get()?.onMutation = {
+            syncCoordinator.onMutation()
+        }
     }
 
     override fun setContentView(view: View) {

@@ -22,5 +22,6 @@ data class MembershipEntity(
     val branchId: String,
     val cardUuid: String? = null,
     val createdAt: String? = null,
-    val updatedAt: String? = null
+    val updatedAt: String? = null,
+    val lastModifiedAt: Long? = null
 )

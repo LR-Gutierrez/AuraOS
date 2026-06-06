@@ -20,6 +20,9 @@ interface BranchDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(branches: List<BranchEntity>)
 
+    @Query("DELETE FROM branches WHERE id = :id")
+    suspend fun deleteById(id: String)
+
     @Query("DELETE FROM branches")
     suspend fun deleteAll()
 }

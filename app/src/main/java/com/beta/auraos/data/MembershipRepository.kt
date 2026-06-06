@@ -1,5 +1,7 @@
 package com.beta.auraos.data
 
+import com.beta.auraos.data.local.ChangeJournal
+import com.beta.auraos.data.local.ChangeJournalProvider
 import com.beta.auraos.data.local.room.AppDatabase
 import com.beta.auraos.data.local.room.MembershipEntity
 import com.beta.auraos.data.model.CreateMembershipInput
@@ -10,8 +12,10 @@ import com.beta.auraos.data.remote.MembershipApi
 import java.io.IOException
 
 class MembershipRepository(
-    private val database: AppDatabase? = null
+    private val database: AppDatabase? = null,
+    private val changeJournal: ChangeJournal? = null
 ) {
+    private val journal: ChangeJournal? get() = changeJournal ?: ChangeJournalProvider.get()
 
     private val api = ApiClient.createApi<MembershipApi>()
 
@@ -100,6 +104,7 @@ class MembershipRepository(
                 val membership = response.body()
                 if (membership != null) {
                     database?.membershipDao()?.insert(membership.toEntity())
+                    journal?.recordCreate("membership", membership.id, membership.toJournalMap())
                     Result.Success(membership)
                 } else {
                     Result.Error(Exception("Error al crear membresía"))
@@ -115,17 +120,18 @@ class MembershipRepository(
 
     suspend fun updateMembership(id: String, input: UpdateMembershipInput): Result<Membership> {
         return try {
-            val map = mutableMapOf<String, Any>()
-            input.memberName?.let { map["memberName"] = it }
-            input.tier?.let { map["tier"] = it }
-            input.endDate?.let { map["endDate"] = it }
-            input.cardUuid?.let { map["cardUuid"] = it }
+            val changedFields = mutableMapOf<String, Any>()
+            input.memberName?.let { changedFields["memberName"] = it }
+            input.tier?.let { changedFields["tier"] = it }
+            input.endDate?.let { changedFields["endDate"] = it }
+            input.cardUuid?.let { changedFields["cardUuid"] = it }
 
-            val response = api.updateMembership(id, map)
+            val response = api.updateMembership(id, changedFields)
             if (response.isSuccessful) {
                 val membership = response.body()
                 if (membership != null) {
                     database?.membershipDao()?.insert(membership.toEntity())
+                    journal?.recordUpdate("membership", id, membership.toJournalMap(), changedFields)
                     Result.Success(membership)
                 } else {
                     Result.Error(Exception("Error al actualizar membresía"))
@@ -141,11 +147,13 @@ class MembershipRepository(
 
     suspend fun registerCard(id: String, cardUuid: String): Result<Membership> {
         return try {
-            val response = api.registerCard(id, mapOf("cardUuid" to cardUuid))
+            val changedFields = mapOf("cardUuid" to cardUuid)
+            val response = api.registerCard(id, changedFields)
             if (response.isSuccessful) {
                 val membership = response.body()
                 if (membership != null) {
                     database?.membershipDao()?.insert(membership.toEntity())
+                    journal?.recordUpdate("membership", id, membership.toJournalMap(), changedFields)
                     Result.Success(membership)
                 } else {
                     Result.Error(Exception("Error al registrar tarjeta"))
@@ -161,11 +169,13 @@ class MembershipRepository(
 
     suspend fun unregisterCard(id: String): Result<Membership> {
         return try {
+            val changedFields = mapOf("cardUuid" to null)
             val response = api.unregisterCard(id)
             if (response.isSuccessful) {
                 val membership = response.body()
                 if (membership != null) {
                     database?.membershipDao()?.insert(membership.toEntity())
+                    journal?.recordUpdate("membership", id, membership.toJournalMap(), changedFields)
                     Result.Success(membership)
                 } else {
                     Result.Error(Exception("Error al desvincular tarjeta"))
@@ -181,9 +191,13 @@ class MembershipRepository(
 
     suspend fun deleteMembership(id: String): Result<Unit> {
         return try {
+            val cached = database?.membershipDao()?.getById(id)
             val response = api.deleteMembership(id)
             if (response.isSuccessful) {
                 database?.membershipDao()?.deleteById(id)
+                if (cached != null) {
+                    journal?.recordDelete("membership", id, cached.toJournalMap())
+                }
                 Result.Success(Unit)
             } else {
                 Result.Error(Exception("Error al eliminar membresía: ${response.code()}"))
@@ -193,6 +207,32 @@ class MembershipRepository(
         }
     }
 
+    private fun Membership.toJournalMap(): Map<String, Any?> = mapOf(
+        "id" to id,
+        "memberName" to memberName,
+        "tier" to tier,
+        "startDate" to startDate,
+        "endDate" to endDate,
+        "isActive" to isActive,
+        "branchId" to branchId,
+        "cardUuid" to cardUuid,
+        "createdAt" to null,
+        "updatedAt" to null
+    )
+
+    private fun MembershipEntity.toJournalMap(): Map<String, Any?> = mapOf(
+        "id" to id,
+        "memberName" to memberName,
+        "tier" to tier,
+        "startDate" to startDate,
+        "endDate" to endDate,
+        "isActive" to isActive,
+        "branchId" to branchId,
+        "cardUuid" to cardUuid,
+        "createdAt" to createdAt,
+        "updatedAt" to updatedAt
+    )
+
     private fun Membership.toEntity() = MembershipEntity(
         id = id,
         memberName = memberName,
@@ -201,7 +241,10 @@ class MembershipRepository(
         endDate = endDate,
         isActive = isActive,
         branchId = branchId,
-        cardUuid = cardUuid
+        cardUuid = cardUuid,
+        createdAt = null,
+        updatedAt = null,
+        lastModifiedAt = System.currentTimeMillis()
     )
 
     private fun MembershipEntity.toModel() = Membership(

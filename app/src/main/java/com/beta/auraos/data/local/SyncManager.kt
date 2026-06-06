@@ -19,6 +19,8 @@ class SyncManager(
 ) {
 
     private val api: SyncApi = ApiClient.createApi()
+    private val changeJournal = ChangeJournal(database, context)
+    private val journalSyncManager = ChangeJournalSyncManager(database, changeJournal)
     private val prefs: SharedPreferences =
         context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
@@ -31,8 +33,15 @@ class SyncManager(
     }
 
     suspend fun sync(): SyncResult {
+        Log.d(TAG, "Starting sync")
+
+        val journalResult = journalSyncManager.sync(token)
+        if (journalResult is ChangeJournalSyncManager.SyncResult.Error) {
+            Log.w(TAG, "Journal sync failed: ${journalResult.message}")
+        }
+
         val lastSync = getLastSyncTimestamp()
-        Log.d(TAG, "Starting sync" + if (lastSync != null) " since=$lastSync" else " (full)")
+        Log.d(TAG, "Starting full sync" + if (lastSync != null) " since=$lastSync" else " (full)")
         val response: SyncResponse = try {
             api.sync(authHeader = "Bearer $token", since = lastSync)
         } catch (e: Exception) {
@@ -41,7 +50,11 @@ class SyncManager(
                 else -> SyncResult.Error(e.message ?: "Unknown error")
             }
             Log.w(TAG, "Sync failed: $result — ${e.message}")
-            return result
+            return if (journalResult is ChangeJournalSyncManager.SyncResult.Success) {
+                SyncResult.Success(lastSync ?: "")
+            } else {
+                result
+            }
         }
 
         if (response.branches.isNotEmpty()) {
