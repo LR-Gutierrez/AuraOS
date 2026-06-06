@@ -380,6 +380,12 @@ class KioskActivity : BaseActivity() {
 
             try {
                 val response = parkingApi.registerNfcEntry(NfcEntryRequest(cardUuid = cardUuid))
+                if (response.isSuccessful) {
+                    val serverEntry = response.body()?.data
+                    if (serverEntry != null) {
+                        vehicleEntryRepository.replaceLocalWithServerEntry(localEntryId, serverEntry)
+                    }
+                }
                 withContext(Dispatchers.Main) {
                     if (response.isSuccessful) {
                         showEntrySuccess(membership)

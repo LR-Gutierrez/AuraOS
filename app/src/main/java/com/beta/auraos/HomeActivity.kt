@@ -570,6 +570,13 @@ class HomeActivity : BaseActivity() {
                     rear = rearPart, left = leftPart, right = rightPart,
                 )
 
+                if (response.isSuccessful) {
+                    val serverEntry = response.body()?.data
+                    if (serverEntry != null) {
+                        vehicleEntryRepository.replaceLocalWithServerEntry(localId, serverEntry)
+                    }
+                }
+
                 withContext(Dispatchers.Main) {
                     if (response.isSuccessful) {
                         resetForm()

@@ -3,7 +3,7 @@ package com.beta.auraos.data.remote
 import com.beta.auraos.data.model.VehicleEntry
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
-import okhttp3.ResponseBody
+
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -83,7 +83,7 @@ interface ParkingApi {
         @Part rear: MultipartBody.Part?,
         @Part left: MultipartBody.Part?,
         @Part right: MultipartBody.Part?,
-    ): Response<ResponseBody>
+    ): Response<ApiResponse<VehicleEntry>>
 
     @Multipart
     @POST("ocr/plate")

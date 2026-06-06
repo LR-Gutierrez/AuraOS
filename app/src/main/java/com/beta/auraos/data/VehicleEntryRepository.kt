@@ -172,6 +172,12 @@ class VehicleEntryRepository(
         database?.vehicleEntryDao()?.deleteById(id)
     }
 
+    suspend fun replaceLocalWithServerEntry(localId: String, serverEntry: VehicleEntry) {
+        database?.vehicleEntryDao()?.deleteById(localId)
+        database?.vehicleEntryDao()?.insert(serverEntry.toEntity())
+        journal?.recordCreate("vehicle_entry", serverEntry.id, serverEntry.toJournalMap())
+    }
+
     suspend fun getAnalyticsSummary(
         branchId: String,
         date: String? = null,
