@@ -17,7 +17,7 @@ import kotlinx.coroutines.launch
 
 abstract class BaseActivity : AppCompatActivity() {
 
-    private lateinit var connectivityObserver: ConnectivityObserver
+    protected lateinit var connectivityObserver: ConnectivityObserver
     private var connectivityBannerView: ConnectivityBannerView? = null
     private var connectivityJob: Job? = null
     private lateinit var syncCoordinator: SyncCoordinator

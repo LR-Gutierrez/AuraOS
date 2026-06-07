@@ -35,7 +35,12 @@ class VehicleEntryRepository(
             if (response.isSuccessful) {
                 val list = response.body()?.data ?: emptyList()
                 database?.vehicleEntryDao()?.insertAll(list.map { it.toEntity() })
-                Result.Success(list)
+
+                val serverIds = list.map { it.id }.toSet()
+                val localPending = getLocalPendingEntries(branchId).filter { it.id !in serverIds }
+                val merged = if (localPending.isEmpty()) list else list + localPending
+
+                Result.Success(merged)
             } else {
                 Result.Error(Exception("Error al cargar ingresos: ${response.code()}"))
             }
@@ -48,6 +53,21 @@ class VehicleEntryRepository(
             }
             Result.Error(Exception("Error de conexión: ${e.localizedMessage}"))
         }
+    }
+
+    private suspend fun getLocalPendingEntries(branchId: String): List<VehicleEntry> {
+        val journal = journal ?: return emptyList()
+        val unsynced = journal.getUnsyncedChanges()
+        val result = mutableListOf<VehicleEntry>()
+        for (change in unsynced) {
+            if (change.entityType == "vehicle_entry" && change.operation == ChangeJournal.OP_CREATE) {
+                val entry = database?.vehicleEntryDao()?.getById(change.entityId)
+                if (entry != null && entry.branchId == branchId && entry.exitedAt == null) {
+                    result.add(entry.toModel())
+                }
+            }
+        }
+        return result
     }
 
     suspend fun getEntry(id: String): Result<VehicleEntry> {
@@ -175,7 +195,7 @@ class VehicleEntryRepository(
     suspend fun replaceLocalWithServerEntry(localId: String, serverEntry: VehicleEntry) {
         database?.vehicleEntryDao()?.deleteById(localId)
         database?.vehicleEntryDao()?.insert(serverEntry.toEntity())
-        journal?.recordCreate("vehicle_entry", serverEntry.id, serverEntry.toJournalMap())
+        journal?.markSyncedForEntity("vehicle_entry", localId)
     }
 
     suspend fun getAnalyticsSummary(

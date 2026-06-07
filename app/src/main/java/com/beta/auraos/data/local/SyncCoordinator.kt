@@ -1,6 +1,7 @@
 package com.beta.auraos.data.local
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.util.Log
 import com.beta.auraos.data.local.room.AppDatabase
 import kotlinx.coroutines.CoroutineScope
@@ -17,18 +18,28 @@ class SyncCoordinator(
 ) {
 
     private val sessionManager = SessionManager(context.applicationContext)
+    private val prefs: SharedPreferences =
+        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+
     private var isOnline = false
-    private var pendingSync = false
+
+    private var pendingSync: Boolean
+        get() = prefs.getBoolean(KEY_PENDING_SYNC, false)
+        set(value) = prefs.edit().putBoolean(KEY_PENDING_SYNC, value).apply()
+
     private var syncJob: Job? = null
 
     init {
         scope.launch {
             connectivityObserver.isOnline.collectLatest { online ->
                 isOnline = online
-                if (online && pendingSync) {
-                    Log.d(TAG, "Back online — syncing pending mutations")
-                    pendingSync = false
-                    triggerSync()
+                if (online) {
+                    if (pendingSync) {
+                        Log.d(TAG, "Back online — syncing pending mutations")
+                        triggerSync()
+                    } else {
+                        triggerExitSync()
+                    }
                 }
             }
         }
@@ -49,21 +60,67 @@ class SyncCoordinator(
     }
 
     private suspend fun triggerSync() {
-        val token = sessionManager.getToken()
-        if (token == null) {
-            Log.w(TAG, "Cannot sync: no token available")
+        if (syncing) {
+            Log.d(TAG, "Sync already in progress, skipping")
             return
         }
+        syncing = true
         try {
+            val token = sessionManager.getToken()
+            if (token == null) {
+                Log.w(TAG, "Cannot sync: no token available")
+                return
+            }
             val db = AppDatabase.getInstance(context)
-            SyncManager(context, db, token).sync()
+            val result = SyncManager(context, db, token).sync()
+            when {
+                result is SyncManager.SyncResult.Success -> {
+                    pendingSync = false
+                    Log.d(TAG, "Journal sync completed successfully")
+                }
+                isAuthError(result) -> {
+                    pendingSync = false
+                    Log.w(TAG, "Sync failed with 401 — clearing pendingSync, token may be invalid")
+                    sessionManager.clearToken()
+                }
+                else -> {
+                    Log.w(TAG, "Journal sync did not complete successfully, will retry: $result")
+                }
+            }
+            triggerExitSync()
         } catch (e: Exception) {
             Log.e(TAG, "Sync after mutation failed: ${e.message}")
+        } finally {
+            syncing = false
         }
+    }
+
+    private suspend fun triggerExitSync() {
+        try {
+            val db = AppDatabase.getInstance(context)
+            val result = ExitSyncManager(db).syncPending()
+            when (result) {
+                is ExitSyncManager.SyncResult.Noop -> {}
+                is ExitSyncManager.SyncResult.Success -> Log.d(TAG, "Exits synced: ${result.count}")
+                is ExitSyncManager.SyncResult.Partial -> Log.d(TAG, "Exits partial: ${result.synced} synced, ${result.failed} failed")
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Exit sync failed: ${e.message}")
+        }
+    }
+
+    private fun isAuthError(result: SyncManager.SyncResult): Boolean {
+        return result is SyncManager.SyncResult.Error &&
+                (result.message.contains("401") || result.message.contains("Unauthorized"))
     }
 
     companion object {
         private const val TAG = "SyncCoordinator"
         private const val DEBOUNCE_MS = 800L
+        private const val PREFS_NAME = "aura_sync_coordinator_prefs"
+        private const val KEY_PENDING_SYNC = "pending_sync"
+
+        @Volatile
+        private var syncing = false
     }
 }

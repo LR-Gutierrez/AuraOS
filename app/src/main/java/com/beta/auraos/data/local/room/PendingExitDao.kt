@@ -19,6 +19,9 @@ interface PendingExitDao {
     @Query("DELETE FROM pending_exits WHERE id = :id")
     suspend fun deleteById(id: Long)
 
+    @Query("UPDATE pending_exits SET retryCount = retryCount + 1, lastError = :error WHERE id = :id")
+    suspend fun incrementRetry(id: Long, error: String)
+
     @Query("DELETE FROM pending_exits")
     suspend fun deleteAll()
 }

@@ -20,7 +20,6 @@ import com.beta.auraos.data.Result
 import com.beta.auraos.data.MembershipRepository
 import com.beta.auraos.data.VehicleEntryRepository
 import com.beta.auraos.data.local.SessionManager
-import com.beta.auraos.data.local.SyncManager
 import com.beta.auraos.data.local.room.AppDatabase
 import com.beta.auraos.data.model.Branch
 import com.beta.auraos.data.model.Membership
@@ -140,12 +139,6 @@ class HomeActivity : BaseActivity() {
         setupWindowInsets()
         loadBranches()
 
-        lifecycleScope.launch(Dispatchers.IO) {
-            val token = sessionManager.getToken()
-            if (token != null) {
-                SyncManager(this@HomeActivity, AppDatabase.getInstance(this@HomeActivity), token).sync()
-            }
-        }
     }
 
     override fun onDestroy() {

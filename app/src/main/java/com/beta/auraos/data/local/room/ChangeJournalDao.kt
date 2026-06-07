@@ -31,6 +31,12 @@ interface ChangeJournalDao {
     @Query("UPDATE change_journal SET synced = 1 WHERE id IN (:ids)")
     suspend fun markAsSynced(ids: List<Long>)
 
+    @Query("UPDATE change_journal SET synced = 1 WHERE entityType = :entityType AND entityId = :entityId")
+    suspend fun markSyncedForEntity(entityType: String, entityId: String)
+
+    @Query("SELECT COUNT(*) FROM change_journal WHERE entityType = :entityType AND entityId = :entityId AND operation = 'CREATE' AND synced = 0")
+    suspend fun hasUnsyncedCreate(entityType: String, entityId: String): Int
+
     @Query("DELETE FROM change_journal WHERE synced = 1 AND timestamp < :before")
     suspend fun deleteOldSynced(before: Long)
 }

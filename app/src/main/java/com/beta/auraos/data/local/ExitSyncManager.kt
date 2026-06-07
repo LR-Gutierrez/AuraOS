@@ -1,5 +1,6 @@
 package com.beta.auraos.data.local
 
+import android.util.Log
 import com.beta.auraos.data.local.room.AppDatabase
 import com.beta.auraos.data.local.room.PendingExitEntity
 import com.beta.auraos.data.remote.ApiClient
@@ -36,15 +37,29 @@ class ExitSyncManager(
 
         var synced = 0
         var failed = 0
+        val maxRetries = 5
 
         for (entry in pending) {
+            if (entry.retryCount >= maxRetries) {
+                Log.w(TAG, "Dropping exit for ${entry.entryId}: max retries reached")
+                database.pendingExitDao().deleteById(entry.id)
+                failed++
+                continue
+            }
+
+            if (hasPendingCreate(entry.entryId)) {
+                Log.d(TAG, "Deferring exit for ${entry.entryId}: entry has pending CREATE journal")
+                failed++
+                continue
+            }
+
             try {
                 val response = api.registerExit(entry.entryId)
                 if (response.isSuccessful) {
                     database.pendingExitDao().deleteById(entry.id)
                     synced++
                 } else {
-                    database.pendingExitDao().deleteById(entry.id)
+                    database.pendingExitDao().incrementRetry(entry.id, response.message() ?: "HTTP ${response.code()}")
                     failed++
                 }
             } catch (e: Exception) {
@@ -55,12 +70,16 @@ class ExitSyncManager(
                 if (isNetworkError) {
                     return SyncResult.Partial(synced, failed + (pending.size - synced - failed))
                 }
-                database.pendingExitDao().deleteById(entry.id)
+                database.pendingExitDao().incrementRetry(entry.id, e.message ?: "Unknown error")
                 failed++
             }
         }
 
         return if (failed > 0) SyncResult.Partial(synced, failed) else SyncResult.Success(synced)
+    }
+
+    private suspend fun hasPendingCreate(entryId: String): Boolean {
+        return database.changeJournalDao().hasUnsyncedCreate("vehicle_entry", entryId) > 0
     }
 
     suspend fun getPendingCount(): Int {
@@ -71,5 +90,9 @@ class ExitSyncManager(
         data object Noop : SyncResult()
         data class Success(val count: Int) : SyncResult()
         data class Partial(val synced: Int, val failed: Int) : SyncResult()
+    }
+
+    companion object {
+        private const val TAG = "ExitSyncManager"
     }
 }

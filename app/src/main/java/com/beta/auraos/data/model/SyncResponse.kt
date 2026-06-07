@@ -56,5 +56,8 @@ data class SyncVehicleEntry(
     val leftPhotoUrl: String?,
     val rightPhotoUrl: String?,
     val createdAt: String,
-    val exitedAt: String?
+    val exitedAt: String?,
+    val duration: String? = null,
+    val fee: Double? = null,
+    val lastModifiedAt: Long? = null
 )

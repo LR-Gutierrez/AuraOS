@@ -94,6 +94,10 @@ class ChangeJournal(
         return dao.getLastSyncedTimestamp()
     }
 
+    suspend fun markSyncedForEntity(entityType: String, entityId: String) {
+        dao.markSyncedForEntity(entityType, entityId)
+    }
+
     suspend fun getChangesForEntity(entityType: String, entityId: String): List<ChangeJournalEntity> {
         return dao.getChangesForEntity(entityType, entityId)
     }
