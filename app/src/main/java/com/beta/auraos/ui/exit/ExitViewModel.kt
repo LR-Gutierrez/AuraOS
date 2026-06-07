@@ -120,27 +120,22 @@ class ExitViewModel(
             }
 
             val result = vehicleEntryRepository.registerExit(entryId)
-            when (result) {
-                is Result.Success -> {
-                    val exited = result.data
-                    val serverEntry = exited.copy(
-                        fee = exited.fee ?: fee,
-                        duration = exited.duration ?: duration,
-                        exitedAt = exited.exitedAt ?: exitTime
-                    )
-                    vehicleEntryRepository.updateCachedEntry(serverEntry)
-                }
-                is Result.Error -> {
-                    if (exitSyncManager != null && entry != null) {
-                        exitSyncManager.enqueue(
-                            entryId = entryId,
-                            exitTime = exitTime,
-                            duration = duration,
-                            fee = fee,
-                            branchId = entry.branchId
-                        )
-                    }
-                }
+            if (result is Result.Success) {
+                val exited = result.data
+                val serverEntry = exited.copy(
+                    fee = exited.fee ?: fee,
+                    duration = exited.duration ?: duration,
+                    exitedAt = exited.exitedAt ?: exitTime
+                )
+                vehicleEntryRepository.updateCachedEntry(serverEntry)
+            } else if (exitSyncManager != null && entry != null) {
+                exitSyncManager.enqueue(
+                    entryId = entryId,
+                    exitTime = exitTime,
+                    duration = duration,
+                    fee = fee,
+                    branchId = entry.branchId
+                )
             }
 
             val entries = state?.entries?.filter { it.id != entryId } ?: emptyList()

@@ -144,39 +144,35 @@ class VehicleEntryRepository(
     }
 
     suspend fun registerExit(id: String): Result<VehicleEntry> {
-        return try {
+        val cached = database?.vehicleEntryDao()?.getById(id)?.toModel()
+
+        try {
             val response = api.registerExit(id)
             if (response.isSuccessful) {
                 val entry = response.body()?.data
                 if (entry != null) {
-                    database?.vehicleEntryDao()?.let { dao ->
-                        dao.insert(entry.toEntity())
-                    }
-                    val changedFields = mapOf(
+                    database?.vehicleEntryDao()?.insert(entry.toEntity())
+                    journal?.recordUpdate("vehicle_entry", id, entry.toJournalMap(), mapOf(
                         "exitedAt" to entry.exitedAt,
                         "duration" to entry.duration,
                         "fee" to entry.fee
-                    )
-                    journal?.recordUpdate("vehicle_entry", id, entry.toJournalMap(), changedFields)
-                    Result.Success(entry)
-                } else {
-                    Result.Error(Exception("Error al registrar salida"))
-                }
-            } else {
-                val errorBody = response.errorBody()?.string() ?: "Error desconocido"
-                Result.Error(Exception("Error al registrar salida: $errorBody"))
-            }
-        } catch (e: Exception) {
-            if (isNetworkError(e)) {
-                val cached = database?.vehicleEntryDao()?.getById(id)
-                if (cached != null) {
-                    val model = cached.toModel()
-                    if (model.exitedAt != null) {
-                        return Result.Success(model)
-                    }
+                    ))
+                    return Result.Success(entry)
                 }
             }
-            Result.Error(Exception("Error de conexión: ${e.localizedMessage}"))
+        } catch (_: Exception) {
+        }
+
+        val model = cached ?: database?.vehicleEntryDao()?.getById(id)?.toModel()
+        return if (model != null && model.exitedAt != null) {
+            journal?.recordUpdate("vehicle_entry", id, model.toJournalMap(), mapOf(
+                "exitedAt" to model.exitedAt,
+                "duration" to model.duration,
+                "fee" to model.fee
+            ))
+            Result.Success(model)
+        } else {
+            Result.Error(Exception("Error al registrar salida"))
         }
     }
 
