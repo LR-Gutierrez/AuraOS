@@ -170,6 +170,52 @@ class LoginActivity : AppCompatActivity() {
 
     private fun startReturningUserFlow() {
         showQuickLogin()
+
+        if (hasBiometricHardware() && biometricKeyManager.isKeyGenerated() && loginViewModel.hasBiometricAvailable()) {
+            binding.quickLoginContainer?.post { tryAutoBiometric() }
+        }
+    }
+
+    private fun tryAutoBiometric() {
+        val signature = biometricKeyManager.getSignatureForAuth() ?: return
+
+        currentChallenge = "smartpark_challenge_${System.currentTimeMillis()}"
+
+        val promptInfo = BiometricPrompt.PromptInfo.Builder()
+            .setTitle(getString(R.string.biometric_prompt_title))
+            .setSubtitle(getString(R.string.biometric_prompt_subtitle))
+            .setAllowedAuthenticators(BIOMETRIC_STRONG or DEVICE_CREDENTIAL)
+            .build()
+
+        executor = ContextCompat.getMainExecutor(this)
+
+        biometricPrompt = BiometricPrompt(this, executor,
+            object : BiometricPrompt.AuthenticationCallback() {
+                override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
+                    super.onAuthenticationSucceeded(result)
+                    val sig = result.cryptoObject?.signature
+                    if (sig != null) {
+                        val signed = biometricKeyManager.signChallenge(sig, currentChallenge)
+                        val userId = loginViewModel.getUserId() ?: return
+                        loginViewModel.loginWithBiometric(userId, currentChallenge, signed)
+                    }
+                }
+
+                override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
+                    super.onAuthenticationError(errorCode, errString)
+                }
+
+                override fun onAuthenticationFailed() {
+                    super.onAuthenticationFailed()
+                    Toast.makeText(
+                        applicationContext,
+                        getString(R.string.biometric_fingerprint_not_recognized),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            })
+
+        biometricPrompt.authenticate(promptInfo, BiometricPrompt.CryptoObject(signature))
     }
 
     private fun showQuickLogin() {
