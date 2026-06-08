@@ -260,8 +260,8 @@
     <string name="dialog_ok">OK</string>
 
     <!-- Biometric Enrollment -->
-    <string name="biometric_enroll_title">Biometric Access</string>
-    <string name="biometric_enroll_message">Would you like to enable quick fingerprint access for next time?</string>
+    <string name="biometric_enroll_title">Quick Access</string>
+    <string name="biometric_enroll_message">Set up quick access with fingerprint or device PIN for faster sign-in next time?</string>
     <string name="biometric_enroll_activate">Activate</string>
     <string name="biometric_enroll_later">Not now</string>
     <string name="biometric_enrolled_success">Biometric access activated</string>

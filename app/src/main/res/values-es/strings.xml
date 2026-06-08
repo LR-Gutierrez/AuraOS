@@ -260,8 +260,8 @@
     <string name="dialog_ok">OK</string>
 
     <!-- Enrollment Biométrico -->
-    <string name="biometric_enroll_title">Acceso Biométrico</string>
-    <string name="biometric_enroll_message">¿Desea activar el acceso rápido con huella digital para la próxima vez?</string>
+    <string name="biometric_enroll_title">Acceso Rápido</string>
+    <string name="biometric_enroll_message">¿Configurar acceso rápido con huella o PIN del dispositivo para la próxima vez?</string>
     <string name="biometric_enroll_activate">Activar</string>
     <string name="biometric_enroll_later">Ahora no</string>
     <string name="biometric_enrolled_success">Acceso biométrico activado</string>

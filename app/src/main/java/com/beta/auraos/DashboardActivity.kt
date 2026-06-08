@@ -39,6 +39,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG
+import androidx.biometric.BiometricManager.Authenticators.DEVICE_CREDENTIAL
 import androidx.lifecycle.lifecycleScope
 
 class DashboardActivity : BaseActivity() {
@@ -363,7 +364,7 @@ class DashboardActivity : BaseActivity() {
     private fun hasBiometricHardware(): Boolean {
         return try {
             val mgr = BiometricManager.from(this)
-            mgr.canAuthenticate(BIOMETRIC_STRONG) == BiometricManager.BIOMETRIC_SUCCESS
+            mgr.canAuthenticate(BIOMETRIC_STRONG or DEVICE_CREDENTIAL) == BiometricManager.BIOMETRIC_SUCCESS
         } catch (e: Exception) {
             false
         }
