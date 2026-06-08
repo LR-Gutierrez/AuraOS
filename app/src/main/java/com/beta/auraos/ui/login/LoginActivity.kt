@@ -1,11 +1,9 @@
 package com.beta.auraos.ui.login
 
 import android.content.Intent
-import android.view.ViewGroup
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
-import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
@@ -42,7 +40,6 @@ class LoginActivity : AppCompatActivity() {
     private var lastPassword: String = ""
     private var currentChallenge: String = ""
     private var isReturningUser = false
-    private var autoBiometricAttempted = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -172,77 +169,10 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun startReturningUserFlow() {
-        binding.formCard?.visibility = View.GONE
-        binding.brandingContainer?.visibility = View.GONE
-        binding.loading?.visibility = View.VISIBLE
-
-        val hasHardware = hasBiometricHardware()
-        val keyExists = biometricKeyManager.isKeyGenerated()
-        val bioAvailable = hasHardware && loginViewModel.hasBiometricAvailable() && keyExists
-
-        if (bioAvailable) {
-            autoBiometricAttempted = true
-            binding.loading?.post { autoBiometricLogin() }
-        } else {
-            showQuickLogin()
-        }
-    }
-
-    private fun autoBiometricLogin() {
-        val signature = biometricKeyManager.getSignatureForAuth()
-        if (signature == null) {
-            showQuickLogin()
-            return
-        }
-
-        currentChallenge = "smartpark_challenge_${System.currentTimeMillis()}"
-
-        val promptInfo = BiometricPrompt.PromptInfo.Builder()
-            .setTitle(getString(R.string.biometric_prompt_title))
-            .setSubtitle(getString(R.string.biometric_prompt_subtitle))
-            .setAllowedAuthenticators(BIOMETRIC_STRONG or DEVICE_CREDENTIAL)
-            .build()
-
-        executor = ContextCompat.getMainExecutor(this)
-
-        biometricPrompt = BiometricPrompt(this, executor,
-            object : BiometricPrompt.AuthenticationCallback() {
-                override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
-                    super.onAuthenticationSucceeded(result)
-                    val sig = result.cryptoObject?.signature
-                    if (sig != null) {
-                        val signed = biometricKeyManager.signChallenge(sig, currentChallenge)
-                        val userId = loginViewModel.getUserId() ?: return
-                        loginViewModel.loginWithBiometric(userId, currentChallenge, signed)
-                    }
-                }
-
-                override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
-                    super.onAuthenticationError(errorCode, errString)
-                    if (errorCode == BiometricPrompt.ERROR_NEGATIVE_BUTTON ||
-                        errorCode == BiometricPrompt.ERROR_USER_CANCELED
-                    ) {
-                        showQuickLogin()
-                    }
-                }
-
-                override fun onAuthenticationFailed() {
-                    super.onAuthenticationFailed()
-                    Toast.makeText(
-                        applicationContext,
-                        getString(R.string.biometric_fingerprint_not_recognized),
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-            })
-
-        biometricPrompt.authenticate(promptInfo, BiometricPrompt.CryptoObject(signature))
+        showQuickLogin()
     }
 
     private fun showQuickLogin() {
-        binding.loading?.visibility = View.GONE
-        binding.brandingContainer?.visibility = View.VISIBLE
-        binding.formCard?.visibility = View.VISIBLE
         binding.quickLoginContainer?.visibility = View.VISIBLE
         binding.fullLoginContainer?.visibility = View.GONE
 
@@ -279,6 +209,12 @@ class LoginActivity : AppCompatActivity() {
     private fun switchToFullLogin() {
         binding.quickLoginContainer?.visibility = View.GONE
         binding.fullLoginContainer?.visibility = View.VISIBLE
+    }
+
+    private fun switchToQuickLogin() {
+        binding.fullLoginContainer?.visibility = View.GONE
+        binding.quickLoginContainer?.visibility = View.VISIBLE
+        loadAvatarForQuickLogin()
     }
 
     private fun doQuickLogin() {

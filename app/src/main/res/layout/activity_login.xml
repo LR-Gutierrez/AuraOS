@@ -298,66 +298,68 @@
                 android:textSize="@dimen/text_size_button"
                 android:textStyle="bold"
                 app:backgroundTint="@null" />
+        </LinearLayout>
 
-            <LinearLayout
-                android:id="@+id/biometricDivider"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/spacing_medium_plus"
-                android:gravity="center"
-                android:orientation="horizontal">
+        <LinearLayout
+            android:id="@+id/biometricDivider"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_medium_plus"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:visibility="gone">
 
-                <View
-                    android:layout_width="0dp"
-                    android:layout_height="1dp"
-                    android:layout_weight="1"
-                    android:background="?attr/dividerColorCustom" />
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1"
+                android:background="?attr/dividerColorCustom" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/spacing_small_plus"
-                    android:layout_marginEnd="@dimen/spacing_small_plus"
-                    android:fontFamily="sans-serif"
-                    android:text="@string/label_or_continue_with"
-                    android:textColor="?attr/textSecondaryCustom"
-                    android:textSize="@dimen/text_size_caption" />
-
-                <View
-                    android:layout_width="0dp"
-                    android:layout_height="1dp"
-                    android:layout_weight="1"
-                    android:background="?attr/dividerColorCustom" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/biometricContainer"
+            <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginTop="@dimen/spacing_medium"
-                android:gravity="center"
-                android:orientation="vertical">
+                android:layout_marginStart="@dimen/spacing_small_plus"
+                android:layout_marginEnd="@dimen/spacing_small_plus"
+                android:fontFamily="sans-serif"
+                android:text="@string/label_or_continue_with"
+                android:textColor="?attr/textSecondaryCustom"
+                android:textSize="@dimen/text_size_caption" />
 
-                <ImageButton
-                    android:id="@+id/biometricLogin"
-                    android:layout_width="@dimen/login_biometric_button_size"
-                    android:layout_height="@dimen/login_biometric_button_size"
-                    android:background="?attr/glassCardBackgroundCustom"
-                    android:contentDescription="@string/biometric_login_icon"
-                    android:scaleType="centerInside"
-                    android:src="@drawable/ic_fingerprint_24"
-                    app:tint="?attr/textPrimaryCustom" />
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1"
+                android:background="?attr/dividerColorCustom" />
+        </LinearLayout>
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
-                    android:fontFamily="sans-serif-medium"
-                    android:text="@string/quick_access"
-                    android:textColor="?attr/textSecondaryCustom"
-                    android:textSize="@dimen/text_size_overline" />
-            </LinearLayout>
+        <LinearLayout
+            android:id="@+id/biometricContainer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="@dimen/spacing_medium"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <ImageButton
+                android:id="@+id/biometricLogin"
+                android:layout_width="@dimen/login_biometric_button_size"
+                android:layout_height="@dimen/login_biometric_button_size"
+                android:background="?attr/glassCardBackgroundCustom"
+                android:contentDescription="@string/biometric_login_icon"
+                android:scaleType="centerInside"
+                android:src="@drawable/ic_fingerprint_24"
+                app:tint="?attr/textPrimaryCustom" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:fontFamily="sans-serif-medium"
+                android:text="@string/quick_access"
+                android:textColor="?attr/textSecondaryCustom"
+                android:textSize="@dimen/text_size_overline" />
         </LinearLayout>
     </LinearLayout>
 
