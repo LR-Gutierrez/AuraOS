@@ -18,6 +18,7 @@ import androidx.core.view.updatePadding
 import androidx.lifecycle.lifecycleScope
 import com.beta.auraos.data.VehicleEntryRepository
 import com.beta.auraos.data.local.SessionManager
+import com.beta.auraos.data.local.SyncCoordinator
 import com.beta.auraos.data.local.room.AppDatabase
 import com.beta.auraos.data.model.VehicleEntry
 import com.beta.auraos.data.remote.ApiClient
@@ -226,6 +227,7 @@ class KioskEntryActivity : BaseActivity() {
         lifecycleScope.launch(Dispatchers.IO) {
             vehicleEntryRepository.updateCachedEntry(localEntry)
 
+            SyncCoordinator.isApiInProgress = true
             try {
                 val api = ApiClient.createApi<ParkingApi>()
 
@@ -295,6 +297,9 @@ class KioskEntryActivity : BaseActivity() {
                     }
                     resetForm()
                 }
+            } finally {
+                SyncCoordinator.isApiInProgress = false
+                syncCoordinator.onMutation()
             }
         }
     }

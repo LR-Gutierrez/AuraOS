@@ -1,10 +1,14 @@
 package com.beta.auraos
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.beta.auraos.data.local.ChangeJournalProvider
 import com.beta.auraos.data.local.ConnectivityObserver
@@ -20,7 +24,7 @@ abstract class BaseActivity : AppCompatActivity() {
     protected lateinit var connectivityObserver: ConnectivityObserver
     private var connectivityBannerView: ConnectivityBannerView? = null
     private var connectivityJob: Job? = null
-    private lateinit var syncCoordinator: SyncCoordinator
+    protected lateinit var syncCoordinator: SyncCoordinator
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,6 +34,29 @@ abstract class BaseActivity : AppCompatActivity() {
         ChangeJournalProvider.get()?.onMutation = {
             syncCoordinator.onMutation()
         }
+        requestNotificationPermission()
+    }
+
+    private fun requestNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(
+                    this, Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                requestPermissions(
+                    arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+                    PERMISSION_REQUEST_NOTIFICATIONS
+                )
+            }
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 
     override fun setContentView(view: View) {
@@ -73,5 +100,9 @@ abstract class BaseActivity : AppCompatActivity() {
         super.onStop()
         connectivityJob?.cancel()
         connectivityBannerView?.cleanup()
+    }
+
+    companion object {
+        private const val PERMISSION_REQUEST_NOTIFICATIONS = 9001
     }
 }

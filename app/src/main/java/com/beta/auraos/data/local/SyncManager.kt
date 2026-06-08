@@ -17,7 +17,7 @@ class SyncManager(
         Log.d(TAG, "Starting sync")
         return when (val result = journalSyncManager.sync(token)) {
             is ChangeJournalSyncManager.SyncResult.Success -> {
-                Log.d(TAG, "Sync completed successfully")
+                Log.d(TAG, "Sync completed successfully (${result.changesApplied} changes applied)")
                 SyncResult.Success
             }
             is ChangeJournalSyncManager.SyncResult.Error -> {

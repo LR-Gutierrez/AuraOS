@@ -457,4 +457,5 @@
     <string name="audit_dashboard_subtitle">Cash closure and revenue audit</string>
     <string name="audit_share_action">Share</string>
     <string name="audit_share_subject">Cash Closure Report</string>
+    <string name="foreground_service_syncing">Sincronizando en segundo plano</string>
 </resources>

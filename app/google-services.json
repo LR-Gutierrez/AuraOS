@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "126149677279",
+    "project_id": "aura-os-1758d",
+    "storage_bucket": "aura-os-1758d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:126149677279:android:3f436ee03acace956a596a",
+        "android_client_info": {
+          "package_name": "com.beta.auraos"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDEFH-HZ8S4dfYruMsgB2tZoEJoQRJVWck"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

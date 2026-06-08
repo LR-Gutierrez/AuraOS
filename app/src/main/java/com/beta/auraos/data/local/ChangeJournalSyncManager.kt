@@ -40,14 +40,14 @@ class ChangeJournalSyncManager(
 
         cleanupOldEntries()
         Log.d(TAG, "--- ChangeJournal sync completed ---")
-        return SyncResult.Success
+        return SyncResult.Success()
     }
 
     private suspend fun pushLocalChanges(token: String): SyncResult {
         val unsynced = changeJournal.getUnsyncedChanges()
         if (unsynced.isEmpty()) {
             Log.d(TAG, "No local changes to push")
-            return SyncResult.Success
+            return SyncResult.Success()
         }
 
         Log.d(TAG, "Pushing ${unsynced.size} local changes")
@@ -61,7 +61,7 @@ class ChangeJournalSyncManager(
                 val ids = unsynced.map { it.id }
                 changeJournal.markAsSynced(ids)
                 Log.d(TAG, "Successfully pushed ${ids.size} changes")
-                SyncResult.Success
+                SyncResult.Success()
             } else {
                 SyncResult.Error("Push failed: ${response.code()} ${response.message()}")
             }
@@ -93,7 +93,7 @@ class ChangeJournalSyncManager(
             val filtered = body.changes.filter { it.deviceId != deviceId }
             if (filtered.isEmpty()) {
                 Log.d(TAG, "No remote changes to apply")
-                return SyncResult.Success
+                return SyncResult.Success(0)
             }
 
             Log.d(TAG, "Applying ${filtered.size} remote changes")
@@ -101,7 +101,7 @@ class ChangeJournalSyncManager(
                 applyRemoteChange(change)
             }
 
-            SyncResult.Success
+            SyncResult.Success(filtered.size)
         } catch (e: Exception) {
             val msg = when (e) {
                 is IOException -> "Network error during pull: ${e.message}"
@@ -321,8 +321,13 @@ class ChangeJournalSyncManager(
     data class EntityWithTimestamp(val lastModifiedAt: Long?)
 
     sealed class SyncResult {
-        data object Success : SyncResult()
+        data class Success(val changesApplied: Int = 0) : SyncResult()
         data class Error(val message: String) : SyncResult()
+    }
+
+    suspend fun pullOnly(token: String): SyncResult {
+        Log.d(TAG, "--- Pull-only sync (SSE-triggered) ---")
+        return pullRemoteChanges(token)
     }
 
     companion object {

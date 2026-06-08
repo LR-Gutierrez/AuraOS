@@ -19,6 +19,7 @@ import com.beta.auraos.data.Result
 import com.beta.auraos.data.VehicleEntryRepository
 import com.beta.auraos.data.local.NfcSyncManager
 import com.beta.auraos.data.local.SessionManager
+import com.beta.auraos.data.local.SyncCoordinator
 import com.beta.auraos.data.local.room.AppDatabase
 import com.beta.auraos.data.model.Branch
 import com.beta.auraos.data.model.Membership
@@ -378,6 +379,7 @@ class KioskActivity : BaseActivity() {
 
             vehicleEntryRepository.updateCachedEntry(localEntry)
 
+            SyncCoordinator.isApiInProgress = true
             try {
                 val response = parkingApi.registerNfcEntry(NfcEntryRequest(cardUuid = cardUuid))
                 if (response.isSuccessful) {
@@ -385,12 +387,13 @@ class KioskActivity : BaseActivity() {
                     if (serverEntry != null) {
                         vehicleEntryRepository.replaceLocalWithServerEntry(localEntryId, serverEntry)
                     }
+                } else {
+                    nfcSyncManager.enqueue(cardUuid, branchId, membership.memberName, membership.id, localEntryId)
                 }
                 withContext(Dispatchers.Main) {
                     if (response.isSuccessful) {
                         showEntrySuccess(membership)
                     } else {
-                        nfcSyncManager.enqueue(cardUuid, branchId, membership.memberName, membership.id, localEntryId)
                         showEntryQueued(membership)
                     }
                 }
@@ -400,6 +403,9 @@ class KioskActivity : BaseActivity() {
                 withContext(Dispatchers.Main) {
                     showEntryQueued(membership)
                 }
+            } finally {
+                SyncCoordinator.isApiInProgress = false
+                syncCoordinator.onMutation()
             }
         }
     }

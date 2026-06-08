@@ -20,6 +20,7 @@ import com.beta.auraos.data.Result
 import com.beta.auraos.data.MembershipRepository
 import com.beta.auraos.data.VehicleEntryRepository
 import com.beta.auraos.data.local.SessionManager
+import com.beta.auraos.data.local.SyncCoordinator
 import com.beta.auraos.data.local.room.AppDatabase
 import com.beta.auraos.data.model.Branch
 import com.beta.auraos.data.model.Membership
@@ -543,6 +544,7 @@ class HomeActivity : BaseActivity() {
         lifecycleScope.launch(Dispatchers.IO) {
             vehicleEntryRepository.updateCachedEntry(localEntry)
 
+            SyncCoordinator.isApiInProgress = true
             try {
                 val plateBody = plate.toRequestBody("text/plain".toMediaTypeOrNull())
                 val typeBody = vehicleType.toRequestBody("text/plain".toMediaTypeOrNull())
@@ -594,6 +596,8 @@ class HomeActivity : BaseActivity() {
                     resetForm()
                 }
             } finally {
+                SyncCoordinator.isApiInProgress = false
+                syncCoordinator.onMutation()
                 withContext(Dispatchers.Main) {
                     with(binding) {
                         btnConfirmEntry.isEnabled = true

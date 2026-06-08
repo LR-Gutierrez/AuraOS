@@ -60,8 +60,8 @@ class SyncCoordinator(
     }
 
     private suspend fun triggerSync() {
-        if (syncing) {
-            Log.d(TAG, "Sync already in progress, skipping")
+        if (syncing || isApiInProgress) {
+            Log.d(TAG, "Sync skipped: syncing=$syncing, apiInProgress=$isApiInProgress")
             return
         }
         syncing = true
@@ -122,5 +122,8 @@ class SyncCoordinator(
 
         @Volatile
         private var syncing = false
+
+        @Volatile
+        var isApiInProgress = false
     }
 }
