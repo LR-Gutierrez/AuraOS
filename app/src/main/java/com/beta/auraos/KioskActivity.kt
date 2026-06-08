@@ -12,6 +12,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import com.beta.auraos.data.BranchRepository
 import com.beta.auraos.data.MembershipRepository
@@ -243,7 +244,9 @@ class KioskActivity : BaseActivity() {
     private fun stopNfcScanning() {
         isNfcScanning = false
         isProcessingNfc = false
-        disableNfcForegroundDispatch()
+        if (lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
+            disableNfcForegroundDispatch()
+        }
         binding.cardNfcScanning.visibility = View.GONE
         binding.cardNfcProcessing.visibility = View.GONE
         binding.tvKioskSubtitle.visibility = View.VISIBLE

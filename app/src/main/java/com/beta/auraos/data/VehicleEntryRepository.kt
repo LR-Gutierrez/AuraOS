@@ -50,6 +50,7 @@ class VehicleEntryRepository(
                 if (cached != null && cached.isNotEmpty()) {
                     return Result.Success(cached.map { it.toModel() })
                 }
+                return Result.Success(emptyList())
             }
             Result.Error(Exception("Error de conexión: ${e.localizedMessage}"))
         }
