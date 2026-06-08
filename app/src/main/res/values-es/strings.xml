@@ -279,6 +279,7 @@
     <string name="biometric_error_init">Error al inicializar biometría. Vuelva a enrolar.</string>
     <string name="biometric_error_verify">Error al verificar biometría</string>
     <string name="biometric_fingerprint_not_recognized">Huella no reconocida. Intente de nuevo.</string>
+    <string name="biometric_use_fingerprint">Usa tu huella en lugar del PIN para acceso rápido</string>
 
     <!-- Mensajes de error comunes -->
     <string name="error_unknown">Error desconocido</string>

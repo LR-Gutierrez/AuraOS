@@ -193,11 +193,17 @@ class LoginActivity : AppCompatActivity() {
             object : BiometricPrompt.AuthenticationCallback() {
                 override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
                     super.onAuthenticationSucceeded(result)
-                    val sig = result.cryptoObject?.signature
-                    if (sig != null) {
+                    val sig = result.cryptoObject?.signature ?: return
+                    val userId = loginViewModel.getUserId() ?: return
+                    try {
                         val signed = biometricKeyManager.signChallenge(sig, currentChallenge)
-                        val userId = loginViewModel.getUserId() ?: return
                         loginViewModel.loginWithBiometric(userId, currentChallenge, signed)
+                    } catch (e: Exception) {
+                        Toast.makeText(
+                            applicationContext,
+                            getString(R.string.biometric_use_fingerprint),
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 }
 
@@ -289,11 +295,17 @@ class LoginActivity : AppCompatActivity() {
             object : BiometricPrompt.AuthenticationCallback() {
                 override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
                     super.onAuthenticationSucceeded(result)
-                    val signature = result.cryptoObject?.signature
-                    if (signature != null) {
-                        val signed = biometricKeyManager.signChallenge(signature, currentChallenge)
-                        val userId = loginViewModel.getUserId() ?: return
+                    val sig = result.cryptoObject?.signature ?: return
+                    val userId = loginViewModel.getUserId() ?: return
+                    try {
+                        val signed = biometricKeyManager.signChallenge(sig, currentChallenge)
                         loginViewModel.loginWithBiometric(userId, currentChallenge, signed)
+                    } catch (e: Exception) {
+                        Toast.makeText(
+                            applicationContext,
+                            getString(R.string.biometric_use_fingerprint),
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 }
 

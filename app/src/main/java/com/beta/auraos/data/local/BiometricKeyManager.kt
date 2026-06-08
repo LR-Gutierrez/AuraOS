@@ -1,6 +1,7 @@
 package com.beta.auraos.data.local
 
 import android.content.Context
+import android.os.Build
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyPermanentlyInvalidatedException
 import android.security.keystore.KeyProperties
@@ -46,7 +47,7 @@ class BiometricKeyManager(context: Context) {
             KEYSTORE_TYPE
         )
 
-        val spec = KeyGenParameterSpec.Builder(
+        val specBuilder = KeyGenParameterSpec.Builder(
             KEY_NAME,
             KeyProperties.PURPOSE_SIGN
         )
@@ -54,7 +55,15 @@ class BiometricKeyManager(context: Context) {
             .setSignaturePaddings(KeyProperties.SIGNATURE_PADDING_RSA_PKCS1)
             .setUserAuthenticationRequired(true)
             .setInvalidatedByBiometricEnrollment(true)
-            .build()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            specBuilder.setUserAuthenticationParameters(
+                0,
+                KeyProperties.AUTH_BIOMETRIC_STRONG or KeyProperties.AUTH_DEVICE_CREDENTIAL
+            )
+        }
+
+        val spec = specBuilder.build()
 
         generator.initialize(spec)
         generator.generateKeyPair()
