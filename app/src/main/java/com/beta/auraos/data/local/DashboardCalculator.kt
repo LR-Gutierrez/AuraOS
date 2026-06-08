@@ -61,8 +61,14 @@ class DashboardCalculator(
             .sortedBy { it.createdAt }
             .take(5)
             .map { entry ->
+                val memberName = if (entry.membershipId != null) {
+                    memberships.find { it.id == entry.membershipId }?.memberName
+                        ?: entry.membershipId
+                } else {
+                    "VIP"
+                }
                 VipArrival(
-                    guestName = if (entry.isVip) "VIP" else entry.membershipId ?: "VIP",
+                    guestName = memberName,
                     slot = entry.plate,
                     membershipId = entry.membershipId
                 )

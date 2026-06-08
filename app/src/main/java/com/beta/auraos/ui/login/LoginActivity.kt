@@ -18,6 +18,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import android.widget.EditText
+import android.widget.ImageButton
 import android.widget.Toast
 import coil.load
 import coil.transform.CircleCropTransformation
@@ -68,6 +69,9 @@ class LoginActivity : AppCompatActivity() {
 
         if (isReturningUser) {
             startReturningUserFlow()
+        } else {
+            binding.username.setText("admin@smartpark.com")
+            binding.password.setText("admin123")
         }
     }
 
@@ -108,6 +112,22 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
+    private fun setupPasswordToggle(toggleButton: android.widget.ImageButton, editText: android.widget.EditText) {
+        var isVisible = false
+        toggleButton.setImageResource(R.drawable.ic_visibility_off)
+        toggleButton.setOnClickListener {
+            isVisible = !isVisible
+            if (isVisible) {
+                editText.inputType = android.text.InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
+                toggleButton.setImageResource(R.drawable.ic_visibility)
+            } else {
+                editText.inputType = android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD
+                toggleButton.setImageResource(R.drawable.ic_visibility_off)
+            }
+            editText.text?.length?.let { editText.setSelection(it) }
+        }
+    }
+
     private fun setupQuickLogin() {
         val storedEmail = loginViewModel.getStoredEmail()
         binding.tvQuickGreeting?.text = getString(
@@ -128,6 +148,10 @@ class LoginActivity : AppCompatActivity() {
         binding.btnQuickLogin?.setOnClickListener { doQuickLogin() }
 
         binding.tvQuickSwitch?.setOnClickListener { switchToFullLogin() }
+
+        binding.quickPasswordToggle?.let { toggle ->
+            binding.etQuickPassword?.let { setupPasswordToggle(toggle, it) }
+        }
     }
 
     private fun setupFullLogin() {
@@ -165,6 +189,10 @@ class LoginActivity : AppCompatActivity() {
                 lastPassword = password.text.toString()
                 loginViewModel.login(username.text.toString(), password.text.toString())
             }
+        }
+
+        binding.passwordToggle?.let { toggle ->
+            setupPasswordToggle(toggle, binding.password)
         }
     }
 

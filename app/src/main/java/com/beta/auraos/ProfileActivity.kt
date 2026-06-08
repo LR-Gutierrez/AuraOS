@@ -320,10 +320,9 @@ class ProfileActivity : BaseActivity() {
 
     private fun enrollBiometric(password: String) {
         val email = sessionManager.getLastEmail()
-        val token = sessionManager.getToken()
         val userId = sessionManager.getUserId()
 
-        if (email == null || token == null || userId == null) {
+        if (email == null || userId == null) {
             Toast.makeText(this, R.string.error_session_expired, Toast.LENGTH_SHORT).show()
             return
         }
@@ -331,46 +330,37 @@ class ProfileActivity : BaseActivity() {
         binding.switchBiometric.isEnabled = false
 
         lifecycleScope.launch {
-            val result = withContext(Dispatchers.IO) {
-                try {
-                    biometricKeyManager.generateKeyPair()
-                    val publicKey = biometricKeyManager.getPublicKey()
-                        ?: return@withContext Result.Error(
-                            java.io.IOException(getString(R.string.biometric_key_generate_error))
-                        )
+            try {
+                biometricKeyManager.generateKeyPair()
 
-                    val dataSource = LoginDataSource(sessionManager)
-                    dataSource.biometricEnroll(token, userId, publicKey)
-                } catch (e: Exception) {
-                    biometricKeyManager.deleteKey()
-                    Result.Error(java.io.IOException(
-                        e.localizedMessage ?: getString(R.string.biometric_enrolled_error)
-                    ))
-                }
-            }
+                sessionManager.saveCredentials(email, password)
+                sessionManager.setBiometricEnrolled(true)
+                updateBiometricStatus()
 
-            binding.switchBiometric.isEnabled = true
+                launch(Dispatchers.IO) {
+                    try {
+                        val publicKey = biometricKeyManager.getPublicKey() ?: return@launch
+                        val token = sessionManager.getToken() ?: return@launch
+                        val dataSource = LoginDataSource(sessionManager)
+                        dataSource.biometricEnroll(token, userId, publicKey)
+                    } catch (_: Exception) { }
+                }
 
-            when (result) {
-                is Result.Success -> {
-                    sessionManager.saveCredentials(email, password)
-                    sessionManager.setBiometricEnrolled(true)
-                    updateBiometricStatus()
-                    Toast.makeText(
-                        this@ProfileActivity,
-                        R.string.profile_biometric_enroll_success,
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-                is Result.Error -> {
-                    biometricKeyManager.deleteKey()
-                    updateBiometricStatus()
-                    Toast.makeText(
-                        this@ProfileActivity,
-                        getString(R.string.profile_biometric_enroll_error, result.exception.message),
-                        Toast.LENGTH_LONG
-                    ).show()
-                }
+                binding.switchBiometric.isEnabled = true
+                Toast.makeText(
+                    this@ProfileActivity,
+                    R.string.profile_biometric_enroll_success,
+                    Toast.LENGTH_SHORT
+                ).show()
+            } catch (e: Exception) {
+                biometricKeyManager.deleteKey()
+                binding.switchBiometric.isEnabled = true
+                updateBiometricStatus()
+                Toast.makeText(
+                    this@ProfileActivity,
+                    getString(R.string.profile_biometric_enroll_error, e.localizedMessage),
+                    Toast.LENGTH_LONG
+                ).show()
             }
         }
     }

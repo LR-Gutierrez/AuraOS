@@ -251,11 +251,10 @@ class DashboardActivity : BaseActivity() {
     }
 
     private fun setupViewModel() {
-        val token = sessionManager.getToken() ?: return
         val db = AppDatabase.getInstance(this)
         val localDataSource = DashboardLocalDataSource(db)
         val calculator = DashboardCalculator(db)
-        val repository = DashboardRepository(token, localDataSource, calculator)
+        val repository = DashboardRepository(sessionManager.getToken(), localDataSource, calculator)
         val membershipRepo = MembershipRepository(db)
         val vehicleEntryRepo = VehicleEntryRepository(db)
         val factory = DashboardViewModelFactory(repository, membershipRepo, vehicleEntryRepo)
@@ -385,34 +384,28 @@ class DashboardActivity : BaseActivity() {
 
     private fun enrollBiometric(email: String, password: String, userId: String) {
         lifecycleScope.launch {
-            val result = withContext(Dispatchers.IO) {
-                try {
-                    biometricKeyManager.generateKeyPair()
-                    val publicKey = biometricKeyManager.getPublicKey()
-                        ?: return@withContext Result.Error(java.io.IOException(getString(R.string.biometric_key_generate_error)))
+            try {
+                biometricKeyManager.generateKeyPair()
 
-                    val token = sessionManager.getToken()
-                        ?: return@withContext Result.Error(java.io.IOException(getString(R.string.biometric_session_expired)))
+                sessionManager.saveCredentials(email, password)
+                sessionManager.setBiometricEnrolled(true)
 
-                    val dataSource = LoginDataSource(sessionManager)
-                    dataSource.biometricEnroll(token, userId, publicKey)
-                } catch (e: Exception) {
-                    biometricKeyManager.deleteKey()
-                    Result.Error(java.io.IOException(e.localizedMessage ?: getString(R.string.biometric_enrolled_error)))
+                launch(Dispatchers.IO) {
+                    try {
+                        val publicKey = biometricKeyManager.getPublicKey() ?: return@launch
+                        val token = sessionManager.getToken() ?: return@launch
+                        val dataSource = LoginDataSource(sessionManager)
+                        dataSource.biometricEnroll(token, userId, publicKey)
+                    } catch (_: Exception) { }
                 }
-            }
 
-            withContext(Dispatchers.Main) {
-                when (result) {
-                    is Result.Success -> {
-                        sessionManager.saveCredentials(email, password)
-                        sessionManager.setBiometricEnrolled(true)
-                        Toast.makeText(this@DashboardActivity, getString(R.string.biometric_enrolled_success), Toast.LENGTH_SHORT).show()
-                    }
-                    is Result.Error -> {
-                        biometricKeyManager.deleteKey()
-                        Toast.makeText(this@DashboardActivity, result.exception.localizedMessage ?: getString(R.string.biometric_enrolled_error), Toast.LENGTH_SHORT).show()
-                    }
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(this@DashboardActivity, getString(R.string.biometric_enrolled_success), Toast.LENGTH_SHORT).show()
+                }
+            } catch (e: Exception) {
+                biometricKeyManager.deleteKey()
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(this@DashboardActivity, e.localizedMessage ?: getString(R.string.biometric_enrolled_error), Toast.LENGTH_SHORT).show()
                 }
             }
         }

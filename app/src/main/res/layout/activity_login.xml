@@ -174,20 +174,35 @@
                 android:textColor="?attr/textSecondaryCustom"
                 android:textSize="@dimen/text_size_small" />
 
-            <EditText
-                android:id="@+id/et_quick_password"
+            <FrameLayout
+                android:id="@+id/quickPasswordLayout"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/login_input_height"
-                android:layout_marginTop="@dimen/spacing_xsmall"
-                android:background="?attr/hollowInputBackground"
-                android:hint="@string/prompt_password"
-                android:imeOptions="actionDone"
-                android:inputType="textPassword"
-                android:paddingStart="@dimen/spacing_medium_plus"
-                android:paddingEnd="@dimen/spacing_medium_plus"
-                android:textColor="?attr/textPrimaryCustom"
-                android:textColorHint="?attr/textSecondaryCustom"
-                android:textSize="@dimen/text_size_body" />
+                android:layout_marginTop="@dimen/spacing_xsmall">
+
+                <EditText
+                    android:id="@+id/et_quick_password"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="?attr/hollowInputBackground"
+                    android:hint="@string/prompt_password"
+                    android:imeOptions="actionDone"
+                    android:inputType="textPassword"
+                    android:paddingStart="@dimen/spacing_medium_plus"
+                    android:paddingEnd="48dp"
+                    android:textColor="?attr/textPrimaryCustom"
+                    android:textColorHint="?attr/textSecondaryCustom"
+                    android:textSize="@dimen/text_size_body" />
+
+                <ImageButton
+                    android:id="@+id/quickPasswordToggle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end|center_vertical"
+                    android:layout_marginEnd="12dp"
+                    android:background="@android:color/transparent"
+                    android:src="@drawable/ic_visibility_off" />
+            </FrameLayout>
 
             <Button
                 android:id="@+id/btn_quick_login"
@@ -267,23 +282,38 @@
                 android:textColor="?attr/textSecondaryCustom"
                 android:textSize="@dimen/text_size_small" />
 
-            <EditText
-                android:id="@+id/password"
+            <FrameLayout
+                android:id="@+id/passwordLayout"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/login_input_height"
-                android:layout_marginTop="@dimen/spacing_xsmall"
-                android:autofillHints="password"
-                android:background="?attr/hollowInputBackground"
-                android:hint="@string/prompt_password"
-                android:imeActionLabel="@string/action_sign_in_short"
-                android:imeOptions="actionDone"
-                android:inputType="textPassword"
-                android:paddingStart="@dimen/spacing_medium_plus"
-                android:paddingEnd="@dimen/spacing_medium_plus"
-                android:selectAllOnFocus="true"
-                android:textColor="?attr/textPrimaryCustom"
-                android:textColorHint="?attr/textSecondaryCustom"
-                android:textSize="@dimen/text_size_body" />
+                android:layout_marginTop="@dimen/spacing_xsmall">
+
+                <EditText
+                    android:id="@+id/password"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:autofillHints="password"
+                    android:background="?attr/hollowInputBackground"
+                    android:hint="@string/prompt_password"
+                    android:imeActionLabel="@string/action_sign_in_short"
+                    android:imeOptions="actionDone"
+                    android:inputType="textPassword"
+                    android:paddingStart="@dimen/spacing_medium_plus"
+                    android:paddingEnd="48dp"
+                    android:selectAllOnFocus="true"
+                    android:textColor="?attr/textPrimaryCustom"
+                    android:textColorHint="?attr/textSecondaryCustom"
+                    android:textSize="@dimen/text_size_body" />
+
+                <ImageButton
+                    android:id="@+id/passwordToggle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end|center_vertical"
+                    android:layout_marginEnd="12dp"
+                    android:background="@android:color/transparent"
+                    android:src="@drawable/ic_visibility_off" />
+            </FrameLayout>
 
             <Button
                 android:id="@+id/login"

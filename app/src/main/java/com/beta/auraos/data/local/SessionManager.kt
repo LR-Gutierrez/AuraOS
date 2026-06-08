@@ -128,7 +128,7 @@ class SessionManager(context: Context) {
     fun getLastDisplayName(): String? = prefs.getString(KEY_LAST_DISPLAY_NAME, null)
 
     fun hasPreviousLogin(): Boolean {
-        return getToken() != null && getUserId() != null
+        return getUserId() != null
     }
 
     fun saveAvatarUrl(url: String) {

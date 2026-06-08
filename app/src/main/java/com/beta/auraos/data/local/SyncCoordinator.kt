@@ -3,6 +3,8 @@ package com.beta.auraos.data.local
 import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
+import com.beta.auraos.data.LoginDataSource
+import com.beta.auraos.data.Result
 import com.beta.auraos.data.local.room.AppDatabase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -66,13 +68,29 @@ class SyncCoordinator(
         }
         syncing = true
         try {
-            val token = sessionManager.getToken()
+            var token = sessionManager.getToken()
             if (token == null) {
-                Log.w(TAG, "Cannot sync: no token available")
-                return
+                val email = sessionManager.getEmail()
+                val password = sessionManager.getPassword()
+                if (email != null && password != null) {
+                    Log.d(TAG, "No token — attempting auto-login with saved credentials")
+                    val loginResult = LoginDataSource(sessionManager).login(email, password)
+                    if (loginResult is Result.Success) {
+                        token = sessionManager.getToken()
+                        Log.d(TAG, "Auto-login successful, token acquired")
+                    } else {
+                        val errorMsg = (loginResult as? Result.Error)?.exception?.message ?: "unknown"
+                        Log.w(TAG, "Auto-login failed: $errorMsg")
+                        return
+                    }
+                } else {
+                    Log.w(TAG, "Cannot sync: no token and no saved credentials")
+                    return
+                }
             }
+            val safeToken = token ?: return
             val db = AppDatabase.getInstance(context)
-            val result = SyncManager(context, db, token).sync()
+            val result = SyncManager(context, db, safeToken).sync()
             when {
                 result is SyncManager.SyncResult.Success -> {
                     pendingSync = false

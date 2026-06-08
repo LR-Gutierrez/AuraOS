@@ -3,6 +3,7 @@ package com.beta.auraos
 import android.app.Application
 import com.beta.auraos.data.local.ChangeJournal
 import com.beta.auraos.data.local.ConnectivityObserver
+import com.beta.auraos.data.local.SeedDataInitializer
 import com.beta.auraos.data.local.SessionManager
 import com.beta.auraos.data.local.room.AppDatabase
 import com.beta.auraos.data.remote.fcm.AuraFcmTokenHolder
@@ -11,6 +12,7 @@ import com.beta.auraos.data.remote.sse.SyncRealtimeCoordinator
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 
 class AuraApplication : Application() {
 
@@ -46,6 +48,10 @@ class AuraApplication : Application() {
             syncNotificationManager = syncNotificationManager,
             scope = appScope
         )
+
+        appScope.launch(Dispatchers.IO) {
+            SeedDataInitializer(this@AuraApplication, sessionManager, AppDatabase.getInstance(this@AuraApplication)).seedIfNeeded()
+        }
     }
 
     companion object {
