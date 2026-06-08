@@ -70,6 +70,16 @@ class VehicleEntryRepository(
         return result
     }
 
+    suspend fun getActiveEntriesLocal(branchId: String): List<VehicleEntry> {
+        return database?.vehicleEntryDao()?.getActiveByBranch(branchId)
+            ?.map { it.toModel() } ?: emptyList()
+    }
+
+    suspend fun getHistoryEntriesLocal(branchId: String): List<VehicleEntry> {
+        return database?.vehicleEntryDao()?.getHistoryByBranch(branchId)
+            ?.map { it.toModel() } ?: emptyList()
+    }
+
     suspend fun getEntry(id: String): Result<VehicleEntry> {
         return try {
             val response = api.getVehicleEntry(id)

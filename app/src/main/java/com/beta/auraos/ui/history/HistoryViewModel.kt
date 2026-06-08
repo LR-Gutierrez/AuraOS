@@ -8,9 +8,11 @@ import com.beta.auraos.data.HistoryResult
 import com.beta.auraos.data.MembershipRepository
 import com.beta.auraos.data.Result
 import com.beta.auraos.data.VehicleEntryRepository
+import com.beta.auraos.data.local.SyncEventBus
 import com.beta.auraos.data.model.VehicleEntry
 import com.beta.auraos.data.remote.AnalyticsSummaryResponse
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
@@ -95,51 +97,90 @@ class HistoryViewModel(
     private var analyticsSummary: AnalyticsSummaryResponse? = null
     private var membershipNameMap: Map<String, String> = emptyMap()
 
+    private var lastBranchId: String? = null
+    private var loadJob: Job? = null
+
     private val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.US).apply {
         timeZone = TimeZone.getTimeZone("UTC")
     }
     private val pageSize = 20
+
+    init {
+        viewModelScope.launch {
+            SyncEventBus.events.collect {
+                val bid = lastBranchId
+                if (bid != null) {
+                    loadHistory(bid)
+                }
+            }
+        }
+    }
 
     companion object {
         const val PAGE_SIZE = 20
     }
 
     fun loadHistory(branchId: String) {
-        _uiState.value = HistoryUiState.Loading
-        viewModelScope.launch {
-            val historyDeferred = repository.getHistoryEntries(branchId)
-            val activeDeferred = repository.getActiveEntries(branchId)
-            val analyticsDeferred = repository.getAnalyticsSummary(branchId)
-            val membershipsDeferred = withContext(Dispatchers.IO) {
-                membershipRepository.getMemberships(branchId = branchId)
-            }
+        lastBranchId = branchId
+        loadJob?.cancel()
+        loadJob = viewModelScope.launch {
+            loadLocalDataAndShow(branchId)
+            loadFromApi(branchId)
+        }
+    }
 
-            analyticsSummary = if (analyticsDeferred is Result.Success) {
-                analyticsDeferred.data
-            } else null
+    private suspend fun loadLocalDataAndShow(branchId: String) {
+        val localActive = repository.getActiveEntriesLocal(branchId)
+        val localHistory = repository.getHistoryEntriesLocal(branchId)
 
-            membershipNameMap = when (membershipsDeferred) {
-                is Result.Success -> membershipsDeferred.data.associate { it.id to it.memberName }
-                is Result.Error -> emptyMap()
-            }
+        if (localActive.isNotEmpty() || localHistory.isNotEmpty()) {
+            exitedEntries = localHistory
+            activeEntries = localActive
+            _uiState.value = applyFilters()
+        }
+    }
 
-            val state = when {
-                historyDeferred is Result.Success -> {
-                    exitedEntries = historyDeferred.data.entries
-                    activeEntries = if (activeDeferred is Result.Success) {
-                        activeDeferred.data
-                    } else {
-                        emptyList()
-                    }
-                    applyFilters()
+    private suspend fun loadFromApi(branchId: String) {
+        val historyDeferred = repository.getHistoryEntries(branchId)
+        val activeDeferred = repository.getActiveEntries(branchId)
+        val analyticsDeferred = repository.getAnalyticsSummary(branchId)
+        val membershipsDeferred = withContext(Dispatchers.IO) {
+            membershipRepository.getMemberships(branchId = branchId)
+        }
+
+        analyticsSummary = if (analyticsDeferred is Result.Success) {
+            analyticsDeferred.data
+        } else null
+
+        membershipNameMap = when (membershipsDeferred) {
+            is Result.Success -> membershipsDeferred.data.associate { it.id to it.memberName }
+            is Result.Error -> emptyMap()
+        }
+
+        val state = when {
+            historyDeferred is Result.Success -> {
+                exitedEntries = historyDeferred.data.entries
+                activeEntries = if (activeDeferred is Result.Success) {
+                    activeDeferred.data
+                } else {
+                    emptyList()
                 }
-                historyDeferred is Result.Error -> HistoryUiState.Error(
+                applyFilters()
+            }
+            historyDeferred is Result.Error -> {
+                val current = _uiState.value
+                if (current is HistoryUiState.Success) current
+                else HistoryUiState.Error(
                     historyDeferred.exception.message ?: "Error al cargar historial"
                 )
-                else -> HistoryUiState.Error("Error desconocido al cargar datos")
             }
-            _uiState.value = state
+            else -> {
+                val current = _uiState.value
+                if (current is HistoryUiState.Success) current
+                else HistoryUiState.Error("Error desconocido al cargar datos")
+            }
         }
+        _uiState.value = state
     }
 
     fun setFilter(filter: HistoryFilter, branchId: String) {

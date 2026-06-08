@@ -9,6 +9,7 @@ import com.beta.auraos.data.local.ChangeJournal
 import com.beta.auraos.data.local.ChangeJournalSyncManager
 import com.beta.auraos.data.local.ConnectivityObserver
 import com.beta.auraos.data.local.SessionManager
+import com.beta.auraos.data.local.SyncEventBus
 import com.beta.auraos.data.local.room.AppDatabase
 import com.beta.auraos.data.remote.ApiClient
 import com.beta.auraos.data.remote.SyncApi
@@ -175,8 +176,11 @@ class SyncRealtimeCoordinator(
                 when (result) {
                     is ChangeJournalSyncManager.SyncResult.Success -> {
                         Log.d(TAG, "Pull completed (${result.changesApplied} changes)")
-                        if (result.changesApplied > 0 && !isInForeground) {
-                            syncNotificationManager.notifySyncCompleted(lastHints, result.changesApplied)
+                        if (result.changesApplied > 0) {
+                            SyncEventBus.emit(result.changesApplied, lastHints)
+                            if (!isInForeground) {
+                                syncNotificationManager.notifySyncCompleted(lastHints, result.changesApplied)
+                            }
                         }
                     }
                     is ChangeJournalSyncManager.SyncResult.Error -> {

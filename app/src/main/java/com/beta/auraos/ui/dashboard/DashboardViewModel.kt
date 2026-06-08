@@ -8,6 +8,7 @@ import com.beta.auraos.data.DashboardRepository
 import com.beta.auraos.data.MembershipRepository
 import com.beta.auraos.data.Result
 import com.beta.auraos.data.VehicleEntryRepository
+import com.beta.auraos.data.local.SyncEventBus
 import com.beta.auraos.data.model.DashboardResponse
 import com.beta.auraos.data.model.VipArrival
 import kotlinx.coroutines.Dispatchers
@@ -32,7 +33,21 @@ class DashboardViewModel(
     private val _uiState = MutableLiveData<DashboardUiState>(DashboardUiState.Loading)
     val uiState: LiveData<DashboardUiState> = _uiState
 
+    private var lastBranchId: String? = null
+
+    init {
+        viewModelScope.launch {
+            SyncEventBus.events.collect {
+                val bid = lastBranchId
+                if (bid != null && _uiState.value !is DashboardUiState.Loading) {
+                    loadDashboard(bid)
+                }
+            }
+        }
+    }
+
     fun loadDashboard(branchId: String) {
+        lastBranchId = branchId
         _uiState.value = DashboardUiState.Loading
         viewModelScope.launch {
             val dashboardResult = repository.getDashboard(branchId)
