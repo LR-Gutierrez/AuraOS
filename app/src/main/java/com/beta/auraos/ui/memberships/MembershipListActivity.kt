@@ -2,19 +2,13 @@ package com.beta.auraos.ui.memberships
 
 import android.app.PendingIntent
 import android.content.Intent
-import android.content.res.ColorStateList
-import android.graphics.Typeface
 import android.nfc.NfcAdapter
-import android.nfc.Tag
 import android.os.Bundle
 import android.view.View
-import android.widget.LinearLayout
-import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
 import com.beta.auraos.BaseActivity
-import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
@@ -25,7 +19,6 @@ import com.beta.auraos.data.local.SessionManager
 import com.beta.auraos.data.model.Membership
 import com.beta.auraos.util.formatDate
 import com.beta.auraos.databinding.ActivityMembershipListBinding
-import com.google.android.material.card.MaterialCardView
 import com.google.android.material.color.MaterialColors
 
 class MembershipListActivity : BaseActivity() {
@@ -37,7 +30,7 @@ class MembershipListActivity : BaseActivity() {
     private var nfcAdapter: NfcAdapter? = null
     private var isNfcScanning = false
     private var pendingMemberForCard: Membership? = null
-    private var nfcCardDialog: androidx.appcompat.app.AlertDialog? = null
+    private var nfcCardDialog: AlertDialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -101,7 +94,7 @@ class MembershipListActivity : BaseActivity() {
         if (NfcAdapter.ACTION_TECH_DISCOVERED == intent.action ||
             NfcAdapter.ACTION_TAG_DISCOVERED == intent.action
         ) {
-            val tag: Tag? = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG)
+            val tag: android.nfc.Tag? = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG)
             if (tag != null) {
                 val cardUuid = bytesToHex(tag.id)
                 val member = pendingMemberForCard
@@ -138,100 +131,77 @@ class MembershipListActivity : BaseActivity() {
             val card = createMembershipCard(m)
             binding.contentContainer.addView(card)
 
-            val params = card.layoutParams as LinearLayout.LayoutParams
-            if (card !== binding.contentContainer.getChildAt(1)) {
-                params.topMargin = resources.getDimensionPixelSize(R.dimen.spacing_small)
-            }
-
-            card.setOnClickListener {
-                val cardInfo = if (m.cardUuid != null) {
-                    "${getString(R.string.membership_card_uuid)}: ${m.cardUuid}"
-                } else {
-                    getString(R.string.membership_card_not_assigned)
-                }
-                AlertDialog.Builder(this)
-                    .setTitle(m.memberName)
-                    .setMessage("${getString(R.string.membership_hint_tier)}: ${m.tier}\n${getString(R.string.membership_hint_end_date)}: ${formatDate(m.endDate)}\n${getString(R.string.membership_status_active)}: ${if (m.isActive) getString(R.string.membership_status_active) else getString(R.string.membership_status_inactive)}\n$cardInfo")
-                    .setPositiveButton(getString(R.string.dialog_ok), null)
-                    .setNeutralButton(
-                        if (m.cardUuid != null) getString(R.string.membership_unregister_card)
-                        else getString(R.string.membership_register_card)
-                    ) { _, _ ->
-                        if (m.cardUuid != null) {
-                            confirmUnregisterCard(m)
-                        } else {
-                            startNfcCardRegistration(m)
-                        }
-                    }
-                    .setNegativeButton(getString(R.string.membership_delete_title)) { _, _ ->
-                        confirmDelete(m)
-                    }
-                    .show()
-            }
+            card.setOnClickListener { showMembershipDialog(m) }
         }
     }
 
     private fun createMembershipCard(m: Membership): View {
-        val density = resources.displayMetrics.density
-        val padding = (16 * density).toInt()
-        val card = MaterialCardView(this).apply {
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            )
-            setCardBackgroundColor(
-                ColorStateList.valueOf(
-                    MaterialColors.getColor(
-                        this, R.attr.cardGlassFillColorCustom
-                    )
-                )
-            )
-            radius = resources.getDimension(R.dimen.card_corner_radius_large)
-            setContentPadding(padding, padding, padding, padding)
-            isClickable = true
-            isFocusable = true
-            foreground = {
-                val tv = android.util.TypedValue()
-                this@MembershipListActivity.theme.resolveAttribute(
-                    android.R.attr.selectableItemBackground, tv, true
-                )
-                ContextCompat.getDrawable(this@MembershipListActivity, tv.resourceId)
-            }()
+        val card = layoutInflater.inflate(R.layout.item_membership_card, binding.contentContainer, false)
+        val tvName = card.findViewById<android.widget.TextView>(R.id.tv_member_name)
+        val tvStatus = card.findViewById<android.widget.TextView>(R.id.tv_status_badge)
+        val ivDot = card.findViewById<android.widget.ImageView>(R.id.iv_status_dot)
+        val tvTier = card.findViewById<android.widget.TextView>(R.id.tv_tier_label)
+        val tvExpiry = card.findViewById<android.widget.TextView>(R.id.tv_expiry_date)
+        val ivNfc = card.findViewById<android.widget.ImageView>(R.id.iv_nfc_icon)
+        val tvCardUuid = card.findViewById<android.widget.TextView>(R.id.tv_card_uuid)
+
+        tvName.text = m.memberName
+
+        if (m.isActive) {
+            tvStatus.text = getString(R.string.membership_status_active).uppercase()
+            tvStatus.setTextColor(0xFF00E676.toInt())
+            ivDot.setColorFilter(0xFF00E676.toInt())
+        } else {
+            tvStatus.text = getString(R.string.membership_status_inactive).uppercase()
+            val muted = MaterialColors.getColor(binding.root, R.attr.textSecondaryCustom)
+            tvStatus.setTextColor(muted)
+            ivDot.setColorFilter(muted)
         }
 
-        val container = LinearLayout(this).apply {
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            )
-            orientation = LinearLayout.VERTICAL
+        val primaryColor = MaterialColors.getColor(binding.root, android.R.attr.colorPrimary)
+        val secondaryColor = MaterialColors.getColor(binding.root, R.attr.textSecondaryCustom)
+        when (m.tier.lowercase()) {
+            "elite" -> tvTier.setTextColor(primaryColor)
+            "premium" -> tvTier.setTextColor(primaryColor)
+            else -> tvTier.setTextColor(secondaryColor)
+        }
+        tvTier.text = m.tier.uppercase()
+
+        tvExpiry.text = getString(R.string.membership_expiry_label, formatDate(m.endDate))
+
+        if (m.cardUuid != null) {
+            ivNfc.visibility = View.VISIBLE
+            tvCardUuid.visibility = View.VISIBLE
+            tvCardUuid.text = m.cardUuid.take(8) + "..."
         }
 
-        val nameText = TextView(this).apply {
-            text = m.memberName
-            setTextColor(
-                MaterialColors.getColor(
-                    binding.root, R.attr.textPrimaryCustom
-                )
-            )
-            textSize = 16f
-            typeface = Typeface.create("sans-serif-black", Typeface.NORMAL)
-        }
-        container.addView(nameText)
-
-        val tierText = TextView(this).apply {
-            text = "${m.tier}  \u2022  ${formatDate(m.endDate)}"
-            setTextColor(
-                MaterialColors.getColor(
-                    binding.root, R.attr.textSecondaryCustom
-                )
-            )
-            textSize = 13f
-        }
-        container.addView(tierText)
-
-        card.addView(container)
         return card
+    }
+
+    private fun showMembershipDialog(m: Membership) {
+        val cardInfo = if (m.cardUuid != null) {
+            "${getString(R.string.membership_card_uuid)}: ${m.cardUuid}"
+        } else {
+            getString(R.string.membership_card_not_assigned)
+        }
+        AlertDialog.Builder(this)
+            .setTitle(m.memberName)
+            .setMessage("${getString(R.string.membership_hint_tier)}: ${m.tier}\n${getString(R.string.membership_hint_end_date)}: ${formatDate(m.endDate)}\n${getString(R.string.membership_status_active)}: ${if (m.isActive) getString(R.string.membership_status_active) else getString(R.string.membership_status_inactive)}\n$cardInfo")
+            .setPositiveButton(getString(R.string.dialog_ok), null)
+            .setNeutralButton(
+                if (m.cardUuid != null) getString(R.string.membership_unregister_card)
+                else getString(R.string.membership_register_card)
+            ) { _, _ ->
+                if (m.cardUuid != null) {
+                    confirmUnregisterCard(m)
+                } else {
+                    startNfcCardRegistration(m)
+                }
+            }
+            .setNegativeButton(getString(R.string.membership_delete_title)) { _, _ ->
+                confirmDelete(m)
+            }
+            .show()
     }
 
     private fun confirmDelete(m: Membership) {
@@ -318,7 +288,6 @@ class MembershipListActivity : BaseActivity() {
         try {
             disableNfcForegroundDispatch()
         } catch (_: IllegalStateException) {
-            // Activity not resumed; dispatch will be disabled in onPause
         }
     }
 

@@ -1,6 +1,7 @@
 package com.beta.auraos.ui.login
 
 import android.content.Intent
+import android.app.AlertDialog
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
@@ -25,6 +26,16 @@ import coil.transform.CircleCropTransformation
 import com.beta.auraos.DashboardActivity
 import com.beta.auraos.R
 import com.beta.auraos.data.local.BiometricKeyManager
+import android.content.pm.PackageManager
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import android.widget.TextView
+import android.view.LayoutInflater
+import android.widget.LinearLayout
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import com.beta.auraos.util.PhotoUrlBuilder
 import com.beta.auraos.util.TabNavigator
 import com.beta.auraos.databinding.ActivityLoginBinding
@@ -66,6 +77,7 @@ class LoginActivity : AppCompatActivity() {
         setupQuickLogin()
         setupFullLogin()
         setupBiometric()
+        setupFooterLinks()
 
         if (isReturningUser) {
             startReturningUserFlow()
@@ -398,6 +410,102 @@ class LoginActivity : AppCompatActivity() {
                 }
             } catch (e: Exception) {
                 Toast.makeText(this, getString(R.string.biometric_error_verify), Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private fun setupFooterLinks() {
+        val versionName = try {
+            packageManager.getPackageInfo(packageName, 0).versionName
+        } catch (_: PackageManager.NameNotFoundException) {
+            "1.0"
+        }
+
+        binding.tvHelp?.setOnClickListener {
+            AlertDialog.Builder(this)
+                .setTitle(R.string.about)
+                .setMessage(getString(R.string.about_dialog_message, versionName))
+                .setPositiveButton(R.string.dialog_ok, null)
+                .show()
+        }
+
+        binding.tvPrivacy?.setOnClickListener {
+            AlertDialog.Builder(this)
+                .setTitle(R.string.privacy)
+                .setMessage(R.string.privacy_dialog_message)
+                .setPositiveButton(R.string.dialog_ok, null)
+                .show()
+        }
+
+        binding.tvNetworkStatus?.setOnClickListener {
+            val statusTextId = android.view.View.generateViewId()
+
+            val contentView = LinearLayout(this).apply {
+                orientation = LinearLayout.HORIZONTAL
+                setPadding(48, 32, 48, 32)
+                addView(android.widget.ProgressBar(this@LoginActivity).apply {
+                    layoutParams = LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                    ).also { it.setMarginEnd(24) }
+                })
+                addView(TextView(this@LoginActivity).apply {
+                    id = statusTextId
+                    text = getString(R.string.network_checking)
+                    textSize = 16f
+                })
+            }
+
+            val dialog = AlertDialog.Builder(this)
+                .setTitle(R.string.network_status)
+                .setView(contentView)
+                .setCancelable(false)
+                .show()
+
+            lifecycleScope.launch {
+                val apiStatus = withContext(Dispatchers.IO) {
+                    try {
+                        val api = com.beta.auraos.data.remote.ApiClient.createApi<com.beta.auraos.data.remote.HealthApi>()
+                        val response = api.health()
+                        response
+                    } catch (_: Exception) {
+                        null
+                    }
+                }
+
+                val statusText = contentView.findViewById<TextView>(statusTextId)
+                val spinner = contentView.getChildAt(0)
+                spinner.visibility = android.view.View.GONE
+
+                val message = if (apiStatus != null) {
+                    val statusLabel = when (apiStatus.status) {
+                        "ok" -> getString(R.string.health_status_ok)
+                        "error" -> getString(R.string.health_status_error)
+                        else -> apiStatus.status
+                    }
+                    val dbLabel = when (apiStatus.database) {
+                        "ok" -> getString(R.string.health_db_ok)
+                        "error" -> getString(R.string.health_db_error)
+                        else -> apiStatus.database
+                    }
+                    val uptimeSec = apiStatus.uptime.toLong()
+                    val uptimeLabel = if (uptimeSec >= 3600) {
+                        "%dh %dm".format(uptimeSec / 3600, (uptimeSec % 3600) / 60)
+                    } else {
+                        "%dm %ds".format(uptimeSec / 60, uptimeSec % 60)
+                    }
+                    getString(
+                        R.string.network_health_format,
+                        statusLabel,
+                        dbLabel,
+                        uptimeLabel
+                    )
+                } else {
+                    getString(R.string.network_offline)
+                }
+                statusText?.text = message
+                dialog.setCancelable(true)
+                dialog.setButton(AlertDialog.BUTTON_POSITIVE, getString(R.string.dialog_ok)) { d, _ -> d.dismiss() }
             }
         }
     }

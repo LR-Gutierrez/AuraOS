@@ -17,7 +17,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
 import androidx.lifecycle.lifecycleScope
 import com.beta.auraos.data.VehicleEntryRepository
-import com.beta.auraos.data.local.SessionManager
+
 import com.beta.auraos.data.local.SyncCoordinator
 import com.beta.auraos.data.local.room.AppDatabase
 import com.beta.auraos.data.model.VehicleEntry
@@ -44,7 +44,6 @@ import java.util.UUID
 class KioskEntryActivity : BaseActivity() {
 
     private lateinit var binding: ActivityKioskEntryBinding
-    private lateinit var sessionManager: SessionManager
 
     private var branchId: String = ""
     private var membershipId: String? = null
@@ -92,18 +91,7 @@ class KioskEntryActivity : BaseActivity() {
         binding = ActivityKioskEntryBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
-            val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.updatePadding(
-                top = 0,
-                bottom = bars.bottom,
-                left = 0,
-                right = 0
-            )
-            insets
-        }
-
-        sessionManager = SessionManager(this)
+        setupWindowInsets()
 
         branchId = intent.getStringExtra("branchId") ?: ""
         membershipId = intent.getStringExtra("membershipId")
@@ -309,6 +297,19 @@ class KioskEntryActivity : BaseActivity() {
         binding.tvPlateError.visibility = android.view.View.GONE
         binding.tvDbStatus.text = getString(R.string.plate_validation_status)
         deletePlatePhoto()
+    }
+
+    private fun setupWindowInsets() {
+        ViewCompat.setOnApplyWindowInsetsListener(binding.headerBar) { view, insets ->
+            val statusBarInsets = insets.getInsets(WindowInsetsCompat.Type.statusBars())
+            view.updatePadding(top = statusBarInsets.top)
+            insets
+        }
+        ViewCompat.setOnApplyWindowInsetsListener(binding.entryScrollView) { view, insets ->
+            val navBarInsets = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
+            view.updatePadding(bottom = navBarInsets.bottom)
+            insets
+        }
     }
 
     private fun showLoading(show: Boolean) {

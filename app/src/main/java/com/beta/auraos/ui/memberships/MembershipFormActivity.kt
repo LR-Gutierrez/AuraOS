@@ -177,7 +177,6 @@ class MembershipFormActivity : BaseActivity() {
 
     private fun saveMembership() {
         val name = binding.etMemberName.text.toString().trim()
-        val tier = binding.etTier.text.toString().trim()
         val endDate = (binding.etEndDate.tag as? String) ?: ""
         val cardUuid = binding.etCardUuid.text.toString().trim()
         val branchId = sessionManager.getSelectedBranchId()
@@ -193,6 +192,12 @@ class MembershipFormActivity : BaseActivity() {
             return
         }
 
+        val tier = when (binding.chipGroupTier.checkedChipId) {
+            R.id.chip_elite -> getString(R.string.membership_tier_elite)
+            R.id.chip_premium -> getString(R.string.membership_tier_premium)
+            else -> getString(R.string.membership_tier_basic)
+        }
+
         val todayFull = LocalDate.now().atStartOfDay(java.time.ZoneOffset.UTC).toString()
         val futureDate = if (endDate.isNotEmpty()) {
             endDate
@@ -202,7 +207,7 @@ class MembershipFormActivity : BaseActivity() {
 
         val input = CreateMembershipInput(
             memberName = name,
-            tier = tier.ifEmpty { getString(R.string.membership_tier_basic) },
+            tier = tier,
             startDate = todayFull,
             endDate = futureDate,
             branchId = branchId,

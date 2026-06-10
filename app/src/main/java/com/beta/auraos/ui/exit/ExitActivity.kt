@@ -127,7 +127,7 @@ class ExitActivity : BaseActivity() {
     }
 
     private fun renderEntries(entries: List<VehicleEntry>, exitingId: String?) {
-        binding.contentContainer.removeViews(3, binding.contentContainer.childCount - 3)
+        binding.contentContainer.removeViews(2, binding.contentContainer.childCount - 2)
 
         if (entries.isEmpty()) {
             binding.tvEmptyState.visibility = View.VISIBLE

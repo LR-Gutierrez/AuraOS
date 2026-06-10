@@ -75,7 +75,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:cardCornerRadius="@dimen/card_corner_radius_large"
-                app:cardBackgroundColor="?attr/cardGlassFillColorCustom"
+                app:cardBackgroundColor="?attr/branchSurfaceCustom"
                 app:strokeColor="?attr/dividerColorCustom"
                 app:strokeWidth="@dimen/stroke_thin"
                 app:layout_constraintTop_toTopOf="parent">
@@ -104,6 +104,9 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/spacing_medium"
                         android:background="?attr/hollowInputBackground"
+                        android:drawableStart="@drawable/ic_edit_24"
+                        android:drawablePadding="@dimen/spacing_small"
+                        android:drawableTint="?attr/textSecondaryCustom"
                         android:fontFamily="sans-serif"
                         android:hint="@string/branch_hint_name"
                         android:imeOptions="actionNext"
@@ -123,6 +126,9 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/spacing_small"
                         android:background="?attr/hollowInputBackground"
+                        android:drawableStart="@drawable/ic_location_pin"
+                        android:drawablePadding="@dimen/spacing_small"
+                        android:drawableTint="?attr/textSecondaryCustom"
                         android:fontFamily="sans-serif"
                         android:hint="@string/branch_hint_address"
                         android:imeOptions="actionNext"
@@ -147,7 +153,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/spacing_medium"
                 app:cardCornerRadius="@dimen/card_corner_radius_large"
-                app:cardBackgroundColor="?attr/cardGlassFillColorCustom"
+                app:cardBackgroundColor="?attr/branchSurfaceCustom"
                 app:strokeColor="?attr/dividerColorCustom"
                 app:strokeWidth="@dimen/stroke_thin"
                 app:layout_constraintTop_toBottomOf="@id/card_basic_info">
@@ -175,7 +181,6 @@
                         android:id="@+id/lbl_moto_capacity"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/spacing_medium"
                         android:fontFamily="sans-serif"
                         android:gravity="center_vertical"
                         android:text="@string/branch_hint_moto_capacity"
@@ -190,6 +195,7 @@
                         android:id="@+id/stepper_moto"
                         android:layout_width="wrap_content"
                         android:layout_height="42dp"
+                        android:layout_marginTop="@dimen/spacing_medium"
                         android:orientation="horizontal"
                         android:gravity="center"
                         android:background="@drawable/bg_hollow_input"
@@ -240,7 +246,6 @@
                         android:id="@+id/lbl_light_capacity"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/spacing_medium"
                         android:fontFamily="sans-serif"
                         android:gravity="center_vertical"
                         android:text="@string/branch_hint_light_capacity"
@@ -255,6 +260,7 @@
                         android:id="@+id/stepper_light"
                         android:layout_width="wrap_content"
                         android:layout_height="42dp"
+                        android:layout_marginTop="@dimen/spacing_medium"
                         android:orientation="horizontal"
                         android:gravity="center"
                         android:background="@drawable/bg_hollow_input"
@@ -305,7 +311,6 @@
                         android:id="@+id/lbl_heavy_capacity"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/spacing_medium"
                         android:fontFamily="sans-serif"
                         android:gravity="center_vertical"
                         android:text="@string/branch_hint_heavy_capacity"
@@ -320,6 +325,7 @@
                         android:id="@+id/stepper_heavy"
                         android:layout_width="wrap_content"
                         android:layout_height="42dp"
+                        android:layout_marginTop="@dimen/spacing_medium"
                         android:orientation="horizontal"
                         android:gravity="center"
                         android:background="@drawable/bg_hollow_input"
@@ -376,7 +382,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/spacing_medium"
                 app:cardCornerRadius="@dimen/card_corner_radius_large"
-                app:cardBackgroundColor="?attr/cardGlassFillColorCustom"
+                app:cardBackgroundColor="?attr/branchSurfaceCustom"
                 app:strokeColor="?attr/dividerColorCustom"
                 app:strokeWidth="@dimen/stroke_thin"
                 app:layout_constraintTop_toBottomOf="@id/card_capacity">
@@ -409,17 +415,14 @@
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:gravity="center_vertical"
                             android:orientation="horizontal"
-                            android:paddingHorizontal="@dimen/spacing_small"
                             android:paddingBottom="@dimen/spacing_small">
 
                             <TextView
                                 android:layout_width="48dp"
                                 android:layout_height="wrap_content"
-                                android:layout_marginEnd="8dp"
-                                android:fontFamily="sans-serif"
                                 android:text=""
-                                android:textSize="@dimen/text_size_body"
                                 android:visibility="invisible" />
 
                             <TextView
@@ -429,7 +432,7 @@
                                 android:layout_marginEnd="6dp"
                                 android:fontFamily="sans-serif-medium"
                                 android:gravity="center"
-                                android:text="Hourly"
+                                android:text="@string/branch_rate_type_hourly"
                                 android:textColor="?attr/textSecondaryCustom"
                                 android:textSize="@dimen/text_size_caption"
                                 android:textStyle="bold" />
@@ -441,7 +444,7 @@
                                 android:layout_marginStart="6dp"
                                 android:fontFamily="sans-serif-medium"
                                 android:gravity="center"
-                                android:text="Overnight"
+                                android:text="@string/branch_rate_type_overnight"
                                 android:textColor="?attr/textSecondaryCustom"
                                 android:textSize="@dimen/text_size_caption"
                                 android:textStyle="bold" />
@@ -450,165 +453,165 @@
 
                         <LinearLayout
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:gravity="center_vertical">
+                            android:layout_height="42dp"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
 
                             <TextView
                                 android:id="@+id/lbl_moto_rates"
-                                android:layout_width="wrap_content"
+                                android:layout_width="48dp"
                                 android:layout_height="wrap_content"
-                                android:fontFamily="sans-serif"
+                                android:fontFamily="sans-serif-black"
                                 android:text="Moto"
                                 android:textColor="?attr/textPrimaryCustom"
-                                android:textSize="@dimen/text_size_body"
-                                android:textStyle="bold"
-                                android:layout_marginEnd="@dimen/spacing_small"
-                                android:minWidth="48dp" />
+                                android:textSize="@dimen/text_size_small"
+                                android:textStyle="bold" />
 
                             <EditText
                                 android:id="@+id/et_moto_rate"
                                 android:layout_width="0dp"
-                                android:layout_height="wrap_content"
+                                android:layout_height="42dp"
                                 android:layout_weight="1"
                                 android:layout_marginEnd="6dp"
                                 android:background="?attr/hollowInputBackground"
                                 android:fontFamily="sans-serif"
+                                android:gravity="center"
                                 android:hint="@string/branch_hint_moto_rate"
                                 android:imeOptions="actionNext"
                                 android:inputType="numberDecimal"
                                 android:maxLines="1"
-                                android:padding="@dimen/spacing_medium"
+                                android:paddingHorizontal="@dimen/spacing_small"
                                 android:textColor="?attr/textPrimaryCustom"
                                 android:textColorHint="?attr/textSecondaryCustom"
-                                android:textSize="@dimen/text_size_body" />
+                                android:textSize="@dimen/text_size_small" />
 
                             <EditText
                                 android:id="@+id/et_moto_overnight"
                                 android:layout_width="0dp"
-                                android:layout_height="wrap_content"
+                                android:layout_height="42dp"
                                 android:layout_weight="1"
                                 android:layout_marginStart="6dp"
                                 android:background="?attr/hollowInputBackground"
                                 android:fontFamily="sans-serif"
+                                android:gravity="center"
                                 android:hint="@string/branch_hint_moto_overnight"
                                 android:imeOptions="actionNext"
                                 android:inputType="numberDecimal"
                                 android:maxLines="1"
-                                android:padding="@dimen/spacing_medium"
+                                android:paddingHorizontal="@dimen/spacing_small"
                                 android:textColor="?attr/textPrimaryCustom"
                                 android:textColorHint="?attr/textSecondaryCustom"
-                                android:textSize="@dimen/text_size_body" />
+                                android:textSize="@dimen/text_size_small" />
 
                         </LinearLayout>
 
                         <LinearLayout
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
+                            android:layout_height="42dp"
                             android:layout_marginTop="@dimen/spacing_small"
-                            android:orientation="horizontal"
-                            android:gravity="center_vertical">
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
 
                             <TextView
                                 android:id="@+id/lbl_light_rates"
-                                android:layout_width="wrap_content"
+                                android:layout_width="48dp"
                                 android:layout_height="wrap_content"
-                                android:fontFamily="sans-serif"
+                                android:fontFamily="sans-serif-black"
                                 android:text="Light"
                                 android:textColor="?attr/textPrimaryCustom"
-                                android:textSize="@dimen/text_size_body"
-                                android:textStyle="bold"
-                                android:layout_marginEnd="@dimen/spacing_small"
-                                android:minWidth="48dp" />
+                                android:textSize="@dimen/text_size_small"
+                                android:textStyle="bold" />
 
                             <EditText
                                 android:id="@+id/et_light_rate"
                                 android:layout_width="0dp"
-                                android:layout_height="wrap_content"
+                                android:layout_height="42dp"
                                 android:layout_weight="1"
                                 android:layout_marginEnd="6dp"
                                 android:background="?attr/hollowInputBackground"
                                 android:fontFamily="sans-serif"
+                                android:gravity="center"
                                 android:hint="@string/branch_hint_light_rate"
                                 android:imeOptions="actionNext"
                                 android:inputType="numberDecimal"
                                 android:maxLines="1"
-                                android:padding="@dimen/spacing_medium"
+                                android:paddingHorizontal="@dimen/spacing_small"
                                 android:textColor="?attr/textPrimaryCustom"
                                 android:textColorHint="?attr/textSecondaryCustom"
-                                android:textSize="@dimen/text_size_body" />
+                                android:textSize="@dimen/text_size_small" />
 
                             <EditText
                                 android:id="@+id/et_light_overnight"
                                 android:layout_width="0dp"
-                                android:layout_height="wrap_content"
+                                android:layout_height="42dp"
                                 android:layout_weight="1"
                                 android:layout_marginStart="6dp"
                                 android:background="?attr/hollowInputBackground"
                                 android:fontFamily="sans-serif"
+                                android:gravity="center"
                                 android:hint="@string/branch_hint_light_overnight"
                                 android:imeOptions="actionNext"
                                 android:inputType="numberDecimal"
                                 android:maxLines="1"
-                                android:padding="@dimen/spacing_medium"
+                                android:paddingHorizontal="@dimen/spacing_small"
                                 android:textColor="?attr/textPrimaryCustom"
                                 android:textColorHint="?attr/textSecondaryCustom"
-                                android:textSize="@dimen/text_size_body" />
+                                android:textSize="@dimen/text_size_small" />
 
                         </LinearLayout>
 
                         <LinearLayout
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
+                            android:layout_height="42dp"
                             android:layout_marginTop="@dimen/spacing_small"
-                            android:orientation="horizontal"
-                            android:gravity="center_vertical">
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
 
                             <TextView
                                 android:id="@+id/lbl_heavy_rates"
-                                android:layout_width="wrap_content"
+                                android:layout_width="48dp"
                                 android:layout_height="wrap_content"
-                                android:fontFamily="sans-serif"
+                                android:fontFamily="sans-serif-black"
                                 android:text="Heavy"
                                 android:textColor="?attr/textPrimaryCustom"
-                                android:textSize="@dimen/text_size_body"
-                                android:textStyle="bold"
-                                android:layout_marginEnd="@dimen/spacing_small"
-                                android:minWidth="48dp" />
+                                android:textSize="@dimen/text_size_small"
+                                android:textStyle="bold" />
 
                             <EditText
                                 android:id="@+id/et_heavy_rate"
                                 android:layout_width="0dp"
-                                android:layout_height="wrap_content"
+                                android:layout_height="42dp"
                                 android:layout_weight="1"
                                 android:layout_marginEnd="6dp"
                                 android:background="?attr/hollowInputBackground"
                                 android:fontFamily="sans-serif"
+                                android:gravity="center"
                                 android:hint="@string/branch_hint_heavy_rate"
                                 android:imeOptions="actionNext"
                                 android:inputType="numberDecimal"
                                 android:maxLines="1"
-                                android:padding="@dimen/spacing_medium"
+                                android:paddingHorizontal="@dimen/spacing_small"
                                 android:textColor="?attr/textPrimaryCustom"
                                 android:textColorHint="?attr/textSecondaryCustom"
-                                android:textSize="@dimen/text_size_body" />
+                                android:textSize="@dimen/text_size_small" />
 
                             <EditText
                                 android:id="@+id/et_heavy_overnight"
                                 android:layout_width="0dp"
-                                android:layout_height="wrap_content"
+                                android:layout_height="42dp"
                                 android:layout_weight="1"
                                 android:layout_marginStart="6dp"
                                 android:background="?attr/hollowInputBackground"
                                 android:fontFamily="sans-serif"
+                                android:gravity="center"
                                 android:hint="@string/branch_hint_heavy_overnight"
                                 android:imeOptions="actionDone"
                                 android:inputType="numberDecimal"
                                 android:maxLines="1"
-                                android:padding="@dimen/spacing_medium"
+                                android:paddingHorizontal="@dimen/spacing_small"
                                 android:textColor="?attr/textPrimaryCustom"
                                 android:textColorHint="?attr/textSecondaryCustom"
-                                android:textSize="@dimen/text_size_body" />
+                                android:textSize="@dimen/text_size_small" />
 
                         </LinearLayout>
 
@@ -625,7 +628,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/spacing_medium"
                 app:cardCornerRadius="@dimen/card_corner_radius_large"
-                app:cardBackgroundColor="?attr/cardGlassFillColorCustom"
+                app:cardBackgroundColor="?attr/branchSurfaceCustom"
                 app:strokeColor="?attr/dividerColorCustom"
                 app:strokeWidth="@dimen/stroke_thin"
                 app:layout_constraintTop_toBottomOf="@id/card_rates">
@@ -648,125 +651,149 @@
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
 
-                    <TextView
-                        android:id="@+id/lbl_open_weekday"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/spacing_medium"
-                        android:fontFamily="sans-serif"
-                        android:text="@string/branch_hint_open_weekday"
-                        android:textColor="?attr/textSecondaryCustom"
-                        android:textSize="@dimen/text_size_caption"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/lbl_section_hours"
-                        app:layout_constraintEnd_toStartOf="@id/tv_open_weekday_block" />
-
-                    <TextView
-                        android:id="@+id/tv_open_weekday_block"
-                        android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:id="@+id/row_open_weekday"
+                        android:layout_width="match_parent"
                         android:layout_height="42dp"
-                        android:background="?attr/hollowInputBackground"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:fontFamily="sans-serif-black"
-                        android:gravity="center"
-                        android:minWidth="110dp"
-                        android:paddingHorizontal="@dimen/spacing_medium"
-                        android:text="07:00"
-                        android:textColor="?attr/textPrimaryCustom"
-                        android:textSize="@dimen/text_size_body"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/lbl_section_hours" />
-
-                    <TextView
-                        android:id="@+id/lbl_close_weekday"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/spacing_medium"
-                        android:fontFamily="sans-serif"
-                        android:text="@string/branch_hint_close_weekday"
-                        android:textColor="?attr/textSecondaryCustom"
-                        android:textSize="@dimen/text_size_caption"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/tv_open_weekday_block"
-                        app:layout_constraintEnd_toStartOf="@id/tv_close_weekday_block" />
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        app:layout_constraintTop_toBottomOf="@id/lbl_section_hours">
 
-                    <TextView
-                        android:id="@+id/tv_close_weekday_block"
-                        android:layout_width="wrap_content"
+                        <TextView
+                            android:id="@+id/lbl_open_weekday"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:fontFamily="sans-serif"
+                            android:text="@string/branch_hint_open_weekday"
+                            android:textColor="?attr/textSecondaryCustom"
+                            android:textSize="@dimen/text_size_body" />
+
+                        <TextView
+                            android:id="@+id/tv_open_weekday_block"
+                            android:layout_width="wrap_content"
+                            android:layout_height="42dp"
+                            android:background="?attr/hollowInputBackground"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:fontFamily="sans-serif-black"
+                            android:gravity="center"
+                            android:minWidth="110dp"
+                            android:paddingHorizontal="@dimen/spacing_medium"
+                            android:text="07:00"
+                            android:textColor="?attr/textPrimaryCustom"
+                            android:textSize="@dimen/text_size_body" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/row_close_weekday"
+                        android:layout_width="match_parent"
                         android:layout_height="42dp"
-                        android:background="?attr/hollowInputBackground"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:fontFamily="sans-serif-black"
-                        android:gravity="center"
-                        android:minWidth="110dp"
-                        android:paddingHorizontal="@dimen/spacing_medium"
-                        android:text="23:00"
-                        android:textColor="?attr/textPrimaryCustom"
-                        android:textSize="@dimen/text_size_body"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/tv_open_weekday_block" />
+                        android:layout_marginTop="@dimen/spacing_small"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        app:layout_constraintTop_toBottomOf="@id/row_open_weekday">
 
-                    <TextView
-                        android:id="@+id/lbl_open_weekend"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
+                        <TextView
+                            android:id="@+id/lbl_close_weekday"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:fontFamily="sans-serif"
+                            android:text="@string/branch_hint_close_weekday"
+                            android:textColor="?attr/textSecondaryCustom"
+                            android:textSize="@dimen/text_size_body" />
+
+                        <TextView
+                            android:id="@+id/tv_close_weekday_block"
+                            android:layout_width="wrap_content"
+                            android:layout_height="42dp"
+                            android:background="?attr/hollowInputBackground"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:fontFamily="sans-serif-black"
+                            android:gravity="center"
+                            android:minWidth="110dp"
+                            android:paddingHorizontal="@dimen/spacing_medium"
+                            android:text="23:00"
+                            android:textColor="?attr/textPrimaryCustom"
+                            android:textSize="@dimen/text_size_body" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/row_open_weekend"
+                        android:layout_width="match_parent"
+                        android:layout_height="42dp"
                         android:layout_marginTop="@dimen/spacing_medium"
-                        android:fontFamily="sans-serif"
-                        android:text="@string/branch_hint_open_weekend"
-                        android:textColor="?attr/textSecondaryCustom"
-                        android:textSize="@dimen/text_size_caption"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/tv_close_weekday_block"
-                        app:layout_constraintEnd_toStartOf="@id/tv_open_weekend_block" />
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        app:layout_constraintTop_toBottomOf="@id/row_close_weekday">
 
-                    <TextView
-                        android:id="@+id/tv_open_weekend_block"
-                        android:layout_width="wrap_content"
+                        <TextView
+                            android:id="@+id/lbl_open_weekend"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:fontFamily="sans-serif"
+                            android:text="@string/branch_hint_open_weekend"
+                            android:textColor="?attr/textSecondaryCustom"
+                            android:textSize="@dimen/text_size_body" />
+
+                        <TextView
+                            android:id="@+id/tv_open_weekend_block"
+                            android:layout_width="wrap_content"
+                            android:layout_height="42dp"
+                            android:background="?attr/hollowInputBackground"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:fontFamily="sans-serif-black"
+                            android:gravity="center"
+                            android:minWidth="110dp"
+                            android:paddingHorizontal="@dimen/spacing_medium"
+                            android:text="09:00"
+                            android:textColor="?attr/textPrimaryCustom"
+                            android:textSize="@dimen/text_size_body" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/row_close_weekend"
+                        android:layout_width="match_parent"
                         android:layout_height="42dp"
-                        android:background="?attr/hollowInputBackground"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:fontFamily="sans-serif-black"
-                        android:gravity="center"
-                        android:minWidth="110dp"
-                        android:paddingHorizontal="@dimen/spacing_medium"
-                        android:text="09:00"
-                        android:textColor="?attr/textPrimaryCustom"
-                        android:textSize="@dimen/text_size_body"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/tv_close_weekday_block" />
+                        android:layout_marginTop="@dimen/spacing_small"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        app:layout_constraintTop_toBottomOf="@id/row_open_weekend">
 
-                    <TextView
-                        android:id="@+id/lbl_close_weekend"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/spacing_medium"
-                        android:fontFamily="sans-serif"
-                        android:text="@string/branch_hint_close_weekend"
-                        android:textColor="?attr/textSecondaryCustom"
-                        android:textSize="@dimen/text_size_caption"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/tv_open_weekend_block"
-                        app:layout_constraintEnd_toStartOf="@id/tv_close_weekend_block" />
+                        <TextView
+                            android:id="@+id/lbl_close_weekend"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:fontFamily="sans-serif"
+                            android:text="@string/branch_hint_close_weekend"
+                            android:textColor="?attr/textSecondaryCustom"
+                            android:textSize="@dimen/text_size_body" />
 
-                    <TextView
-                        android:id="@+id/tv_close_weekend_block"
-                        android:layout_width="wrap_content"
-                        android:layout_height="42dp"
-                        android:background="?attr/hollowInputBackground"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:fontFamily="sans-serif-black"
-                        android:gravity="center"
-                        android:minWidth="110dp"
-                        android:paddingHorizontal="@dimen/spacing_medium"
-                        android:text="22:00"
-                        android:textColor="?attr/textPrimaryCustom"
-                        android:textSize="@dimen/text_size_body"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/tv_open_weekend_block" />
+                        <TextView
+                            android:id="@+id/tv_close_weekend_block"
+                            android:layout_width="wrap_content"
+                            android:layout_height="42dp"
+                            android:background="?attr/hollowInputBackground"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:fontFamily="sans-serif-black"
+                            android:gravity="center"
+                            android:minWidth="110dp"
+                            android:paddingHorizontal="@dimen/spacing_medium"
+                            android:text="22:00"
+                            android:textColor="?attr/textPrimaryCustom"
+                            android:textSize="@dimen/text_size_body" />
+
+                    </LinearLayout>
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -779,7 +806,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/spacing_medium"
                 app:cardCornerRadius="@dimen/card_corner_radius_large"
-                app:cardBackgroundColor="?attr/cardGlassFillColorCustom"
+                app:cardBackgroundColor="?attr/branchSurfaceCustom"
                 app:strokeColor="?attr/dividerColorCustom"
                 app:strokeWidth="@dimen/stroke_thin"
                 app:layout_constraintTop_toBottomOf="@id/card_hours">
@@ -822,7 +849,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/spacing_medium"
                 app:cardCornerRadius="@dimen/card_corner_radius_large"
-                app:cardBackgroundColor="?attr/cardGlassFillColorCustom"
+                app:cardBackgroundColor="?attr/branchSurfaceCustom"
                 app:strokeColor="?attr/dividerColorCustom"
                 app:strokeWidth="@dimen/stroke_thin"
                 app:layout_constraintTop_toBottomOf="@id/card_currency">
@@ -838,7 +865,7 @@
                         android:layout_height="wrap_content"
                         android:fontFamily="sans-serif-medium"
                         android:letterSpacing="0.06"
-                        android:text="REAL-TIME API SYNC"
+                        android:text="@string/branch_section_sync"
                         android:textColor="?attr/textSecondaryCustom"
                         android:textSize="@dimen/text_size_overline"
                         android:textStyle="bold"
@@ -856,14 +883,16 @@
 
                     <TextView
                         android:id="@+id/lbl_sync_description"
-                        android:layout_width="match_parent"
+                        android:layout_width="255dp"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/spacing_small"
+                        android:layout_marginEnd="8dp"
+                        android:alpha="0.7"
                         android:fontFamily="sans-serif"
-                        android:text="Synchronize branch data with cloud API in real time"
+                        android:text="@string/branch_sync_description"
                         android:textColor="?attr/textSecondaryCustom"
                         android:textSize="@dimen/text_size_small"
-                        android:alpha="0.7"
+                        app:layout_constraintEnd_toStartOf="@+id/switch_api_sync"
                         app:layout_constraintTop_toBottomOf="@id/lbl_section_sync" />
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
@@ -877,10 +906,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/primary_button_height"
                 android:layout_marginTop="@dimen/spacing_xxlarge"
+                android:fontFamily="sans-serif-black"
                 android:text="@string/branch_save_action"
                 android:textAllCaps="false"
                 android:textSize="@dimen/text_size_button"
-                android:textStyle="bold"
                 app:backgroundTint="?attr/colorPrimary"
                 app:cornerRadius="@dimen/button_corner_radius_full"
                 app:layout_constraintTop_toBottomOf="@id/card_api_sync" />

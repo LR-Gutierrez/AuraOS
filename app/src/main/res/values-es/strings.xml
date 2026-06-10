@@ -30,9 +30,18 @@
     <string name="invalid_password">La contraseña debe tener más de 5 caracteres</string>
     <string name="login_failed">Error al iniciar sesión</string>
 
-    <string name="help">Ayuda</string>
+    <string name="about">Acerca de</string>
+    <string name="about_dialog_message">SmartPark OS %1$s\n\nDesarrollador: Luis Angel Gutierrez\nGitHub: github.com/LR-Gutierrez\nEmail: luisangelrgr@gmail.com</string>
     <string name="privacy">Privacidad</string>
+    <string name="privacy_dialog_message">Los datos se almacenan localmente y se sincronizan con la nube via API para respaldo y continuidad entre dispositivos. No se comparte información personal con terceros.</string>
     <string name="network_status">Estado de Red</string>
+    <string name="network_health_format">El API está %1$s. Base de datos: %2$s. Tiempo activo: %3$s.</string>
+    <string name="health_status_ok">saludable</string>
+    <string name="health_status_error">degradado</string>
+    <string name="health_db_ok">conectada</string>
+    <string name="health_db_error">desconectada</string>
+    <string name="network_offline">API no accesible. Los datos se almacenarán localmente y se sincronizarán cuando se restablezca la conexión.</string>
+    <string name="network_checking">Verificando conexión al API…</string>
 
     <string name="cd_user_profile">Foto de perfil del usuario</string>
     <string name="home_app_title">SmartPark OS</string>
@@ -152,6 +161,9 @@
     <string name="exit_confirm_title">Confirmar Salida</string>
     <string name="exit_confirm_message">¿Registrar salida de %1$s?</string>
     <string name="exit_confirm_action">Registrar Salida</string>
+    <string name="exit_stay_duration">DURACIÓN DE ESTANCIA</string>
+    <string name="exit_stay_fee">TARIFA DE ESTANCIA</string>
+    <string name="exit_vehicle_photo_desc">Foto del vehículo</string>
 
     <!-- Membresías -->
     <string name="membership_list_title">Membresías</string>
@@ -162,9 +174,9 @@
     <string name="membership_update_action">Actualizar Membresía</string>
     <string name="membership_empty">No hay membresías registradas</string>
     <string name="membership_hint_name">Nombre del miembro *</string>
-    <string name="membership_hint_tier">Nivel (Elite, Premium, Básico)</string>
+    <string name="membership_hint_tier">Nivel</string>
     <string name="membership_hint_end_date">Fecha de vencimiento</string>
-    <string name="membership_hint_card_uuid">UUID de tarjeta NFC (opcional)</string>
+    <string name="membership_hint_card_uuid">UUID de tarjeta NFC</string>
     <string name="membership_scan_nfc">Escanear NFC</string>
     <string name="membership_scanning">Escaneando\u2026</string>
     <string name="membership_card_scanned">Tarjeta NFC escaneada</string>
@@ -183,6 +195,11 @@
     <string name="membership_delete_confirm">¿Eliminar membresía de %1$s?</string>
     <string name="membership_delete_title">Eliminar Membresía</string>
     <string name="membership_section_info">INFORMACIÓN DEL MIEMBRO</string>
+    <string name="membership_section_nfc">TARJETA NFC</string>
+    <string name="membership_nfc_description">Asigna una tarjeta NFC para identificación rápida en el kiosko</string>
+    <string name="membership_nfc_icon_desc">Icono NFC</string>
+    <string name="membership_tier_elite">Elite</string>
+    <string name="membership_tier_premium">Premium</string>
     <string name="membership_status_active">Activa</string>
     <string name="membership_status_inactive">Inactiva</string>
 
@@ -301,6 +318,10 @@
     <string name="branch_default_toast">Sucursal predeterminada: %1$s</string>
     <string name="field_required_plain">Campo obligatorio</string>
     <string name="branch_currencies">USD,MXN,GTQ</string>
+    <string name="branch_rate_type_hourly">Por hora</string>
+    <string name="branch_rate_type_overnight">Por noche</string>
+    <string name="branch_section_sync">SINCRONIZACIÓN API</string>
+    <string name="branch_sync_description">Sincroniza los datos de la sucursal con la nube en tiempo real</string>
 
     <!-- Toast Bienvenida -->
     <string name="welcome_toast">Bienvenido %1$s</string>
@@ -338,6 +359,7 @@
     <string name="profile_edit_avatar">Editar Avatar</string>
     <string name="profile_icon_security">Icono de seguridad</string>
     <string name="profile_icon_about">Icono de información</string>
+    <string name="profile_icon_theme">Icono de tema</string>
     <string name="profile_logout">Cerrar Sesión</string>
     <string name="profile_logout_desc">Limpiar sesión y volver al inicio</string>
     <string name="profile_logout_confirm_title">Cerrar Sesión</string>
@@ -366,6 +388,7 @@
     <string name="branch_hours_format">Lun–Sab %1$s–%2$s  Dom %3$s–%4$s</string>
     <string name="membership_select_branch_first">Selecciona una sucursal primero</string>
     <string name="membership_tier_basic">Básico</string>
+    <string name="membership_expiry_label">Vence: %1$s</string>
     <string name="analytics_trend_up">+%1$d%%</string>
     <string name="analytics_trend_down">%1$d%%</string>
 
@@ -446,4 +469,23 @@
     <string name="audit_dashboard_subtitle">Cierre de caja y auditoría de ingresos</string>
     <string name="audit_share_action">Compartir</string>
     <string name="audit_share_subject">Reporte de Cierre de Caja</string>
+    <string name="audit_no_pending_message">No hay registros pendientes para cerrar</string>
+
+    <!-- Branch list new UI -->
+    <string name="branch_subtitle">Supervisa 12 centros de estacionamiento globales</string>
+    <string name="branch_search_hint">Busca por ubicación o terminal.</string>
+    <string name="branch_kpi_active_fleet">FLOTA ACTIVA</string>
+    <string name="branch_kpi_global_cap">CAP. GLOBAL</string>
+    <string name="branch_status_active">ACTIVO</string>
+    <string name="branch_status_inactive">INACTIVO</string>
+    <string name="branch_occupancy_format">Ocupación %1$d / %2$d</string>
+    <string name="branch_action_manage">GESTIONAR</string>
+    <string name="branch_action_activate">ACTIVAR ⚡</string>
+    <string name="branch_action_manage_desc">Gestionar sucursal</string>
+
+    <!-- NFC Kiosk -->
+    <string name="kiosk_nfc_scanning">Escaneando\u2026</string>
+
+    <!-- Foreground service -->
+    <string name="foreground_service_syncing">Sincronizando en segundo plano</string>
 </resources>

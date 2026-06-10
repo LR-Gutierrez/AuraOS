@@ -67,11 +67,13 @@
             android:paddingTop="@dimen/spacing_large"
             android:paddingBottom="@dimen/spacing_xxlarge">
 
+            <!-- Card: Member Info -->
             <com.google.android.material.card.MaterialCardView
+                android:id="@+id/card_member_info"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:cardCornerRadius="@dimen/card_corner_radius_large"
-                app:cardBackgroundColor="?attr/cardGlassFillColorCustom"
+                app:cardBackgroundColor="?attr/branchSurfaceCustom"
                 app:strokeColor="?attr/dividerColorCustom"
                 app:strokeWidth="@dimen/stroke_thin">
 
@@ -99,6 +101,9 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/spacing_medium"
                         android:background="?attr/hollowInputBackground"
+                        android:drawableStart="@drawable/ic_person"
+                        android:drawablePadding="@dimen/spacing_small"
+                        android:drawableTint="?attr/textSecondaryCustom"
                         android:fontFamily="sans-serif"
                         android:hint="@string/membership_hint_name"
                         android:imeOptions="actionNext"
@@ -107,31 +112,83 @@
                         android:padding="@dimen/spacing_medium"
                         android:textColor="?attr/textPrimaryCustom"
                         android:textColorHint="?attr/textSecondaryCustom"
+                        android:textSize="@dimen/text_size_body"
                         app:layout_constraintTop_toBottomOf="@id/lbl_section" />
 
-                    <EditText
-                        android:id="@+id/et_tier"
+                    <!-- Tier Section Label -->
+                    <TextView
+                        android:id="@+id/lbl_tier"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/spacing_medium"
+                        android:fontFamily="sans-serif-medium"
+                        android:text="@string/membership_hint_tier"
+                        android:textColor="?attr/textSecondaryCustom"
+                        android:textSize="@dimen/text_size_caption"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/et_member_name" />
+
+                    <com.google.android.material.chip.ChipGroup
+                        android:id="@+id/chip_group_tier"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/spacing_small"
-                        android:background="?attr/hollowInputBackground"
-                        android:fontFamily="sans-serif"
-                        android:hint="@string/membership_hint_tier"
-                        android:imeOptions="actionNext"
-                        android:inputType="text|textCapWords"
-                        android:maxLines="1"
-                        android:padding="@dimen/spacing_medium"
-                        android:textColor="?attr/textPrimaryCustom"
-                        android:textColorHint="?attr/textSecondaryCustom"
-                        app:layout_constraintTop_toBottomOf="@id/et_member_name" />
+                        app:chipSpacingHorizontal="@dimen/spacing_small"
+                        app:singleSelection="true"
+                        app:layout_constraintTop_toBottomOf="@id/lbl_tier">
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/chip_elite"
+                            style="@style/Widget.MaterialComponents.Chip.Filter"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/membership_tier_elite"
+                            android:textColor="@color/chip_selector_text"
+                            android:textSize="@dimen/text_size_small"
+                            app:chipBackgroundColor="@color/chip_selector_bg"
+                            app:chipStrokeColor="@color/chip_selector_stroke"
+                            app:chipStrokeWidth="@dimen/stroke_thin"
+                            app:chipCornerRadius="@dimen/radius_full" />
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/chip_premium"
+                            style="@style/Widget.MaterialComponents.Chip.Filter"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/membership_tier_premium"
+                            android:textColor="@color/chip_selector_text"
+                            android:textSize="@dimen/text_size_small"
+                            app:chipBackgroundColor="@color/chip_selector_bg"
+                            app:chipStrokeColor="@color/chip_selector_stroke"
+                            app:chipStrokeWidth="@dimen/stroke_thin"
+                            app:chipCornerRadius="@dimen/radius_full" />
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/chip_basic"
+                            style="@style/Widget.MaterialComponents.Chip.Filter"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:checked="true"
+                            android:text="@string/membership_tier_basic"
+                            android:textColor="@color/chip_selector_text"
+                            android:textSize="@dimen/text_size_small"
+                            app:chipBackgroundColor="@color/chip_selector_bg"
+                            app:chipStrokeColor="@color/chip_selector_stroke"
+                            app:chipStrokeWidth="@dimen/stroke_thin"
+                            app:chipCornerRadius="@dimen/radius_full" />
+
+                    </com.google.android.material.chip.ChipGroup>
 
                     <EditText
                         android:id="@+id/et_end_date"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/spacing_small"
+                        android:layout_marginTop="@dimen/spacing_medium"
                         android:background="?attr/hollowInputBackground"
                         android:clickable="true"
+                        android:drawableStart="@drawable/ic_calendar"
+                        android:drawablePadding="@dimen/spacing_small"
+                        android:drawableTint="?attr/textSecondaryCustom"
                         android:focusable="false"
                         android:fontFamily="sans-serif"
                         android:hint="@string/membership_hint_end_date"
@@ -140,46 +197,101 @@
                         android:padding="@dimen/spacing_medium"
                         android:textColor="?attr/textPrimaryCustom"
                         android:textColorHint="?attr/textSecondaryCustom"
-                        app:layout_constraintTop_toBottomOf="@id/et_tier" />
+                        android:textSize="@dimen/text_size_body"
+                        app:layout_constraintTop_toBottomOf="@id/chip_group_tier" />
 
-                    <androidx.constraintlayout.widget.ConstraintLayout
-                        android:id="@+id/nfc_card_container"
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Card: NFC Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/card_nfc"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_medium"
+                app:cardCornerRadius="@dimen/card_corner_radius_large"
+                app:cardBackgroundColor="?attr/branchSurfaceCustom"
+                app:strokeColor="?attr/dividerColorCustom"
+                app:strokeWidth="@dimen/stroke_thin">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="@dimen/spacing_large">
+
+                    <TextView
+                        android:id="@+id/lbl_section_nfc"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="sans-serif-medium"
+                        android:letterSpacing="0.06"
+                        android:text="@string/membership_section_nfc"
+                        android:textColor="?attr/textSecondaryCustom"
+                        android:textSize="@dimen/text_size_overline"
+                        android:textStyle="bold"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <ImageView
+                        android:id="@+id/iv_nfc_icon"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:layout_marginTop="@dimen/spacing_medium"
+                        android:contentDescription="@string/membership_nfc_icon_desc"
+                        android:src="@drawable/ic_nfc"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/lbl_section_nfc"
+                        app:tint="?attr/textSecondaryCustom" />
+
+                    <TextView
+                        android:id="@+id/tv_nfc_description"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/spacing_medium"
+                        android:fontFamily="sans-serif"
+                        android:gravity="center_vertical"
+                        android:lineSpacingExtra="2dp"
+                        android:text="@string/membership_nfc_description"
+                        android:textColor="?attr/textSecondaryCustom"
+                        android:textSize="@dimen/text_size_small"
+                        app:layout_constraintBottom_toBottomOf="@id/iv_nfc_icon"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toEndOf="@id/iv_nfc_icon"
+                        app:layout_constraintTop_toTopOf="@id/iv_nfc_icon" />
+
+                    <EditText
+                        android:id="@+id/et_card_uuid"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/spacing_small"
-                        app:layout_constraintTop_toBottomOf="@id/et_end_date">
+                        android:layout_marginTop="@dimen/spacing_medium"
+                        android:background="?attr/hollowInputBackground"
+                        android:focusable="false"
+                        android:fontFamily="sans-serif"
+                        android:hint="@string/membership_hint_card_uuid"
+                        android:maxLines="1"
+                        android:padding="@dimen/spacing_medium"
+                        android:textColor="?attr/textPrimaryCustom"
+                        android:textColorHint="?attr/textSecondaryCustom"
+                        android:textSize="@dimen/text_size_body"
+                        app:layout_constraintTop_toBottomOf="@id/iv_nfc_icon" />
 
-                        <EditText
-                            android:id="@+id/et_card_uuid"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:background="?attr/hollowInputBackground"
-                            android:focusable="false"
-                            android:fontFamily="sans-serif"
-                            android:hint="@string/membership_hint_card_uuid"
-                            android:maxLines="1"
-                            android:padding="@dimen/spacing_medium"
-                            android:textColor="?attr/textPrimaryCustom"
-                            android:textColorHint="?attr/textSecondaryCustom"
-                            app:layout_constraintEnd_toStartOf="@id/btn_scan_nfc"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="parent" />
-
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/btn_scan_nfc"
-                            android:layout_width="wrap_content"
-                            android:layout_height="0dp"
-                            android:layout_marginStart="@dimen/spacing_small"
-                            android:fontFamily="sans-serif-black"
-                            android:text="@string/membership_scan_nfc"
-                            android:textAllCaps="false"
-                            android:textSize="12sp"
-                            app:cornerRadius="@dimen/button_corner_radius_full"
-                            app:layout_constraintBottom_toBottomOf="@id/et_card_uuid"
-                            app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintTop_toTopOf="@id/et_card_uuid" />
-
-                    </androidx.constraintlayout.widget.ConstraintLayout>
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_scan_nfc"
+                        style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/primary_button_height"
+                        android:layout_marginTop="@dimen/spacing_medium"
+                        android:drawableStart="@drawable/ic_nfc"
+                        android:drawablePadding="@dimen/spacing_small"
+                        android:fontFamily="sans-serif-black"
+                        android:text="@string/membership_scan_nfc"
+                        android:textAllCaps="false"
+                        android:textSize="@dimen/text_size_button"
+                        app:backgroundTint="?attr/colorPrimary"
+                        app:cornerRadius="@dimen/button_corner_radius_full"
+                        app:iconTint="?attr/colorOnPrimary"
+                        app:layout_constraintTop_toBottomOf="@id/et_card_uuid" />
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -191,10 +303,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/primary_button_height"
                 android:layout_marginTop="@dimen/spacing_xxlarge"
+                android:fontFamily="sans-serif-black"
                 android:text="@string/membership_save_action"
                 android:textAllCaps="false"
                 android:textSize="@dimen/text_size_button"
-                android:textStyle="bold"
                 app:backgroundTint="?attr/colorPrimary"
                 app:cornerRadius="@dimen/button_corner_radius_full" />
 

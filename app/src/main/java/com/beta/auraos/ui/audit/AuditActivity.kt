@@ -1,12 +1,12 @@
 package com.beta.auraos.ui.audit
 
 import android.content.Intent
-import android.graphics.drawable.GradientDrawable
+
 import android.os.Bundle
 import android.view.View
 import android.widget.TextView
 import android.widget.Toast
-import androidx.core.content.ContextCompat
+
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
 import com.beta.auraos.BaseActivity
@@ -21,6 +21,7 @@ import com.beta.auraos.data.audit.ClosureBatch
 import com.beta.auraos.data.local.SessionManager
 import com.beta.auraos.databinding.ActivityAuditBinding
 import com.google.android.material.color.MaterialColors
+import com.google.android.material.snackbar.Snackbar
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -57,7 +58,7 @@ class AuditActivity : BaseActivity() {
             viewModel.loadSummary(branchId)
         } else {
             binding.tvPeriodRange.text = getString(R.string.audit_error_no_branch)
-            binding.btnExecuteClosure.isEnabled = false
+            binding.btnExecuteClosure.alpha = 0.4f
         }
     }
 
@@ -75,14 +76,13 @@ class AuditActivity : BaseActivity() {
     }
 
     private fun setupClickHandlers() {
-        GradientDrawable().apply {
-            shape = GradientDrawable.RECTANGLE
-            cornerRadius = 999f
-            setColor(ContextCompat.getColor(this@AuditActivity, R.color.branch_blue_manage))
-        }.let { binding.btnExecuteClosure.background = it }
-
         binding.btnExecuteClosure.setOnClickListener {
-            showClosureConfirmDialog()
+            val pending = binding.tvPendingCount.text.toString().toIntOrNull() ?: 0
+            if (pending == 0) {
+                Snackbar.make(binding.root, R.string.audit_no_pending_message, Snackbar.LENGTH_SHORT).show()
+            } else {
+                showClosureConfirmDialog()
+            }
         }
     }
 
@@ -153,7 +153,7 @@ class AuditActivity : BaseActivity() {
             binding.closureHistoryContainer.addView(card)
         }
 
-        binding.btnExecuteClosure.isEnabled = summary.pendingClosureRecords > 0
+        binding.btnExecuteClosure.alpha = if (summary.pendingClosureRecords > 0) 1f else 0.4f
     }
 
     private fun showClosureConfirmDialog() {

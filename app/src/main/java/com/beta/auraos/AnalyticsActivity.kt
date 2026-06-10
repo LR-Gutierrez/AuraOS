@@ -360,10 +360,10 @@ class AnalyticsActivity : BaseActivity() {
             tv.setTextColor(MaterialColors.getColor(binding.root, R.attr.textSecondaryCustom))
         } else if (trend > 0) {
             tv.text = getString(R.string.analytics_trend_up, trend)
-            tv.setTextColor(android.graphics.Color.parseColor("#4CAF50"))
+            tv.setTextColor(MaterialColors.getColor(binding.root, R.attr.semanticSuccessCustom))
         } else {
             tv.text = getString(R.string.analytics_trend_down, trend)
-            tv.setTextColor(android.graphics.Color.parseColor("#EF5350"))
+            tv.setTextColor(MaterialColors.getColor(binding.root, com.google.android.material.R.attr.colorError))
         }
     }
 
@@ -432,7 +432,7 @@ class AnalyticsActivity : BaseActivity() {
 
     private fun createHistoryCard(entry: HistoryEntry): View {
         val density = resources.displayMetrics.density
-        val padding = (16 * density).toInt()
+        val padding = resources.getDimensionPixelSize(R.dimen.spacing_medium)
         val e = entry.entry
         val type = entry.activityType
 
@@ -447,14 +447,6 @@ class AnalyticsActivity : BaseActivity() {
             if (fullUrl != null) label to fullUrl else null
         }
 
-        val strokeColor = when (type) {
-            ActivityType.INBOUND -> android.graphics.Color.parseColor("#4CAF50")
-            ActivityType.OCCUPIED -> android.graphics.Color.parseColor("#FFC107")
-            ActivityType.OUTBOUND -> MaterialColors.getColor(
-                binding.root, R.attr.dividerColorCustom
-            )
-        }
-
         val displayName = resolvePlateDisplayName(e)
 
         val card = MaterialCardView(this).apply {
@@ -464,13 +456,13 @@ class AnalyticsActivity : BaseActivity() {
             )
             setCardBackgroundColor(
                 android.content.res.ColorStateList.valueOf(
-                    MaterialColors.getColor(this, R.attr.cardGlassFillColorCustom)
+                    MaterialColors.getColor(this, R.attr.branchSurfaceCustom)
                 )
             )
             radius = resources.getDimension(R.dimen.card_corner_radius_large)
-            this.strokeColor = strokeColor
+            strokeColor = MaterialColors.getColor(this, R.attr.dividerColorCustom)
             strokeWidth = resources.getDimensionPixelSize(R.dimen.stroke_thin)
-            setContentPadding(padding, padding, padding, padding)
+            setContentPadding(0, 0, 0, 0)
             isClickable = photoFields.isNotEmpty()
             isFocusable = photoFields.isNotEmpty()
             if (photoFields.isNotEmpty()) {
@@ -491,6 +483,7 @@ class AnalyticsActivity : BaseActivity() {
                 LinearLayout.LayoutParams.WRAP_CONTENT
             )
             orientation = LinearLayout.VERTICAL
+            setPadding(padding, padding, padding, padding)
         }
 
         val topRow = LinearLayout(this).apply {
@@ -505,14 +498,14 @@ class AnalyticsActivity : BaseActivity() {
         val thumbUrl = PhotoUrlBuilder.build(e.platePhotoUrl)
         val thumbnail = ImageView(this).apply {
             layoutParams = LinearLayout.LayoutParams(
-                (48 * density).toInt(),
-                (48 * density).toInt()
+                resources.getDimensionPixelSize(R.dimen.thumbnail_size),
+                resources.getDimensionPixelSize(R.dimen.thumbnail_size)
             )
             scaleType = ImageView.ScaleType.CENTER_CROP
             if (thumbUrl != null) {
                 load(thumbUrl) {
                     crossfade(true)
-                    transformations(RoundedCornersTransformation(6f * density))
+                    transformations(RoundedCornersTransformation(8f * density))
                     placeholder(android.R.drawable.ic_menu_camera)
                     error(android.R.drawable.ic_menu_camera)
                 }
@@ -529,7 +522,9 @@ class AnalyticsActivity : BaseActivity() {
                 1f
             )
             orientation = LinearLayout.VERTICAL
-            setPadding((12 * density).toInt(), 0, 0, 0)
+            setPadding(
+                resources.getDimensionPixelSize(R.dimen.spacing_small_plus), 0, 0, 0
+            )
         }
 
         val vehicleTypeStr = e.vehicleType.replaceFirstChar { it.uppercase() }
@@ -539,8 +534,7 @@ class AnalyticsActivity : BaseActivity() {
             text = "$displayName  $vipStr"
             setTextColor(MaterialColors.getColor(binding.root, R.attr.textPrimaryCustom))
             textSize = 16f
-            typeface = Typeface.MONOSPACE
-            setTypeface(Typeface.MONOSPACE, Typeface.BOLD)
+            typeface = Typeface.create("sans-serif-black", Typeface.NORMAL)
         }
         infoCol.addView(plateText)
 
@@ -549,11 +543,7 @@ class AnalyticsActivity : BaseActivity() {
             ActivityType.OCCUPIED -> "${vehicleTypeStr} • ${getString(R.string.traffic_card_occupied_subtitle)}"
             ActivityType.OUTBOUND -> vehicleTypeStr
         }
-        val secondaryColor = if (type == ActivityType.OCCUPIED) {
-            android.graphics.Color.parseColor("#FFC107")
-        } else {
-            MaterialColors.getColor(binding.root, R.attr.textSecondaryCustom)
-        }
+        val secondaryColor = MaterialColors.getColor(binding.root, R.attr.textSecondaryCustom)
 
         val typeText = TextView(this).apply {
             text = secondaryText
@@ -568,7 +558,9 @@ class AnalyticsActivity : BaseActivity() {
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
-            ).also { it.topMargin = (12 * density).toInt() }
+            ).also {
+                it.topMargin = resources.getDimensionPixelSize(R.dimen.spacing_small_plus)
+            }
             orientation = LinearLayout.HORIZONTAL
         }
 
@@ -577,15 +569,17 @@ class AnalyticsActivity : BaseActivity() {
                 0,
                 LinearLayout.LayoutParams.WRAP_CONTENT,
                 1f
-            )
+                ).also { it.marginEnd = resources.getDimensionPixelSize(R.dimen.spacing_small) }
             orientation = LinearLayout.VERTICAL
         }
 
         val durationLabel = TextView(this).apply {
             text = getString(R.string.history_stay_label)
             setTextColor(MaterialColors.getColor(binding.root, R.attr.textSecondaryCustom))
-            textSize = 10f
+            setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX,
+                resources.getDimension(R.dimen.text_size_overline))
             alpha = 0.5f
+            letterSpacing = 0.08f
         }
         durationCol.addView(durationLabel)
 
@@ -597,6 +591,7 @@ class AnalyticsActivity : BaseActivity() {
             text = displayDuration
             setTextColor(MaterialColors.getColor(binding.root, R.attr.textPrimaryCustom))
             textSize = 16f
+            typeface = Typeface.create("sans-serif-mono", Typeface.BOLD)
         }
         durationCol.addView(durationVal)
         bottomRow.addView(durationCol)
@@ -605,15 +600,17 @@ class AnalyticsActivity : BaseActivity() {
             layoutParams = LinearLayout.LayoutParams(
                 0,
                 LinearLayout.LayoutParams.WRAP_CONTENT,
-                1f
-            )
+                1.5f
+                ).also { it.marginEnd = resources.getDimensionPixelSize(R.dimen.spacing_small) }
             orientation = LinearLayout.VERTICAL
         }
         val entryExitLabel = TextView(this).apply {
             text = getString(R.string.history_entry_exit_label)
             setTextColor(MaterialColors.getColor(binding.root, R.attr.textSecondaryCustom))
-            textSize = 10f
+            setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX,
+                resources.getDimension(R.dimen.text_size_overline))
             alpha = 0.5f
+            letterSpacing = 0.08f
         }
         entryExitCol.addView(entryExitLabel)
 
@@ -622,7 +619,8 @@ class AnalyticsActivity : BaseActivity() {
         val dateText = TextView(this).apply {
             text = entryDate
             setTextColor(MaterialColors.getColor(binding.root, R.attr.textSecondaryCustom))
-            textSize = 11f
+            setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX,
+                resources.getDimension(R.dimen.text_size_caption))
             alpha = 0.7f
         }
         entryExitCol.addView(dateText)
@@ -635,7 +633,8 @@ class AnalyticsActivity : BaseActivity() {
         val entryExitVal = TextView(this).apply {
             text = "$entryTime — $displayExit"
             setTextColor(MaterialColors.getColor(binding.root, R.attr.textPrimaryCustom))
-            textSize = 14f
+            setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX,
+                resources.getDimension(R.dimen.text_size_small))
         }
         entryExitCol.addView(entryExitVal)
         bottomRow.addView(entryExitCol)
@@ -644,7 +643,7 @@ class AnalyticsActivity : BaseActivity() {
             layoutParams = LinearLayout.LayoutParams(
                 0,
                 LinearLayout.LayoutParams.WRAP_CONTENT,
-                1f
+                0.8f
             )
             orientation = LinearLayout.VERTICAL
             gravity = android.view.Gravity.END
@@ -652,8 +651,10 @@ class AnalyticsActivity : BaseActivity() {
         val feeLabel = TextView(this).apply {
             text = getString(R.string.history_paid_label)
             setTextColor(MaterialColors.getColor(binding.root, R.attr.textSecondaryCustom))
-            textSize = 10f
+            setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX,
+                resources.getDimension(R.dimen.text_size_overline))
             alpha = 0.5f
+            letterSpacing = 0.08f
         }
         feeCol.addView(feeLabel)
 

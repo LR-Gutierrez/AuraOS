@@ -17,11 +17,9 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/header_bar"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="@dimen/home_header_height"
             android:background="?attr/navbarBackground"
-            android:paddingHorizontal="@dimen/spacing_large"
-            android:paddingVertical="@dimen/spacing_medium"
-            app:layout_scrollFlags="scroll|enterAlways">
+            android:paddingHorizontal="@dimen/spacing_large">
 
             <ImageButton
                 android:id="@+id/btn_back"
@@ -45,25 +43,10 @@
                 android:textColor="?attr/textPrimaryCustom"
                 android:textSize="@dimen/text_size_title"
                 android:textStyle="bold"
-                app:layout_constraintBottom_toTopOf="@id/tv_subtitle"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@id/btn_back"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <TextView
-                android:id="@+id/tv_subtitle"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/spacing_medium"
-                android:layout_marginTop="2dp"
-                android:fontFamily="sans-serif"
-                android:text="Manage departures and process payments."
-                android:textColor="?attr/textSecondaryCustom"
-                android:textSize="13sp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@id/btn_back"
-                app:layout_constraintTop_toBottomOf="@id/tv_title" />
+                app:layout_constraintTop_toTopOf="parent" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -87,22 +70,10 @@
             android:paddingTop="@dimen/spacing_large"
             android:paddingBottom="@dimen/spacing_xxlarge">
 
-            <TextView
-                android:id="@+id/tv_facility_label"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/spacing_small"
-                android:text="CURRENTLY IN FACILITY"
-                    android:textColor="?attr/textSecondaryCustom"
-                android:textSize="11sp"
-                android:textAllCaps="true"
-                android:letterSpacing="0.08"
-                android:fontFamily="sans-serif" />
-
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/search_card"
                 android:layout_width="match_parent"
-                android:layout_height="52dp"
+                android:layout_height="42dp"
                 android:layout_marginBottom="@dimen/spacing_medium"
                 app:cardCornerRadius="999dp"
                 app:cardBackgroundColor="?attr/branchSurfaceCustom"
@@ -114,7 +85,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:gravity="center_vertical"
-                    android:paddingHorizontal="16dp">
+                    android:paddingHorizontal="@dimen/spacing_medium">
 
                     <ImageView
                         android:layout_width="18dp"
@@ -128,13 +99,13 @@
                         android:layout_height="match_parent"
                         android:layout_marginStart="12dp"
                         android:background="@null"
-                        android:hint="@string/history_search_hint"
-                        android:textColorHint="?attr/textSecondaryCustom"
-                        android:textColor="?attr/branchSurfaceTextCustom"
-                        android:textSize="14sp"
                         android:fontFamily="sans-serif"
+                        android:hint="@string/history_search_hint"
                         android:inputType="text"
-                        android:importantForAutofill="no" />
+                        android:importantForAutofill="no"
+                        android:textColor="?attr/textPrimaryCustom"
+                        android:textColorHint="?attr/textSecondaryCustom"
+                        android:textSize="14sp" />
 
                 </LinearLayout>
 
