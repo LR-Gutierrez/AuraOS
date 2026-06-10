@@ -123,4 +123,8 @@
     <color name="connectivity_offline_midnight">#383838</color>
     <color name="connectivity_online_midnight">#4CAF50</color>
 
+    <!-- Profile icon backgrounds (Crystal / Light) -->
+    <color name="profile_icon_security_bg">#E8F5E9</color>
+    <color name="profile_icon_about_bg">#EBF5FF</color>
+
 </resources>

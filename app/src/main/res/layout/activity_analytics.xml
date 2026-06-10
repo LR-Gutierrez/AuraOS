@@ -35,7 +35,8 @@
             <TextView
                 android:id="@+id/tv_app_title"
                 android:layout_width="wrap_content"
-                android:layout_height="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
                 android:fontFamily="sans-serif-black"
                 android:gravity="bottom"
                 android:text="@string/analytics_title"
@@ -113,31 +114,31 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/history_today_revenue"
-                        android:textColor="?attr/textSecondaryCustom"
-                        android:textSize="11sp"
                         android:letterSpacing="0.08"
-                        android:textAllCaps="true" />
+                        android:text="@string/history_today_revenue"
+                        android:textAllCaps="true"
+                        android:textColor="?attr/textSecondaryCustom"
+                        android:textSize="11sp" />
 
                     <TextView
                         android:id="@+id/tv_today_revenue"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
                         android:text="$18.00"
                         android:textColor="?attr/textPrimaryCustom"
                         android:textSize="34sp"
-                        android:textStyle="bold"
-                        android:layout_marginTop="4dp" />
+                        android:textStyle="bold" />
 
                     <TextView
                         android:id="@+id/tv_peak_text"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:alpha="0.6"
                         android:text="$0.00 peak hour"
                         android:textColor="?attr/textSecondaryCustom"
-                        android:textSize="13sp"
-                        android:alpha="0.6"
-                        android:layout_marginTop="4dp" />
+                        android:textSize="13sp" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -420,7 +421,7 @@
                 android:layout_height="56dp"
                 android:layout_marginTop="24dp"
                 app:cardCornerRadius="999dp"
-                app:cardBackgroundColor="#0DFFFFFF"
+                app:cardBackgroundColor="?attr/branchSurfaceCustom"
                 app:strokeColor="?attr/dividerColorCustom"
                 app:strokeWidth="1dp"
                 app:cardElevation="0dp">
@@ -443,6 +444,7 @@
                         android:background="@null"
                         android:hint="@string/history_search_hint"
                         android:textColorHint="?attr/textSecondaryCustom"
+                        android:textColor="?attr/textPrimaryCustom"
                         android:textSize="15sp" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -614,7 +616,7 @@
         android:id="@+id/loading_overlay"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#80000000"
+        android:background="#99000000"
         android:clickable="true"
         android:focusable="true"
         android:visibility="gone">

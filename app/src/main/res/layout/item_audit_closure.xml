@@ -8,10 +8,11 @@
     android:clickable="true"
     android:focusable="true"
     android:foreground="?attr/selectableItemBackground"
-    app:cardCornerRadius="@dimen/card_corner_radius_small"
-    app:cardBackgroundColor="?attr/cardGlassFillColorCustom"
+    app:cardCornerRadius="@dimen/card_corner_radius_large"
+    app:cardBackgroundColor="?attr/branchSurfaceCustom"
     app:strokeColor="?attr/dividerColorCustom"
-    app:strokeWidth="@dimen/stroke_thin">
+    app:strokeWidth="@dimen/stroke_thin"
+    app:cardElevation="0dp">
 
     <LinearLayout
         android:layout_width="match_parent"

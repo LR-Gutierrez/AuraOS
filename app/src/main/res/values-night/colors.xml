@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Profile icon backgrounds (Midnight / Dark) -->
+    <color name="profile_icon_security_bg">#14251C</color>
+    <color name="profile_icon_about_bg">#1A2836</color>
+
+</resources>

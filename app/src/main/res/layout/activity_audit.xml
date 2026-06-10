@@ -77,7 +77,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 app:cardCornerRadius="@dimen/card_corner_radius_large"
-                app:cardBackgroundColor="?attr/cardGlassFillColorCustom"
+                app:cardBackgroundColor="?attr/branchSurfaceCustom"
                 app:strokeColor="?attr/dividerColorCustom"
                 app:strokeWidth="@dimen/stroke_thin"
                 app:layout_constraintTop_toTopOf="parent"
@@ -172,16 +172,16 @@
 
             <TextView
                 android:id="@+id/btn_execute_closure"
-                android:layout_width="0dp"
-                android:layout_height="34dp"
-                android:layout_marginTop="@dimen/spacing_medium"
-                android:background="@android:color/transparent"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_marginTop="@dimen/spacing_large"
+                android:background="@drawable/bg_blue_pill"
                 android:clickable="true"
                 android:focusable="true"
-                android:fontFamily="sans-serif"
+                android:fontFamily="sans-serif-black"
                 android:gravity="center"
                 android:letterSpacing="0.05"
-                android:paddingHorizontal="18dp"
+                android:paddingHorizontal="28dp"
                 android:text="@string/audit_execute_closure"
                 android:textColor="#1A1A1C"
                 android:textSize="12sp"
@@ -197,7 +197,7 @@
                 android:layout_marginTop="@dimen/spacing_large"
                 android:text="@string/audit_closure_history"
                 android:textColor="?attr/textPrimaryCustom"
-                android:textSize="18sp"
+                android:textSize="@dimen/text_size_title"
                 android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/btn_execute_closure" />
@@ -234,12 +234,18 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="#99000000"
+        android:clickable="true"
+        android:focusable="true"
         android:visibility="gone">
 
         <com.google.android.material.progressindicator.CircularProgressIndicator
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center" />
+            android:layout_gravity="center"
+            android:indeterminate="true"
+            app:indicatorColor="?attr/colorPrimary"
+            app:indicatorSize="48dp"
+            app:trackThickness="4dp" />
 
     </FrameLayout>
 

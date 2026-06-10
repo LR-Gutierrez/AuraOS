@@ -6,7 +6,7 @@
     android:layout_height="wrap_content"
     android:layout_marginBottom="@dimen/spacing_small"
     app:cardCornerRadius="@dimen/card_corner_radius_large"
-    app:cardBackgroundColor="?attr/cardGlassFillColorCustom"
+    app:cardBackgroundColor="?attr/branchSurfaceCustom"
     app:strokeColor="?attr/dividerColorCustom"
     app:strokeWidth="@dimen/stroke_thin"
     app:cardElevation="0dp">
@@ -28,7 +28,7 @@
                 android:layout_width="56dp"
                 android:layout_height="56dp"
                 android:scaleType="centerCrop"
-                android:contentDescription="Vehicle photo"
+                android:contentDescription="@string/exit_vehicle_photo_desc"
                 android:src="@android:drawable/ic_menu_camera" />
 
             <LinearLayout
@@ -75,7 +75,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="STAY DURATION"
+                    android:text="@string/exit_stay_duration"
                     android:textColor="?attr/textSecondaryCustom"
                     android:textSize="9sp"
                     android:textAllCaps="true"
@@ -103,7 +103,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="STAY FEE"
+                    android:text="@string/exit_stay_fee"
                     android:textColor="?attr/textSecondaryCustom"
                     android:textSize="9sp"
                     android:textAllCaps="true"
