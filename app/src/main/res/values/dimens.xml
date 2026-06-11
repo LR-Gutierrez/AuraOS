@@ -82,4 +82,9 @@
     <dimen name="text_size_plate">44sp</dimen>
     <!-- Connectivity banner -->
     <dimen name="connectivity_banner_height">38dp</dimen>
+
+    <!-- Legacy - used by landscape and tablet layouts -->
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="fab_margin">16dp</dimen>
+    <dimen name="text_margin">16dp</dimen>
 </resources>

@@ -13,6 +13,22 @@ android {
         }
     }
 
+    val keystoreFile = rootProject.file("keystore.properties")
+    if (keystoreFile.exists()) {
+        val props = keystoreFile.readLines().mapNotNull { line ->
+            val parts = line.split("=", limit = 2)
+            if (parts.size == 2) parts[0].trim() to parts[1].trim() else null
+        }.toMap()
+        signingConfigs {
+            create("release") {
+                storeFile = file(props["storeFile"]!!)
+                storePassword = props["storePassword"]!!
+                keyAlias = props["keyAlias"]!!
+                keyPassword = props["keyPassword"]!!
+            }
+        }
+    }
+
     defaultConfig {
         applicationId = "com.beta.auraos"
         minSdk = 24
@@ -30,6 +46,9 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            if (keystoreFile.exists()) {
+                signingConfig = signingConfigs.getByName("release")
+            }
         }
     }
     compileOptions {

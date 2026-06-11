@@ -10,7 +10,11 @@
 /.idea/planningMode.xml
 .DS_Store
 /build
+/build/*
+app/build
+app/release
 /captures
 .externalNativeBuild
 .cxx
 local.properties
+keystore.properties
