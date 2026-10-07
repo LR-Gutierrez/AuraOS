@@ -420,3 +420,7 @@ Las migraciones de base de datos son explícitas y manuales. Cada modificación 
 > **Desarrollador:** Luis Angel Gutierrez · [GitHub](https://github.com/LR-Gutierrez) · luisangelrgr@gmail.com
 >
 
+
+## License
+
+MIT — see [LICENSE](LICENSE).
