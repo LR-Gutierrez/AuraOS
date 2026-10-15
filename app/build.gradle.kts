@@ -13,6 +13,15 @@ android {
         }
     }
 
+    // URL del backend: se lee de local.properties (no versionado) para no fijarla en el código.
+    val localProps = rootProject.file("local.properties").takeIf { it.exists() }
+        ?.readLines()?.mapNotNull { line ->
+            val parts = line.split("=", limit = 2)
+            if (parts.size == 2 && !line.trimStart().startsWith("#")) parts[0].trim() to parts[1].trim() else null
+        }?.toMap() ?: emptyMap()
+    val apiBaseUrlDebug = localProps["api.baseUrl.debug"] ?: "http://10.0.2.2:3000/"
+    val apiBaseUrlRelease = localProps["api.baseUrl.release"] ?: apiBaseUrlDebug
+
     val keystoreFile = rootProject.file("keystore.properties")
     if (keystoreFile.exists()) {
         val props = keystoreFile.readLines().mapNotNull { line ->
@@ -40,7 +49,11 @@ android {
     }
 
     buildTypes {
+        debug {
+            buildConfigField("String", "API_BASE_URL", "\"$apiBaseUrlDebug\"")
+        }
         release {
+            buildConfigField("String", "API_BASE_URL", "\"$apiBaseUrlRelease\"")
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -60,6 +73,7 @@ android {
     }
     buildFeatures {
         viewBinding = true
+        buildConfig = true
     }
 }
 

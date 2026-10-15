@@ -1,5 +1,6 @@
 package com.beta.auraos.data.remote
 
+import com.beta.auraos.BuildConfig
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -8,9 +9,7 @@ import java.util.concurrent.TimeUnit
 
 object ApiClient {
 
-    //const val BASE_URL = "http://192.168.0.143:3000/"
-    //const val BASE_URL = "http://192.168.2.2:3000/"
-    const val BASE_URL = "http://192.168.2.112:3000/"
+    const val BASE_URL: String = BuildConfig.API_BASE_URL
 
     val retrofit: Retrofit by lazy {
         val logging = HttpLoggingInterceptor().apply {
