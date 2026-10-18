@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="pc_back_arrow">← Volver</string>
+    <string name="nav_cash">Caja</string>
+
+    <!-- Inicio -->
+    <string name="pc_occupancy_label">Ocupación actual · %1$s</string>
+    <string name="pc_capacity">/ %1$d</string>
+    <string name="pc_occupancy_pct">%1$d%% ocupado</string>
+    <string name="pc_register_entry">Registrar entrada</string>
+    <string name="pc_register_exit">Registrar salida</string>
+    <string name="pc_entries">Entradas</string>
+    <string name="pc_exits">Salidas</string>
+    <string name="pc_revenue">Ingresos</string>
+    <string name="pc_all_branches">Todas las sedes</string>
+    <string name="pc_count_of_cap">%1$s / %2$d</string>
+    <string name="pc_kiosk_mode">Modo kiosko</string>
+    <string name="pc_kiosk_sub">Autoservicio de entrada para %1$s</string>
+    <string name="pc_on_site">En sitio</string>
+    <string name="pc_on_site_empty">No hay vehículos en sitio ahora.</string>
+    <string name="pc_since">desde %1$s</string>
+    <string name="pc_meta">%1$s · %2$s</string>
+    <string name="pc_member">Membresía</string>
+    <string name="pc_membership_alert">%1$s · %2$s · %3$s</string>
+    <string name="pc_no_branches_chip">Configurar sedes</string>
+
+    <!-- Registro -->
+    <string name="pc_register_title">Registro</string>
+    <string name="pc_branch_meta">%1$s · %2$s / %3$d</string>
+    <string name="pc_entry">Entrada</string>
+    <string name="pc_exit">Salida</string>
+    <string name="pc_plate">Placa</string>
+    <string name="pc_type">Tipo</string>
+    <string name="pc_membership_optional">Membresía · opcional</string>
+    <string name="pc_link_membership">Asociar una membresía</string>
+    <string name="pc_remove">Quitar</string>
+    <string name="pc_member_label">Membresía · %1$s</string>
+    <string name="pc_member_until">Vigente hasta %1$s</string>
+    <string name="pc_photos">Fotos</string>
+    <string name="pc_photo_count">%1$d de 5</string>
+    <string name="pc_photos_hint">La foto de la placa es obligatoria. Frontal, trasera y laterales son opcionales y quedan como evidencia del estado del vehículo. Mantén presionada una foto para quitarla.</string>
+    <string name="pc_slot_plate">Placa</string>
+    <string name="pc_slot_front">Frontal</string>
+    <string name="pc_slot_rear">Trasera</string>
+    <string name="pc_slot_left">Lateral izq.</string>
+    <string name="pc_slot_right">Lateral der.</string>
+    <string name="pc_required">Requerida</string>
+    <string name="pc_optional">Opcional</string>
+    <string name="pc_tap_to_retake">%1$s · tocar para repetir</string>
+    <string name="pc_no_read">SIN LECTURA</string>
+    <string name="pc_entry_time">Entrada %1$s</string>
+    <string name="pc_rate_per_day">Tarifa %1$s / día</string>
+    <string name="pc_sending">Enviando…</string>
+    <string name="pc_entry_done">Entrada registrada</string>
+    <string name="pc_entry_queued">Entrada guardada sin conexión</string>
+    <string name="pc_register_another">Registrar otro</string>
+
+    <!-- Salida -->
+    <string name="pc_search_plate">Buscar placa</string>
+    <string name="pc_in">Entrada</string>
+    <string name="pc_time">Tiempo</string>
+    <string name="pc_out">Salida</string>
+    <string name="pc_photos_of">%1$d de 5</string>
+    <string name="pc_total_due">Total a cobrar</string>
+    <string name="pc_charge_and_exit">Cobrar y registrar salida</string>
+    <string name="pc_view_photos">Ver fotos</string>
+    <string name="pc_pick_another">Elegir otro vehículo</string>
+    <string name="pc_exit_done">Salida registrada</string>
+    <string name="pc_exit_done_meta">%1$s · %2$s</string>
+
+    <!-- Caja -->
+    <string name="pc_cash_title">Caja y auditoría</string>
+    <string name="pc_period_since">Desde %1$s · %2$s</string>
+    <string name="pc_period_first">Primer periodo · %1$s</string>
+    <string name="pc_period_revenue">Ingresos del periodo</string>
+    <string name="pc_memberships">Membresías</string>
+    <string name="pc_closure_panel">Cierre del periodo</string>
+    <string name="pc_pending_records">Registros pendientes</string>
+    <string name="pc_vehicle_revenue">Ingresos por vehículos</string>
+    <string name="pc_to_close">Por cerrar</string>
+    <string name="pc_closure_hint">Al cerrar, el periodo queda sellado: sus registros ya no cambian y los totales quedan para auditoría.</string>
+    <string name="pc_close_cash">Cerrar caja</string>
+    <string name="pc_movements">Movimientos</string>
+    <string name="pc_no_movements">Sin movimientos en este periodo.</string>
+    <string name="pc_closure_history">Historial de cierres</string>
+
+    <!-- Analíticas -->
+    <string name="pc_period_today">Hoy</string>
+    <string name="pc_period_7d">7 días</string>
+    <string name="pc_period_30d">30 días</string>
+    <string name="pc_period_12m">12 meses</string>
+    <string name="pc_period_label_today">hoy</string>
+    <string name="pc_period_label_7d">últimos 7 días</string>
+    <string name="pc_period_label_30d">últimos 30 días</string>
+    <string name="pc_period_label_12m">últimos 12 meses</string>
+    <string name="pc_revenue_label">Ingresos · %1$s</string>
+    <string name="pc_change_vs_previous">%1$s vs. periodo anterior</string>
+    <string name="pc_no_previous">Sin ingresos en el periodo anterior</string>
+    <string name="pc_all_types">Todos los tipos</string>
+    <string name="pc_vehicles">Vehículos</string>
+    <string name="pc_avg_ticket">Ticket promedio</string>
+    <string name="pc_by_branch">Por sede</string>
+    <string name="pc_by_type">Por tipo de vehículo</string>
+    <string name="pc_share_value">%1$s · %2$d%%</string>
+    <string name="pc_period_exits">Salidas del periodo</string>
+    <string name="pc_no_exits">Sin salidas en este periodo.</string>
+    <string name="pc_hour_range">%1$s – %2$s</string>
+
+    <!-- Perfil -->
+    <string name="pc_operation">Operación</string>
+    <string name="pc_preferences">Preferencias</string>
+    <string name="pc_branches">Sedes</string>
+    <string name="pc_memberships_meta">Planes, tarjetas NFC y renovaciones</string>
+    <string name="pc_kiosk_meta">Abrir autoservicio en %1$s</string>
+    <string name="pc_appearance">Apariencia</string>
+    <string name="pc_theme_light">Claro</string>
+    <string name="pc_theme_dark">Oscuro</string>
+    <string name="pc_sign_out">Cerrar sesión</string>
+    <string name="pc_version_line">%1$s %2$s · build %3$d</string>
+
+    <!-- Kiosko -->
+    <string name="pc_kiosk_exit">Salir</string>
+    <string name="pc_kiosk_header">Autoservicio · %1$s</string>
+    <string name="pc_welcome">Bienvenido</string>
+    <string name="pc_kiosk_enter">Entrar</string>
+    <string name="pc_kiosk_enter_sub">Registra tu placa y toma tu ticket</string>
+    <string name="pc_kiosk_member">Tengo membresía</string>
+    <string name="pc_kiosk_member_sub">Acerca tu tarjeta para entrar</string>
+    <string name="pc_kiosk_rates">%1$s %2$s · %3$s %4$s · %5$s %6$s por día</string>
+    <string name="pc_kiosk_nfc_title">Acerca tu tarjeta</string>
+    <string name="pc_kiosk_nfc_hint">Colócala sobre el lector, debajo de la pantalla.</string>
+    <string name="pc_kiosk_waiting">Esperando tarjeta…</string>
+    <string name="pc_kiosk_reading">Leyendo tarjeta…</string>
+    <string name="pc_kiosk_welcome_member">Bienvenido, %1$s</string>
+    <string name="pc_kiosk_member_in">Entrada registrada con tu membresía. Adelante.</string>
+    <string name="pc_kiosk_member_meta">%1$s · %2$s · vigente hasta %3$s</string>
+    <string name="pc_back_home">Volver al inicio</string>
+
+    <!-- Kiosk entry -->
+    <string name="pc_kiosk_entry_title">Registra tu entrada</string>
+    <string name="pc_kiosk_entry_hint">Escribe tu placa. Luego tomaremos una foto de la placa.</string>
+    <string name="pc_continue">Continuar</string>
+    <string name="pc_capturing">Capturando placa</string>
+    <string name="pc_capturing_hint">Mantén el vehículo detenido frente a la cámara.</string>
+    <string name="pc_registering">Registrando entrada</string>
+    <string name="pc_registering_hint">Solo toma un momento.</string>
+    <string name="pc_kiosk_go_ahead">Adelante</string>
+    <string name="pc_kiosk_ticket_hint">Tu entrada quedó registrada. Al salir solo necesitas tu placa.</string>
+    <string name="pc_kiosk_saved_offline">Entrada guardada</string>
+    <string name="pc_kiosk_saved_offline_hint">Sin conexión en este momento. Tu entrada se sincroniza sola.</string>
+    <string name="pc_ticket">Ticket</string>
+    <string name="pc_done">Listo</string>
+    <string name="pc_log_exit">Registrar salida</string>
+    <string name="pc_member_no_charge">Membresía · sin cargo</string>
+    <string name="pc_included_in_plan">Incluido en el plan mensual</string>
+    <string name="pc_disable">Desactivar</string>
+    <plurals name="pc_load_more">
+        <item quantity="one">Ver %1$d más</item>
+        <item quantity="other">Ver %1$d más</item>
+    </plurals>
+    <plurals name="pc_kiosk_free">
+        <item quantity="one">Hay %1$d puesto libre en este momento.</item>
+        <item quantity="other">Hay %1$d puestos libres en este momento.</item>
+    </plurals>
+    <plurals name="pc_free">
+        <item quantity="one">%1$d puesto libre</item>
+        <item quantity="other">%1$d puestos libres</item>
+    </plurals>
+    <plurals name="pc_memberships_expiring">
+        <item quantity="one">%1$s membresía por vencer</item>
+        <item quantity="other">%1$s membresías por vencer</item>
+    </plurals>
+    <plurals name="pc_vehicles_count">
+        <item quantity="one">%1$d vehículo</item>
+        <item quantity="other">%1$d vehículos</item>
+    </plurals>
+    <plurals name="pc_see_all">
+        <item quantity="one">Verlo</item>
+        <item quantity="other">Ver los %1$d</item>
+    </plurals>
+    <plurals name="pc_entry_done_meta">
+        <item quantity="one">%1$s · %2$s · %3$d foto</item>
+        <item quantity="other">%1$s · %2$s · %3$d fotos</item>
+    </plurals>
+    <plurals name="pc_profile_meta">
+        <item quantity="one">%1$s · %2$s sede</item>
+        <item quantity="other">%1$s · %2$s sedes</item>
+    </plurals>
+    <plurals name="pc_charges">
+        <item quantity="one">%1$s cobro · %2$s</item>
+        <item quantity="other">%1$s cobros · %2$s</item>
+    </plurals>
+    <plurals name="pc_charges_short">
+        <item quantity="one">%1$s cobro</item>
+        <item quantity="other">%1$s cobros</item>
+    </plurals>
+    <plurals name="pc_closure_meta">
+        <item quantity="one">%1$s · %2$d salida</item>
+        <item quantity="other">%1$s · %2$d salidas</item>
+    </plurals>
+    <plurals name="pc_on_site_count">
+        <item quantity="one">%1$s vehículo en sitio · %2$s</item>
+        <item quantity="other">%1$s vehículos en sitio · %2$s</item>
+    </plurals>
+    <plurals name="pc_results">
+        <item quantity="one">%1$d resultado · %2$s</item>
+        <item quantity="other">%1$d resultados · %2$s</item>
+    </plurals>
+
+    <!-- No-server setup -->
+    <string name="setup_link">¿Sin servidor? Configura este dispositivo</string>
+    <string name="setup_title">Configurar sin servidor</string>
+    <string name="setup_lede">Crea la cuenta y la primera sede en este teléfono. Todo funciona sin conexión y se sincroniza cuando inicies sesión con una cuenta del servidor.</string>
+    <string name="setup_section_account">Tu cuenta</string>
+    <string name="setup_section_branch">Primera sede</string>
+    <string name="setup_name">Nombre</string>
+    <string name="setup_email">Correo</string>
+    <string name="setup_password">Contraseña</string>
+    <string name="setup_confirm">Repite la contraseña</string>
+    <string name="setup_branch_name">Nombre de la sede</string>
+    <string name="setup_capacity">Puestos por tipo de vehículo</string>
+    <string name="setup_rates">Tarifa diaria por tipo de vehículo (USD)</string>
+    <string name="setup_footnote">La cuenta vive solo en este dispositivo hasta que un servidor la acepte. Las tarifas de pernocta y los horarios se ajustan luego en Sedes.</string>
+    <string name="setup_create">Crear cuenta y sede</string>
+    <string name="setup_creating">Creando…</string>
+    <string name="setup_error_required">Obligatorio.</string>
+    <string name="setup_error_email">Escribe un correo válido.</string>
+    <string name="setup_error_password">Mínimo 6 caracteres.</string>
+    <string name="setup_error_confirm">Las contraseñas no coinciden.</string>
+    <string name="setup_error_capacity">Indica al menos un puesto; solo números enteros.</string>
+    <string name="setup_error_rates">Las tarifas deben ser números, 0 o más.</string>
+    <string name="setup_no_lock_title">Primero activa un bloqueo de pantalla</string>
+    <string name="setup_no_lock_body">Crear una cuenta sin servidor está protegido por el bloqueo de pantalla del teléfono. Configura un PIN, patrón o contraseña en Ajustes e inténtalo de nuevo.</string>
+    <string name="setup_open_settings">Abrir ajustes</string>
+    <string name="setup_confirm_title">Confirma que eres tú</string>
+    <string name="setup_confirm_body">Usa el bloqueo de pantalla para configurar AuraOS sin servidor.</string>
+    <string name="setup_not_empty">Este dispositivo ya tiene una cuenta. Inicia sesión con ella.</string>
+    <string name="setup_failed">No se pudo guardar la configuración. Inténtalo de nuevo.</string>
+    <string name="pc_logout_local_message">Esta cuenta existe solo en este teléfono. Cerrar sesión la conserva junto con sus datos; vuelve a entrar con la misma contraseña.</string>
+    <!-- Ajuste de servidor -->
+    <string name="server_title">Servidor</string>
+    <string name="server_body">AuraOS funciona sin servidor. Escribe la dirección de tu backend para sincronizar entre dispositivos, o déjalo vacío.</string>
+    <string name="server_test">Probar</string>
+    <string name="server_save">Guardar</string>
+    <string name="server_none">Sin servidor: los datos quedan en este dispositivo.</string>
+    <string name="server_invalid">Esa dirección no es válida. Ejemplo: http://192.168.1.10:3000</string>
+    <string name="server_saved">Servidor guardado. Inicia sesión para sincronizar con él.</string>
+    <string name="server_removed">Servidor quitado. La app funciona solo en este dispositivo.</string>
+    <string name="server_confirm_title">Cambiar servidor</string>
+    <string name="server_confirm_body">Los cambios pendientes de este dispositivo se enviarán al nuevo servidor.</string>
+</resources>

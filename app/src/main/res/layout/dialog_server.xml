@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingHorizontal="24dp"
+    android:paddingTop="8dp">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/server_body"
+        android:textAppearance="@style/TextAppearance.Pc.Body"
+        android:textColor="?attr/textSecondaryCustom"
+        android:textSize="14sp" />
+
+    <EditText
+        android:id="@+id/et_server"
+        style="@style/Widget.Pc.Input"
+        android:layout_width="match_parent"
+        android:layout_marginTop="16dp"
+        android:hint="@string/server_hint"
+        android:importantForAutofill="no"
+        android:inputType="textUri" />
+
+    <TextView
+        android:id="@+id/tv_server_status"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:minHeight="40dp"
+        android:textAppearance="@style/TextAppearance.Pc.Body"
+        android:textColor="?attr/textSecondaryCustom"
+        android:textSize="14sp" />
+</LinearLayout>

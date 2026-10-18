@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Confirmation card after an entry or exit is logged. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_lrg_card"
+    android:orientation="vertical"
+    android:paddingHorizontal="20dp"
+    android:paddingVertical="24dp">
+
+    <FrameLayout
+        android:layout_width="44dp"
+        android:layout_height="44dp"
+        android:background="@drawable/bg_pc_circle_accent">
+
+        <ImageView
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:layout_gravity="center"
+            android:importantForAccessibility="no"
+            android:src="@drawable/ic_pc_check"
+            app:tint="?attr/onAccentCustom" />
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/tv_done_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="18dp"
+        android:textAppearance="@style/TextAppearance.Pc.Stat"
+        tools:text="Entrada registrada" />
+
+    <TextView
+        android:id="@+id/tv_done_plate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:fontFamily="@font/aura_mono"
+        android:letterSpacing="0.06"
+        android:textColor="?attr/textPrimaryCustom"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        tools:text="AB123CD" />
+
+    <TextView
+        android:id="@+id/tv_done_meta"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:textAppearance="@style/TextAppearance.Pc.Mono"
+        tools:text="07:42 · Auto · 3 fotos" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_done_again"
+        style="@style/Widget.Pc.Button.Outlined"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="18dp"
+        android:paddingHorizontal="18dp"
+        tools:text="Registrar otro" />
+</LinearLayout>

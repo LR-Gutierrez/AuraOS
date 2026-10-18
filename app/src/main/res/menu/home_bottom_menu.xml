@@ -1,19 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Parqueo·Control tab bar: Inicio · Registro · Caja · Analíticas · Perfil -->
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/nav_dashboard"
-        android:icon="@drawable/ic_nav_home_selector"
-        android:title="" />
+        android:icon="@drawable/ic_tab_home"
+        android:title="@string/nav_dashboard" />
     <item
         android:id="@+id/nav_register"
-        android:icon="@drawable/ic_nav_scan_selector"
-        android:title="" />
+        android:icon="@drawable/ic_tab_register"
+        android:title="@string/nav_register" />
+    <item
+        android:id="@+id/nav_cash"
+        android:icon="@drawable/ic_tab_cash"
+        android:title="@string/nav_cash" />
     <item
         android:id="@+id/nav_analytics"
-        android:icon="@drawable/ic_nav_chart_selector"
-        android:title="" />
+        android:icon="@drawable/ic_tab_chart"
+        android:title="@string/nav_analytics" />
     <item
         android:id="@+id/nav_profile"
-        android:icon="@drawable/ic_nav_profile_selector"
-        android:title="" />
+        android:icon="@drawable/ic_tab_profile"
+        android:title="@string/nav_profile" />
 </menu>

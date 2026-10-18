@@ -12,7 +12,7 @@
     <dimen name="spacing_xxlarge">40dp</dimen>
     <dimen name="spacing_xxxlarge">48dp</dimen>
 
-    <dimen name="container_padding">24dp</dimen>
+    <dimen name="container_padding">20dp</dimen>
     <dimen name="container_padding_large">32dp</dimen>
 
     <!-- Stroke -->
@@ -27,25 +27,25 @@
     <dimen name="elevation_medium">4dp</dimen>
     <dimen name="elevation_large">8dp</dimen>
 
-    <!-- Corner Radii: 28dp+ for main containers, >=12dp for secondary -->
+    <!-- Corner radii (LRGutierrez system): 8dp controls, 12dp cards and containers -->
     <dimen name="radius_sm">8dp</dimen>
-    <dimen name="radius_md">16dp</dimen>
-    <dimen name="radius_lg">24dp</dimen>
-    <dimen name="radius_xl">28dp</dimen>
-    <dimen name="radius_2xl">32dp</dimen>
-    <dimen name="radius_3xl">48dp</dimen>
+    <dimen name="radius_md">12dp</dimen>
+    <dimen name="radius_lg">12dp</dimen>
+    <dimen name="radius_xl">12dp</dimen>
+    <dimen name="radius_2xl">12dp</dimen>
+    <dimen name="radius_3xl">12dp</dimen>
     <dimen name="radius_full">9999dp</dimen>
 
     <!-- Card corner radii -->
     <dimen name="card_corner_radius_small">12dp</dimen>
-    <dimen name="card_corner_radius_medium">16dp</dimen>
-    <dimen name="card_corner_radius_large">28dp</dimen>
-    <dimen name="card_corner_radius_xlarge">32dp</dimen>
+    <dimen name="card_corner_radius_medium">12dp</dimen>
+    <dimen name="card_corner_radius_large">12dp</dimen>
+    <dimen name="card_corner_radius_xlarge">12dp</dimen>
 
     <!-- Button corner radii -->
-    <dimen name="button_corner_radius_small">12dp</dimen>
-    <dimen name="button_corner_radius_large">20dp</dimen>
-    <dimen name="button_corner_radius_xlarge">28dp</dimen>
+    <dimen name="button_corner_radius_small">8dp</dimen>
+    <dimen name="button_corner_radius_large">8dp</dimen>
+    <dimen name="button_corner_radius_xlarge">8dp</dimen>
     <dimen name="button_corner_radius_full">9999dp</dimen>
 
     <!-- Login specific -->
@@ -53,11 +53,11 @@
     <dimen name="login_input_height">50dp</dimen>
     <dimen name="login_button_height">52dp</dimen>
     <dimen name="login_biometric_button_size">56dp</dimen>
+    <dimen name="login_column_max_width">520dp</dimen>
 
     <!-- Home specific -->
     <dimen name="home_header_height">90dp</dimen>
     <dimen name="bottom_nav_height">64dp</dimen>
-    <dimen name="bottom_nav_indicator_width">40dp</dimen>
     <dimen name="avatar_size">40dp</dimen>
     <dimen name="icon_size_small">16dp</dimen>
     <dimen name="icon_size_medium">24dp</dimen>
@@ -77,9 +77,18 @@
     <dimen name="text_size_body">15sp</dimen>
     <dimen name="text_size_button">16sp</dimen>
     <dimen name="text_size_title">20sp</dimen>
+    <dimen name="text_size_subtitle">18sp</dimen>
+    <dimen name="text_size_title_large">22sp</dimen>
     <dimen name="text_size_headline">28sp</dimen>
     <dimen name="text_size_display">34sp</dimen>
     <dimen name="text_size_plate">44sp</dimen>
+    <!-- Touch targets & list icons (HIG: 44pt default ≈ 48dp on Android) -->
+    <dimen name="touch_target_min">48dp</dimen>
+    <dimen name="list_icon_size">40dp</dimen>
+    <dimen name="chevron_size">20dp</dimen>
+    <dimen name="stat_card_min_height">100dp</dimen>
+    <dimen name="hero_card_min_height">200dp</dimen>
+
     <!-- Connectivity banner -->
     <dimen name="connectivity_banner_height">38dp</dimen>
 

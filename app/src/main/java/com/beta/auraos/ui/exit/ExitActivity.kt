@@ -1,25 +1,25 @@
 package com.beta.auraos.ui.exit
 
-import android.graphics.drawable.GradientDrawable
+import android.content.Intent
 import android.os.Bundle
-import androidx.core.content.ContextCompat
 import android.text.Editable
+import android.text.InputFilter
 import android.text.TextWatcher
 import android.view.View
-import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
-import com.beta.auraos.BaseActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
 import androidx.lifecycle.ViewModelProvider
 import coil.load
 import coil.transform.RoundedCornersTransformation
+import com.beta.auraos.BaseActivity
+import com.beta.auraos.HomeActivity
 import com.beta.auraos.R
 import com.beta.auraos.data.BranchRepository
 import com.beta.auraos.data.MembershipRepository
@@ -28,16 +28,20 @@ import com.beta.auraos.data.audit.AuditEngine
 import com.beta.auraos.data.audit.FeeCalculator
 import com.beta.auraos.data.local.ExitSyncManager
 import com.beta.auraos.data.local.SessionManager
+import com.beta.auraos.data.local.room.AppDatabase
 import com.beta.auraos.data.model.Branch
 import com.beta.auraos.data.model.VehicleEntry
 import com.beta.auraos.data.remote.ApiClient
 import com.beta.auraos.data.remote.BranchApi
 import com.beta.auraos.databinding.ActivityExitBinding
-import com.beta.auraos.databinding.ItemExitVehicleBinding
+import com.beta.auraos.databinding.ItemPcVehicleRowBinding
+import com.beta.auraos.util.ParkingFormat
+import com.beta.auraos.util.PcUi
 import com.beta.auraos.util.PhotoUrlBuilder
-import com.beta.auraos.util.formatDateTime
+import com.beta.auraos.util.TabNavigator
 import com.google.android.material.color.MaterialColors
 
+/** Registro · Salida: pick a vehicle on site, review the charge and log the exit. */
 class ExitActivity : BaseActivity() {
 
     private lateinit var binding: ActivityExitBinding
@@ -47,154 +51,214 @@ class ExitActivity : BaseActivity() {
     private var allEntries: List<VehicleEntry> = emptyList()
     private var currentBranch: Branch? = null
     private var membershipNameMap: Map<String, String> = emptyMap()
+    private var selectedId: String? = null
+    private var exitingId: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
         sessionManager = SessionManager(this)
-        val db = com.beta.auraos.data.local.room.AppDatabase.getInstance(this)
-        val vehicleRepo = VehicleEntryRepository(db)
-        val branchApi = ApiClient.createApi<BranchApi>()
-        val branchRepo = BranchRepository(branchApi, db)
-        val membershipRepo = MembershipRepository(db)
-        val auditEngine = AuditEngine(applicationContext)
-        val exitSyncManager = ExitSyncManager(db)
-        val factory = ExitViewModelFactory(vehicleRepo, branchRepo, membershipRepo, auditEngine, exitSyncManager)
+        val db = AppDatabase.getInstance(this)
+        val factory = ExitViewModelFactory(
+            VehicleEntryRepository(db),
+            BranchRepository(ApiClient.createApi<BranchApi>(), db),
+            MembershipRepository(db),
+            AuditEngine(applicationContext),
+            ExitSyncManager(db),
+        )
         viewModel = ViewModelProvider(this, factory)[ExitViewModel::class.java]
 
         binding = ActivityExitBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        setupWindowInsets()
+        selectedId = savedInstanceState?.getString(STATE_SELECTED) ?: intent.getStringExtra(EXTRA_ENTRY_ID)
 
-        binding.btnBack.setOnClickListener { finish() }
+        TabNavigator.setup(this, binding.tabBar, R.id.nav_register)
+        ViewCompat.setOnApplyWindowInsetsListener(binding.scrollView) { view, insets ->
+            val statusBar = insets.getInsets(WindowInsetsCompat.Type.statusBars())
+            view.updatePadding(top = statusBar.top)
+            insets
+        }
 
+        binding.header.segment.check(R.id.seg_exit)
+        binding.header.segEntry.setOnClickListener {
+            TabNavigator.open(this, Intent(this, HomeActivity::class.java), R.id.nav_register, R.id.nav_register)
+        }
+
+        PcUi.underline(binding.btnViewPhotos)
+        PcUi.underline(binding.btnClearSelection)
+        binding.btnClearSelection.setOnClickListener { select(null) }
+        binding.btnCheckout.setOnClickListener {
+            val id = selectedId ?: return@setOnClickListener
+            exitingId = id
+            render()
+            viewModel.registerExit(id)
+        }
+        binding.done.btnDoneAgain.text = getString(R.string.pc_pick_another)
+        binding.done.btnDoneAgain.setOnClickListener {
+            binding.done.root.visibility = View.GONE
+            render()
+        }
+
+        binding.etSearchPlate.filters = arrayOf(InputFilter.AllCaps())
         binding.etSearchPlate.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-            override fun afterTextChanged(s: Editable?) {
-                val query = s?.toString()?.lowercase() ?: ""
-                val filtered = if (query.isEmpty()) {
-                    allEntries
-                } else {
-                    allEntries.filter { entry ->
-                        entry.plate.lowercase().contains(query) ||
-                        resolvePlateDisplayName(entry).lowercase().contains(query)
-                    }
-                }
-                renderEntries(filtered, null)
-            }
+            override fun afterTextChanged(s: Editable?) = renderList()
         })
 
         viewModel.uiState.observe(this) { state ->
+            binding.loadingOverlay.visibility = if (state is ExitUiState.Loading) View.VISIBLE else View.GONE
             when (state) {
-                is ExitUiState.Loading -> {
-                    binding.loadingOverlay.visibility = View.VISIBLE
-                }
                 is ExitUiState.Success -> {
-                    binding.loadingOverlay.visibility = View.GONE
                     allEntries = state.entries
                     membershipNameMap = state.membershipNameMap
-                    renderEntries(state.entries, state.exitingId)
+                    if (selectedId != null && allEntries.none { it.id == selectedId }) selectedId = null
+                    render()
                 }
-                is ExitUiState.Error -> {
-                    binding.loadingOverlay.visibility = View.GONE
-                    Toast.makeText(this, state.message, Toast.LENGTH_LONG).show()
-                }
+                is ExitUiState.Error -> Toast.makeText(this, state.message, Toast.LENGTH_LONG).show()
+                is ExitUiState.Loading -> Unit
             }
         }
 
         viewModel.branch.observe(this) { branch ->
             currentBranch = branch
-            val entries = viewModel.uiState.value
-            if (entries is ExitUiState.Success) {
-                renderEntries(entries.entries, entries.exitingId)
-            }
+            render()
+        }
+
+        viewModel.lastExit.observe(this) { exited ->
+            if (exited == null) return@observe
+            viewModel.consumeExit()
+            exitingId = null
+            selectedId = null
+            showDone(exited)
         }
 
         loadEntries()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putString(STATE_SELECTED, selectedId)
     }
 
     private fun loadEntries() {
         val branchId = sessionManager.getSelectedBranchId()
         if (branchId == null) {
             Toast.makeText(this, R.string.exit_no_branch, Toast.LENGTH_LONG).show()
-            finish()
             return
         }
         viewModel.loadEntries(branchId)
     }
 
-    private fun renderEntries(entries: List<VehicleEntry>, exitingId: String?) {
-        binding.contentContainer.removeViews(2, binding.contentContainer.childCount - 2)
+    private fun select(id: String?) {
+        selectedId = id
+        binding.done.root.visibility = View.GONE
+        render()
+        binding.scrollView.smoothScrollTo(0, 0)
+    }
 
-        if (entries.isEmpty()) {
-            binding.tvEmptyState.visibility = View.VISIBLE
-            return
+    private fun render() {
+        val capacity = currentBranch?.let {
+            it.lightVehicleCapacity + it.heavyVehicleCapacity + it.motorcycleCapacity
+        } ?: 0
+        binding.header.tvBranchMeta.text = getString(
+            R.string.pc_branch_meta, branchName(), ParkingFormat.pad2(allEntries.size), capacity
+        )
+        val selected = allEntries.find { it.id == selectedId }
+        val showDone = binding.done.root.visibility == View.VISIBLE
+        binding.listSection.visibility = if (selected == null && !showDone) View.VISIBLE else View.GONE
+        binding.checkoutSection.visibility = if (selected != null && !showDone) View.VISIBLE else View.GONE
+        if (selected != null) renderCheckout(selected) else renderList()
+    }
+
+    private fun renderList() {
+        val query = binding.etSearchPlate.text?.toString()?.trim()?.uppercase().orEmpty()
+        val results = if (query.isEmpty()) allEntries else allEntries.filter {
+            it.plate.uppercase().contains(query) || resolvePlateDisplayName(it).uppercase().contains(query)
         }
+        binding.tvResultLabel.text = if (query.isEmpty()) {
+            resources.getQuantityString(R.plurals.pc_on_site_count, allEntries.size, ParkingFormat.pad2(allEntries.size), branchName())
+        } else {
+            resources.getQuantityString(R.plurals.pc_results, results.size, results.size, branchName())
+        }
+        binding.tvEmptyState.visibility =
+            if (results.isEmpty() && viewModel.uiState.value is ExitUiState.Success) View.VISIBLE else View.GONE
 
-        binding.tvEmptyState.visibility = View.GONE
-
-        for (entry in entries) {
-            val itemBinding = ItemExitVehicleBinding.inflate(layoutInflater, binding.contentContainer, false)
-            val card = itemBinding.root
-
-            val params = card.layoutParams as? ViewGroup.MarginLayoutParams
-            if (params != null) {
-                params.topMargin = resources.getDimensionPixelSize(R.dimen.spacing_small)
-                card.layoutParams = params
-            }
-
-            itemBinding.tvPlate.text = resolvePlateDisplayName(entry)
-
-            val typeLabel = entry.vehicleType.replaceFirstChar { it.uppercase() }
-            val timeLabel = formatDateTime(entry.createdAt)
-            val vipLabel = if (entry.isVip) " \u2605 VIP" else ""
-            itemBinding.tvEntryInfo.text = "$typeLabel  \u2022  $timeLabel$vipLabel"
-
-            val duration = entry.duration ?: FeeCalculator.computeDuration(entry.createdAt)
-            itemBinding.tvDurationValue.text = duration
-
-            if (entry.id == exitingId) {
-                itemBinding.tvCurrentFeeValue.text = getString(R.string.exit_registering)
-                itemBinding.btnProcessCheckout.visibility = View.GONE
-            } else {
-                val fee = entry.fee ?: FeeCalculator.computeFee(entry.createdAt, entry.vehicleType, currentBranch)
-                itemBinding.tvCurrentFeeValue.text = if (fee != null) {
-                    "$ ${String.format("%.2f", fee)}"
-                } else {
-                    "--"
-                }
-            }
-
-            val photoUrl = PhotoUrlBuilder.build(entry.platePhotoUrl)
-            if (photoUrl != null) {
-                itemBinding.ivThumbnail.load(photoUrl) {
-                    crossfade(true)
-                    transformations(RoundedCornersTransformation(8f * resources.displayMetrics.density))
-                    placeholder(android.R.drawable.ic_menu_camera)
-                    error(android.R.drawable.ic_menu_camera)
-                }
-            }
-
-            GradientDrawable().apply {
-                shape = GradientDrawable.RECTANGLE
-                cornerRadius = 999f
-                setColor(ContextCompat.getColor(this@ExitActivity, R.color.branch_blue_manage))
-            }.let { itemBinding.btnProcessCheckout.background = it }
-
-            if (entry.id != exitingId) {
-                itemBinding.btnProcessCheckout.setOnClickListener {
-                    showExitPhotoDialog(entry)
-                }
-            }
-
-            binding.contentContainer.addView(card)
+        val list = binding.llResults
+        list.removeAllViews()
+        results.sortedByDescending { it.createdAt }.forEach { entry ->
+            val item = ItemPcVehicleRowBinding.inflate(layoutInflater, list, true)
+            item.tvPlate.text = resolvePlateDisplayName(entry)
+            item.tvMeta.text = getString(R.string.pc_meta, kindLabel(entry), ParkingFormat.duration(entry.createdAt))
+            item.tvAmount.text = ParkingFormat.money(feeFor(entry), currentBranch?.currency)
+            item.tvSince.text = getString(R.string.pc_since, ParkingFormat.hhmm(entry.createdAt))
+            item.root.setOnClickListener { select(entry.id) }
         }
     }
 
-    private fun showExitPhotoDialog(entry: VehicleEntry) {
+    private fun renderCheckout(entry: VehicleEntry) {
+        binding.tvCoPlate.text = resolvePlateDisplayName(entry)
+        binding.tvCoType.text = kindLabel(entry)
+        binding.kvIn.tvKey.setText(R.string.pc_in)
+        binding.kvIn.tvValue.text = ParkingFormat.hhmm(entry.createdAt)
+        binding.kvDuration.tvKey.setText(R.string.pc_time)
+        binding.kvDuration.tvValue.text = ParkingFormat.duration(entry.createdAt)
+        binding.kvPhotos.tvKey.setText(R.string.pc_photos)
+        binding.kvPhotos.tvValue.text = getString(R.string.pc_photos_of, photoCount(entry))
+        binding.kvOut.tvKey.setText(R.string.pc_out)
+        binding.kvOut.tvValue.text = ParkingFormat.hhmm()
+        binding.tvCoAmount.text = ParkingFormat.money(feeFor(entry), currentBranch?.currency)
+
+        val busy = exitingId == entry.id
+        val isMember = entry.membershipId != null
+        binding.btnCheckout.text = getString(
+            when {
+                busy -> R.string.exit_registering
+                isMember -> R.string.pc_log_exit
+                else -> R.string.pc_charge_and_exit
+            }
+        )
+        binding.tvCoAmountNote.visibility = if (isMember) View.VISIBLE else View.GONE
+        binding.btnCheckout.isEnabled = !busy
+        binding.btnViewPhotos.visibility = if (photoCount(entry) > 0) View.VISIBLE else View.GONE
+        binding.btnViewPhotos.setOnClickListener { showPhotosDialog(entry) }
+    }
+
+    private fun showDone(exited: VehicleEntry) {
+        binding.done.tvDoneTitle.setText(R.string.pc_exit_done)
+        binding.done.tvDonePlate.text = resolvePlateDisplayName(exited)
+        val charge = if (exited.membershipId != null) {
+            getString(R.string.pc_member_no_charge)
+        } else {
+            ParkingFormat.money(exited.fee, currentBranch?.currency)
+        }
+        binding.done.tvDoneMeta.text = getString(
+            R.string.pc_exit_done_meta, charge, ParkingFormat.duration(exited.createdAt)
+        )
+        binding.done.root.visibility = View.VISIBLE
+        binding.etSearchPlate.setText("")
+        render()
+        binding.scrollView.smoothScrollTo(0, 0)
+    }
+
+    private fun branchName(): String = currentBranch?.name ?: ""
+
+    private fun kindLabel(entry: VehicleEntry): String =
+        if (entry.membershipId != null) getString(R.string.pc_member)
+        else ParkingFormat.vehicleType(this, entry.vehicleType)
+
+    // Same rule ExitViewModel records on exit, so the screen never promises a different charge.
+    private fun feeFor(entry: VehicleEntry): Double? =
+        if (entry.membershipId != null) 0.0
+        else entry.fee ?: FeeCalculator.exitFee(entry, currentBranch)
+
+    private fun photoCount(entry: VehicleEntry): Int = listOf(
+        entry.platePhotoUrl, entry.frontPhotoUrl, entry.rearPhotoUrl, entry.leftPhotoUrl, entry.rightPhotoUrl
+    ).count { !it.isNullOrBlank() }
+
+    private fun showPhotosDialog(entry: VehicleEntry) {
         val density = resources.displayMetrics.density
         val scroll = android.widget.ScrollView(this)
         val container = LinearLayout(this).apply {
@@ -206,23 +270,14 @@ class ExitActivity : BaseActivity() {
             setPadding((16 * density).toInt(), (8 * density).toInt(), (16 * density).toInt(), 0)
         }
 
-        val primaryText = MaterialColors.getColor(binding.root, R.attr.textPrimaryCustom)
         val secondaryText = MaterialColors.getColor(binding.root, R.attr.textSecondaryCustom)
 
-        val msgText = TextView(this).apply {
-            text = getString(R.string.exit_confirm_message, resolvePlateDisplayName(entry))
-            setTextColor(primaryText)
-            textSize = 14f
-            setPadding(0, 0, 0, (12 * density).toInt())
-        }
-        container.addView(msgText)
-
         val photoFields = listOf(
-            "Placa" to entry.platePhotoUrl,
-            "Frontal" to entry.frontPhotoUrl,
-            "Trasera" to entry.rearPhotoUrl,
-            "Izquierda" to entry.leftPhotoUrl,
-            "Derecha" to entry.rightPhotoUrl
+            getString(R.string.pc_slot_plate) to entry.platePhotoUrl,
+            getString(R.string.pc_slot_front) to entry.frontPhotoUrl,
+            getString(R.string.pc_slot_rear) to entry.rearPhotoUrl,
+            getString(R.string.pc_slot_left) to entry.leftPhotoUrl,
+            getString(R.string.pc_slot_right) to entry.rightPhotoUrl
         )
 
         for ((label, url) in photoFields) {
@@ -255,12 +310,9 @@ class ExitActivity : BaseActivity() {
         scroll.addView(container)
 
         AlertDialog.Builder(this)
-            .setTitle(getString(R.string.exit_confirm_title))
+            .setTitle(resolvePlateDisplayName(entry))
             .setView(scroll)
-            .setPositiveButton(getString(R.string.exit_confirm_action)) { _, _ ->
-                viewModel.registerExit(entry.id)
-            }
-            .setNegativeButton(getString(R.string.action_cancel), null)
+            .setPositiveButton(android.R.string.ok, null)
             .show()
     }
 
@@ -271,17 +323,9 @@ class ExitActivity : BaseActivity() {
         return entry.plate
     }
 
-    private fun setupWindowInsets() {
-        ViewCompat.setOnApplyWindowInsetsListener(binding.headerBar) { view, insets ->
-            val statusBarInsets = insets.getInsets(WindowInsetsCompat.Type.statusBars())
-            view.updatePadding(top = statusBarInsets.top)
-            insets
-        }
-
-        ViewCompat.setOnApplyWindowInsetsListener(binding.scrollView) { view, insets ->
-            val navBarInsets = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
-            view.updatePadding(bottom = navBarInsets.bottom)
-            insets
-        }
+    companion object {
+        /** Opens straight into the checkout panel for this entry. */
+        const val EXTRA_ENTRY_ID = "extra_entry_id"
+        private const val STATE_SELECTED = "state_selected"
     }
 }

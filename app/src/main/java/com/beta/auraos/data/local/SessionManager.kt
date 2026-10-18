@@ -153,6 +153,10 @@ class SessionManager(context: Context) {
 
     fun isDarkModeEnabled(): Boolean = prefs.getBoolean(KEY_DARK_MODE, false)
 
+    /** The user's explicit theme choice, or null when they never picked one (follow the system). */
+    fun darkModePreference(): Boolean? =
+        if (prefs.contains(KEY_DARK_MODE)) prefs.getBoolean(KEY_DARK_MODE, false) else null
+
     fun setDarkModeEnabled(enabled: Boolean) {
         prefs.edit().putBoolean(KEY_DARK_MODE, enabled).apply()
     }
@@ -179,6 +183,29 @@ class SessionManager(context: Context) {
         return encryptedPrefs.getString(KEY_LOCAL_PASSWORD_HASH, null)
     }
 
+    /**
+     * True while the account exists only on this device (created by the no-server setup).
+     * It becomes false the first time the backend accepts a login for it.
+     */
+    fun isLocalOnlyAccount(): Boolean = prefs.getBoolean(KEY_LOCAL_ONLY_ACCOUNT, false)
+
+    fun setLocalOnlyAccount(localOnly: Boolean) {
+        prefs.edit().putBoolean(KEY_LOCAL_ONLY_ACCOUNT, localOnly).apply()
+    }
+
+    /**
+     * Backend address typed in the app: null when never set (use the build's default), empty
+     * when the operator chose to run without a server. Survives logout on purpose.
+     */
+    fun getServerUrl(): String? = prefs.getString(KEY_SERVER_URL, null)
+
+    fun setServerUrl(url: String) {
+        prefs.edit().putString(KEY_SERVER_URL, url).apply()
+    }
+
+    /** No account of any kind on this device yet: the only state where the no-server setup is offered. */
+    fun isDeviceEmpty(): Boolean = getLocalUserProfile() == null && !hasPreviousLogin()
+
     fun clearLocalCache() {
         encryptedPrefs.edit()
             .remove(KEY_LOCAL_USER_PROFILE)
@@ -196,10 +223,12 @@ class SessionManager(context: Context) {
         private const val KEY_BIOMETRIC_ENROLLED = "biometric_enrolled"
         private const val KEY_SELECTED_BRANCH_ID = "selected_branch_id"
         private const val KEY_LAST_EMAIL = "last_email"
+        private const val KEY_SERVER_URL = "server_url"
         private const val KEY_LAST_DISPLAY_NAME = "last_display_name"
         private const val KEY_DARK_MODE = "dark_mode"
         private const val KEY_AVATAR_URL = "avatar_url"
         private const val KEY_LOCAL_USER_PROFILE = "local_user_profile"
         private const val KEY_LOCAL_PASSWORD_HASH = "local_password_hash"
+        private const val KEY_LOCAL_ONLY_ACCOUNT = "local_only_account"
     }
 }

@@ -23,11 +23,22 @@
         android:fillViewport="true"
         android:scrollbars="none">
 
-        <LinearLayout
+        <!-- One layout for every width: on tablets the column stops growing and stays centered. -->
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:gravity="center_horizontal"
             android:orientation="vertical"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.4"
+            app:layout_constraintWidth_max="@dimen/login_column_max_width"
             android:paddingHorizontal="@dimen/spacing_large"
             android:paddingTop="@dimen/spacing_xxxlarge"
             android:paddingBottom="@dimen/spacing_xlarge">
@@ -53,25 +64,24 @@
                 </FrameLayout>
 
                 <TextView
+                    android:id="@+id/tv_brand"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/spacing_medium"
-                    android:fontFamily="sans-serif-black"
-                    android:letterSpacing="-0.03"
-                    android:text="@string/app_name"
+                    android:accessibilityHeading="true"
+                    android:contentDescription="@string/app_name"
+                    android:fontFamily="@font/aura_mono"
+                    android:text="@string/pc_wordmark"
                     android:textColor="?attr/textPrimaryCustom"
-                    android:textSize="@dimen/text_size_display"
+                    android:textSize="22sp"
                     android:textStyle="bold" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/spacing_xxsmall"
-                    android:letterSpacing="0.06"
                     android:text="@string/app_edition"
-                    android:textColor="?attr/textSecondaryCustom"
-                    android:textSize="@dimen/text_size_overline"
-                    android:textStyle="bold" />
+                    android:textAppearance="@style/TextAppearance.Lrg.Label" />
             </LinearLayout>
 
             <LinearLayout
@@ -112,7 +122,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center"
-                                android:fontFamily="sans-serif-black"
+                                android:fontFamily="@font/aura_sans"
                                 android:textColor="?attr/colorOnPrimaryContainer"
                                 android:textSize="28sp"
                                 android:textStyle="bold"
@@ -123,7 +133,7 @@
                             android:id="@+id/tv_quick_greeting"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:fontFamily="sans-serif-black"
+                            android:fontFamily="@font/aura_sans"
                             android:gravity="center"
                             android:letterSpacing="-0.02"
                             android:textColor="?attr/textPrimaryCustom"
@@ -134,7 +144,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="@dimen/spacing_xsmall"
-                            android:fontFamily="sans-serif-medium"
+                            android:fontFamily="@font/aura_sans_medium"
                             android:gravity="center"
                             android:text="@string/quick_login_subtitle"
                             android:textColor="?attr/textSecondaryCustom"
@@ -150,7 +160,7 @@
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:fontFamily="sans-serif-medium"
+                            android:fontFamily="@font/aura_sans_medium"
                             android:text="@string/quick_login_email_label"
                             android:textColor="?attr/textSecondaryCustom"
                             android:textSize="@dimen/text_size_small" />
@@ -160,7 +170,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="@dimen/spacing_xsmall"
-                            android:fontFamily="sans-serif-mono"
+                            android:fontFamily="@font/aura_mono"
                             android:textColor="?attr/textPrimaryCustom"
                             android:textSize="@dimen/text_size_body"
                             android:textStyle="bold" />
@@ -169,7 +179,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="@dimen/spacing_small_plus"
-                            android:fontFamily="sans-serif-medium"
+                            android:fontFamily="@font/aura_sans_medium"
                             android:text="@string/pin_password"
                             android:textColor="?attr/textSecondaryCustom"
                             android:textSize="@dimen/text_size_small" />
@@ -223,7 +233,7 @@
                             android:layout_height="wrap_content"
                             android:layout_gravity="center"
                             android:layout_marginTop="@dimen/spacing_medium"
-                            android:fontFamily="sans-serif-medium"
+                            android:fontFamily="@font/aura_sans_medium"
                             android:text="@string/quick_login_switch"
                             android:textColor="?attr/textSecondaryCustom"
                             android:textSize="@dimen/text_size_small" />
@@ -239,7 +249,7 @@
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:fontFamily="sans-serif-black"
+                            android:fontFamily="@font/aura_sans"
                             android:gravity="center"
                             android:letterSpacing="-0.01"
                             android:text="@string/title_authentication"
@@ -251,7 +261,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="@dimen/spacing_large"
-                            android:fontFamily="sans-serif-medium"
+                            android:fontFamily="@font/aura_sans_medium"
                             android:text="@string/username"
                             android:textColor="?attr/textSecondaryCustom"
                             android:textSize="@dimen/text_size_small" />
@@ -276,7 +286,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="@dimen/spacing_medium"
-                            android:fontFamily="sans-serif-medium"
+                            android:fontFamily="@font/aura_sans_medium"
                             android:text="@string/pin_password"
                             android:textColor="?attr/textSecondaryCustom"
                             android:textSize="@dimen/text_size_small" />
@@ -350,7 +360,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginStart="@dimen/spacing_small_plus"
                             android:layout_marginEnd="@dimen/spacing_small_plus"
-                            android:fontFamily="sans-serif"
+                            android:fontFamily="@font/aura_sans"
                             android:text="@string/label_or_continue_with"
                             android:textColor="?attr/textSecondaryCustom"
                             android:textSize="@dimen/text_size_caption" />
@@ -387,7 +397,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="6dp"
-                            android:fontFamily="sans-serif-medium"
+                            android:fontFamily="@font/aura_sans_medium"
                             android:text="@string/quick_access"
                             android:textColor="?attr/textSecondaryCustom"
                             android:textSize="@dimen/text_size_overline" />
@@ -402,6 +412,15 @@
                 android:layout_marginTop="@dimen/spacing_large"
                 android:gravity="center"
                 android:orientation="vertical">
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_setup_offline"
+                    style="@style/Widget.Pc.TextLink"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:text="@string/setup_link"
+                    android:visibility="gone" />
+
 
                 <LinearLayout
                     android:layout_width="wrap_content"
@@ -435,20 +454,21 @@
                         android:textSize="@dimen/text_size_small" />
 
                     <TextView
-                        android:id="@+id/tvNetworkStatus"
+                        android:id="@+id/tvServer"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:background="?attr/selectableItemBackground"
                         android:minHeight="48dp"
                         android:paddingHorizontal="8dp"
                         android:paddingVertical="12dp"
-                        android:text="@string/network_status"
+                        android:text="@string/server_title"
                         android:textColor="?attr/textSecondaryCustom"
                         android:textSize="@dimen/text_size_small" />
                 </LinearLayout>
             </LinearLayout>
 
         </LinearLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.core.widget.NestedScrollView>
 
     <ProgressBar

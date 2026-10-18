@@ -2,6 +2,7 @@ package com.beta.auraos
 
 import android.app.Dialog
 import android.content.Intent
+import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.net.Uri
@@ -30,7 +31,10 @@ import com.beta.auraos.data.local.BiometricKeyManager
 import com.beta.auraos.data.local.SessionManager
 import com.beta.auraos.databinding.ActivityProfileBinding
 import com.beta.auraos.ui.login.LoginActivity
-import com.beta.auraos.util.BottomNavIndicator
+import com.beta.auraos.data.local.room.AppDatabase
+import com.beta.auraos.ui.branches.BranchListActivity
+import com.beta.auraos.ui.memberships.MembershipListActivity
+import com.beta.auraos.util.ParkingFormat
 import com.beta.auraos.util.PhotoUrlBuilder
 import com.beta.auraos.util.TabNavigator
 import kotlinx.coroutines.Dispatchers
@@ -82,53 +86,10 @@ class ProfileActivity : BaseActivity() {
         binding = ActivityProfileBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.bottomNavigation.selectedItemId = R.id.nav_profile
-
-        BottomNavIndicator.attach(
-            bottomNav = binding.bottomNavigation,
-            indicator = binding.bottomNavIndicator,
-            initialItemId = R.id.nav_profile,
-        )
-
-        binding.bottomNavigation.setOnItemSelectedListener { item ->
-            when (item.itemId) {
-                R.id.nav_profile -> {
-                    BottomNavIndicator.animateTo(
-                        bottomNav = binding.bottomNavigation,
-                        indicator = binding.bottomNavIndicator,
-                        itemId = R.id.nav_profile,
-                    )
-                    true
-                }
-                else -> {
-                    BottomNavIndicator.animateTo(
-                        bottomNav = binding.bottomNavigation,
-                        indicator = binding.bottomNavIndicator,
-                        itemId = item.itemId,
-                    )
-                    TabNavigator.navigate(this, item.itemId)
-                    true
-                }
-            }
-        }
-
-        // Window Insets implementations
-        ViewCompat.setOnApplyWindowInsetsListener(binding.headerBar) { view, insets ->
-            val statusBarInsets = insets.getInsets(WindowInsetsCompat.Type.statusBars())
-            view.updatePadding(top = statusBarInsets.top)
-            insets
-        }
-
-        ViewCompat.setOnApplyWindowInsetsListener(binding.bottomNavigation) { view, insets ->
-            val navBarInsets = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
-            view.updatePadding(bottom = navBarInsets.bottom)
-            insets
-        }
-
+        TabNavigator.setup(this, binding.tabBar, R.id.nav_profile)
         ViewCompat.setOnApplyWindowInsetsListener(binding.homeScrollView) { view, insets ->
-            val bottomNavH = resources.getDimensionPixelSize(R.dimen.bottom_nav_height)
-            val navBarInsets = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
-            view.updatePadding(bottom = bottomNavH + navBarInsets.bottom)
+            val statusBar = insets.getInsets(WindowInsetsCompat.Type.statusBars())
+            view.updatePadding(top = statusBar.top)
             insets
         }
 
@@ -137,6 +98,7 @@ class ProfileActivity : BaseActivity() {
         }
 
         loadUserProfile()
+        setupOperationRows()
         setupBiometricCard()
         setupThemeToggle()
         setupAbout()
@@ -185,7 +147,7 @@ class ProfileActivity : BaseActivity() {
 
         binding.tvProfileName.text = displayName
         binding.tvProfileEmail.text = email
-        binding.tvAvatarInitial.text = displayName.firstOrNull()?.uppercase() ?: "?"
+        binding.tvAvatarInitial.text = initials(displayName)
 
         loadAvatar(displayName)
     }
@@ -206,7 +168,7 @@ class ProfileActivity : BaseActivity() {
                 listener(onError = { _, _ ->
                     binding.ivAvatarPhoto.visibility = android.view.View.GONE
                     binding.tvAvatarInitial.visibility = android.view.View.VISIBLE
-                    binding.tvAvatarInitial.text = displayName.firstOrNull()?.uppercase() ?: "?"
+                    binding.tvAvatarInitial.text = initials(displayName)
                 })
             }
             binding.ivAvatarPhoto.setOnClickListener { showAvatarFullScreen(fullUrl) }
@@ -214,7 +176,7 @@ class ProfileActivity : BaseActivity() {
             binding.ivAvatarPhoto.visibility = android.view.View.GONE
             binding.ivAvatarPhoto.setOnClickListener(null)
             binding.tvAvatarInitial.visibility = android.view.View.VISIBLE
-            binding.tvAvatarInitial.text = displayName.firstOrNull()?.uppercase() ?: "?"
+            binding.tvAvatarInitial.text = initials(displayName)
         }
     }
 
@@ -274,8 +236,44 @@ class ProfileActivity : BaseActivity() {
 
     private fun updateBiometricStatus() {
         val enrolled = sessionManager.isBiometricEnrolled() && biometricKeyManager.isKeyGenerated()
-        // Vinculamos visualmente el estado con el switch de la vista
         binding.switchBiometric.isChecked = enrolled
+        binding.tvBiometricMeta.setText(
+            if (enrolled) R.string.profile_biometric_enabled else R.string.profile_biometric_enroll_hint
+        )
+    }
+
+    private fun initials(name: String): String =
+        name.split(" ").filter { it.isNotBlank() }.take(2)
+            .joinToString("") { it.first().uppercase() }.ifEmpty { "?" }
+
+    private fun setupOperationRows() {
+        binding.rowBranches.tvTitle.setText(R.string.pc_branches)
+        binding.rowBranches.root.setOnClickListener {
+            startActivity(Intent(this, BranchListActivity::class.java))
+        }
+        binding.rowMemberships.tvTitle.setText(R.string.membership_list_title)
+        binding.rowMemberships.tvMeta.setText(R.string.pc_memberships_meta)
+        binding.rowMemberships.root.setOnClickListener {
+            startActivity(Intent(this, MembershipListActivity::class.java))
+        }
+        binding.rowKiosk.tvTitle.setText(R.string.pc_kiosk_mode)
+        binding.rowKiosk.root.setOnClickListener {
+            startActivity(Intent(this, KioskActivity::class.java))
+        }
+
+        val db = AppDatabase.getInstance(this)
+        lifecycleScope.launch {
+            val branches = withContext(Dispatchers.IO) { db.branchDao().getAll() }
+            binding.rowBranches.tvMeta.text = branches.joinToString(" · ") { it.name }
+            val email = sessionManager.getLastEmail().orEmpty()
+            binding.tvProfileEmail.text = if (email.isEmpty()) {
+                ""
+            } else {
+                resources.getQuantityString(R.plurals.pc_profile_meta, branches.size, email, ParkingFormat.pad2(branches.size))
+            }
+            val current = branches.find { it.id == sessionManager.getSelectedBranchId() }
+            binding.rowKiosk.tvMeta.text = getString(R.string.pc_kiosk_meta, current?.name ?: "")
+        }
     }
 
     private fun setupBiometricCard() {
@@ -369,7 +367,7 @@ class ProfileActivity : BaseActivity() {
         AlertDialog.Builder(this)
             .setTitle(R.string.profile_biometric_disable_confirm)
             .setMessage(R.string.profile_biometric_disable_message)
-            .setPositiveButton(R.string.profile_biometric_disable_confirm) { _, _ ->
+            .setPositiveButton(R.string.pc_disable) { _, _ ->
                 disableBiometric()
             }
             .setNegativeButton(R.string.dialog_cancel) { _, _ ->
@@ -389,7 +387,9 @@ class ProfileActivity : BaseActivity() {
 
     private fun setupThemeToggle() {
         // Marcamos el botón correcto al iniciar basándonos en la persistencia
-        val isDark = sessionManager.isDarkModeEnabled()
+        // Reflect the theme on screen, which follows the system until the user picks one.
+        val isDark = sessionManager.darkModePreference()
+            ?: ((resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES)
         if (isDark) {
             binding.toggleGroupTheme.check(R.id.btn_theme_midnight)
         } else {
@@ -402,7 +402,7 @@ class ProfileActivity : BaseActivity() {
                 val targetDark = (checkedId == R.id.btn_theme_midnight)
 
                 // Evitamos recrear infinitamente si ya estamos en ese estado actual
-                if (targetDark != sessionManager.isDarkModeEnabled()) {
+                if (targetDark != sessionManager.darkModePreference()) {
                     sessionManager.setDarkModeEnabled(targetDark)
                     val mode = if (targetDark) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
                     AppCompatDelegate.setDefaultNightMode(mode)
@@ -420,7 +420,8 @@ class ProfileActivity : BaseActivity() {
         @Suppress("DEPRECATION")
         val code = info?.versionCode ?: 1
         binding.tvVersion.text = getString(
-            R.string.profile_version_format,
+            R.string.pc_version_line,
+            getString(R.string.pc_wordmark),
             info?.versionName ?: "1.0",
             code
         )
@@ -431,7 +432,10 @@ class ProfileActivity : BaseActivity() {
         binding.btnLogout.setOnClickListener {
             AlertDialog.Builder(this)
                 .setTitle(R.string.profile_logout_confirm_title)
-                .setMessage(R.string.profile_logout_confirm_message)
+                .setMessage(
+                    if (sessionManager.isLocalOnlyAccount()) R.string.pc_logout_local_message
+                    else R.string.profile_logout_confirm_message
+                )
                 .setPositiveButton(R.string.profile_logout_confirm_action) { _, _ ->
                     performLogout()
                 }
@@ -441,8 +445,12 @@ class ProfileActivity : BaseActivity() {
     }
 
     private fun performLogout() {
-        sessionManager.clearSession()
-        biometricKeyManager.deleteKey()
+        // A device-only account is the sole way into this phone's data: signing out returns to
+        // the login screen but keeps the account, its password hash and the fingerprint key.
+        if (!sessionManager.isLocalOnlyAccount()) {
+            sessionManager.clearSession()
+            biometricKeyManager.deleteKey()
+        }
 
         val intent = Intent(this, LoginActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK

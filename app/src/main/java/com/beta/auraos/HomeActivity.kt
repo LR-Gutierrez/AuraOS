@@ -1,9 +1,12 @@
 package com.beta.auraos
 
+import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
+import android.text.Editable
+import android.text.InputFilter
+import android.text.TextWatcher
 import android.view.View
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -16,9 +19,10 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
 import androidx.lifecycle.lifecycleScope
 import com.beta.auraos.data.BranchRepository
-import com.beta.auraos.data.Result
 import com.beta.auraos.data.MembershipRepository
+import com.beta.auraos.data.Result
 import com.beta.auraos.data.VehicleEntryRepository
+import com.beta.auraos.data.local.PendingPhotoStore
 import com.beta.auraos.data.local.SessionManager
 import com.beta.auraos.data.local.SyncCoordinator
 import com.beta.auraos.data.local.room.AppDatabase
@@ -28,9 +32,13 @@ import com.beta.auraos.data.remote.ApiClient
 import com.beta.auraos.data.remote.BranchApi
 import com.beta.auraos.data.remote.ParkingApi
 import com.beta.auraos.databinding.ActivityHomeBinding
+import com.beta.auraos.databinding.ItemPcPhotoSlotBinding
 import com.beta.auraos.ui.branches.BranchListActivity
-import com.beta.auraos.util.BottomNavIndicator
+import com.beta.auraos.ui.exit.ExitActivity
+import com.beta.auraos.util.ParkingFormat
+import com.beta.auraos.util.PcUi
 import com.beta.auraos.util.TabNavigator
+import com.beta.auraos.util.formatDate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -39,8 +47,10 @@ import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.File
 import java.io.IOException
+import java.util.Date
 import java.util.UUID
 
+/** Registro · Entrada. The Salida half of the tab lives in [ExitActivity]. */
 class HomeActivity : BaseActivity() {
 
     private lateinit var binding: ActivityHomeBinding
@@ -66,50 +76,38 @@ class HomeActivity : BaseActivity() {
         VehicleEntryRepository(AppDatabase.getInstance(this@HomeActivity))
     }
 
-    private var frontPhotoUri: Uri? = null
-    private var rearPhotoUri: Uri? = null
-    private var leftPhotoUri: Uri? = null
-    private var rightPhotoUri: Uri? = null
-    private var platePhotoUri: Uri? = null
+    private val parkingApi: ParkingApi by lazy {
+        ApiClient.createApi<ParkingApi>()
+    }
 
-    private var hasFrontPhoto = false
-    private var hasRearPhoto = false
-    private var hasLeftPhoto = false
-    private var hasRightPhoto = false
-    private var hasPlatePhoto = false
+    /** One capture slot: where the file goes, its view and when it was taken. */
+    private class PhotoSlot(
+        val key: String,
+        val labelRes: Int,
+        val required: Boolean,
+        val view: ItemPcPhotoSlotBinding,
+    ) {
+        var uri: Uri? = null
+        var takenAt: Date? = null
+    }
 
-    private var currentPhotoSlot: String? = null
+    private lateinit var slots: List<PhotoSlot>
+    private var currentPhotoSlot: PhotoSlot? = null
 
     private val takePictureLauncher = registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
+        val slot = currentPhotoSlot ?: return@registerForActivityResult
         if (success) {
-            val slot = currentPhotoSlot
-            val uri = when (slot) {
-                "front" -> frontPhotoUri
-                "rear" -> rearPhotoUri
-                "left" -> leftPhotoUri
-                "right" -> rightPhotoUri
-                "plate" -> platePhotoUri
-                else -> null
-            }
-            if (slot != null && uri != null) {
-                loadPhoto(slot, uri)
-                setPhotoState(slot, true)
-            }
+            slot.takenAt = Date()
+            renderSlots()
         }
     }
 
     private val cameraPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         if (granted) {
-            if (currentPhotoSlot != null) {
-                openCamera()
-            }
+            openCamera()
         } else {
             Toast.makeText(this, R.string.camera_permission_required, Toast.LENGTH_SHORT).show()
         }
-    }
-
-    private val parkingApi: ParkingApi by lazy {
-        ApiClient.createApi<ParkingApi>()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -119,66 +117,109 @@ class HomeActivity : BaseActivity() {
         binding = ActivityHomeBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.bottomNavigation.selectedItemId = R.id.nav_register
-
-        BottomNavIndicator.attach(
-            bottomNav = binding.bottomNavigation,
-            indicator = binding.bottomNavIndicator,
-            initialItemId = R.id.nav_register,
-        )
-
         sessionManager = SessionManager(this)
 
-        initPhotoUris()
-        setupPhotoClickHandlers()
-        setupRetakeDeleteHandlers()
-        setupVehicleButtons()
-        setupConfirmButton()
-        setupBranchSelector()
+        TabNavigator.setup(this, binding.tabBar, R.id.nav_register)
+        ViewCompat.setOnApplyWindowInsetsListener(binding.homeScrollView) { view, insets ->
+            val statusBar = insets.getInsets(WindowInsetsCompat.Type.statusBars())
+            view.updatePadding(top = statusBar.top)
+            insets
+        }
+
+        setupSegment()
+        initPhotoSlots()
+        setupPlateField()
+        renderTypeChips()
         setupMembershipSelector()
-        setupBottomNav()
-        setupWindowInsets()
+        binding.btnConfirmEntry.setOnClickListener { validateAndSend() }
+        binding.done.btnDoneAgain.text = getString(R.string.pc_register_another)
+        binding.done.btnDoneAgain.setOnClickListener {
+            binding.done.root.visibility = View.GONE
+            binding.form.visibility = View.VISIBLE
+        }
+        binding.header.tvBranchMeta.setOnClickListener { showBranchSelector() }
+
+        updateEntryTime()
+        updateConfirmState()
         loadBranches()
-
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onResume() {
+        super.onResume()
+        updateEntryTime()
+        selectedBranch?.let { refreshBranchMeta(it) }
     }
 
-    private fun initPhotoUris() {
+    private fun setupSegment() {
+        binding.header.segment.check(R.id.seg_entry)
+        binding.header.segExit.setOnClickListener {
+            TabNavigator.open(this, Intent(this, ExitActivity::class.java), R.id.nav_register, R.id.nav_register)
+        }
+    }
+
+    // region Photos
+
+    private fun initPhotoSlots() {
+        slots = listOf(
+            PhotoSlot("plate", R.string.pc_slot_plate, true, binding.slotPlate),
+            PhotoSlot("front", R.string.pc_slot_front, false, binding.slotFront),
+            PhotoSlot("rear", R.string.pc_slot_rear, false, binding.slotRear),
+            PhotoSlot("left", R.string.pc_slot_left, false, binding.slotLeft),
+            PhotoSlot("right", R.string.pc_slot_right, false, binding.slotRight),
+        )
         val photoDir = File(filesDir, "photos").also { it.mkdirs() }
         photoDir.listFiles()?.forEach { it.delete() }
-        frontPhotoUri = FileProvider.getUriForFile(this, "${packageName}.fileprovider", File(photoDir, "front.jpg"))
-        rearPhotoUri = FileProvider.getUriForFile(this, "${packageName}.fileprovider", File(photoDir, "rear.jpg"))
-        leftPhotoUri = FileProvider.getUriForFile(this, "${packageName}.fileprovider", File(photoDir, "left.jpg"))
-        rightPhotoUri = FileProvider.getUriForFile(this, "${packageName}.fileprovider", File(photoDir, "right.jpg"))
-        platePhotoUri = FileProvider.getUriForFile(this, "${packageName}.fileprovider", File(photoDir, "plate.jpg"))
+        slots.forEach { slot ->
+            slot.uri = FileProvider.getUriForFile(
+                this, "${packageName}.fileprovider", File(photoDir, "${slot.key}.jpg")
+            )
+            slot.view.slot.setOnClickListener { requestCamera(slot) }
+            slot.view.slot.setOnLongClickListener {
+                if (slot.takenAt == null) return@setOnLongClickListener false
+                slot.takenAt = null
+                File(photoDir, "${slot.key}.jpg").delete()
+                renderSlots()
+                true
+            }
+        }
+        renderSlots()
     }
 
-    private fun setupPhotoClickHandlers() {
-        binding.containerFront.setOnClickListener { requestCamera("front") }
-        binding.containerRear.setOnClickListener { requestCamera("rear") }
-        binding.containerLeft.setOnClickListener { requestCamera("left") }
-        binding.containerRight.setOnClickListener { requestCamera("right") }
-        binding.containerPlate.setOnClickListener { requestCamera("plate") }
+    private fun renderSlots() {
+        val plateText = binding.etPlateNumber.text?.toString()?.trim().orEmpty()
+        slots.forEach { slot ->
+            val v = slot.view
+            val captured = slot.takenAt != null
+            val label = getString(slot.labelRes)
+            v.slot.setBackgroundResource(if (captured) R.drawable.bg_lrg_card else R.drawable.bg_pc_dashed)
+            v.ivCamera.visibility = if (captured) View.GONE else View.VISIBLE
+            v.ivCheck.visibility = if (captured) View.VISIBLE else View.GONE
+            v.tvLabel.text = label
+            val isPlateShot = captured && slot.key == "plate"
+            v.tvPlateTag.visibility = if (isPlateShot) View.VISIBLE else View.GONE
+            v.tvPlateTag.text = plateText.ifEmpty { getString(R.string.pc_no_read) }
+            if (captured) {
+                v.tvSub.isAllCaps = false
+                v.tvSub.setTextColor(PcUi.color(v.root, R.attr.textMutedCustom))
+                v.tvSub.text = getString(R.string.pc_tap_to_retake, ParkingFormat.hhmm(slot.takenAt!!))
+            } else {
+                v.tvSub.isAllCaps = true
+                v.tvSub.setTextColor(
+                    PcUi.color(v.root, if (slot.required) R.attr.accentTextCustom else R.attr.textMutedCustom)
+                )
+                v.tvSub.setText(if (slot.required) R.string.pc_required else R.string.pc_optional)
+            }
+            v.slot.contentDescription = "$label. ${v.tvSub.text}"
+        }
+        binding.tvPhotoCount.text = getString(R.string.pc_photo_count, photoCount())
+        updateConfirmState()
     }
 
-    private fun setupRetakeDeleteHandlers() {
-        binding.btnRetakeFront.setOnClickListener { requestCamera("front") }
-        binding.btnRetakeRear.setOnClickListener { requestCamera("rear") }
-        binding.btnRetakeLeft.setOnClickListener { requestCamera("left") }
-        binding.btnRetakeRight.setOnClickListener { requestCamera("right") }
-        binding.btnRetakePlate.setOnClickListener { requestCamera("plate") }
+    private fun photoCount(): Int = slots.count { it.takenAt != null }
 
-        binding.btnDeleteFront.setOnClickListener { deletePhoto("front") }
-        binding.btnDeleteRear.setOnClickListener { deletePhoto("rear") }
-        binding.btnDeleteLeft.setOnClickListener { deletePhoto("left") }
-        binding.btnDeleteRight.setOnClickListener { deletePhoto("right") }
-        binding.btnDeletePlate.setOnClickListener { deletePhoto("plate") }
-    }
+    private fun hasPlatePhoto(): Boolean = slots.first { it.key == "plate" }.takenAt != null
 
-    private fun requestCamera(slot: String) {
+    private fun requestCamera(slot: PhotoSlot) {
         currentPhotoSlot = slot
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
             openCamera()
@@ -188,152 +229,127 @@ class HomeActivity : BaseActivity() {
     }
 
     private fun openCamera() {
-        val uri = when (currentPhotoSlot) {
-            "front" -> frontPhotoUri
-            "rear" -> rearPhotoUri
-            "left" -> leftPhotoUri
-            "right" -> rightPhotoUri
-            "plate" -> platePhotoUri
-            else -> null
-        }
-        uri?.let { takePictureLauncher.launch(it) }
+        currentPhotoSlot?.uri?.let { takePictureLauncher.launch(it) }
     }
 
-    private fun loadPhoto(slot: String, uri: Uri) {
-        val iv = when (slot) {
-            "front" -> binding.ivFront
-            "rear" -> binding.ivRear
-            "left" -> binding.ivLeft
-            "right" -> binding.ivRight
-            "plate" -> binding.ivPlate
-            else -> return
-        }
-        lifecycleScope.launch {
-            val bitmap = withContext(Dispatchers.IO) {
-                try {
-                    contentResolver.openInputStream(uri)?.use { inputStream ->
-                        val opts = BitmapFactory.Options().apply {
-                            inSampleSize = 4
-                        }
-                        BitmapFactory.decodeStream(inputStream, null, opts)
-                    }
-                } catch (e: Exception) {
-                    null
-                }
-            }
-            bitmap?.let { iv.setImageBitmap(it) }
-        }
-    }
-
-    private fun setPhotoState(slot: String, hasPhoto: Boolean) {
-        val retakeBtn = when (slot) {
-            "front" -> binding.btnRetakeFront
-            "rear" -> binding.btnRetakeRear
-            "left" -> binding.btnRetakeLeft
-            "right" -> binding.btnRetakeRight
-            "plate" -> binding.btnRetakePlate
-            else -> return
-        }
-        val deleteBtn = when (slot) {
-            "front" -> binding.btnDeleteFront
-            "rear" -> binding.btnDeleteRear
-            "left" -> binding.btnDeleteLeft
-            "right" -> binding.btnDeleteRight
-            "plate" -> binding.btnDeletePlate
-            else -> return
-        }
-        val visibility = if (hasPhoto) View.VISIBLE else View.GONE
-        retakeBtn.visibility = visibility
-        deleteBtn.visibility = visibility
-
-        when (slot) {
-            "front" -> hasFrontPhoto = hasPhoto
-            "rear" -> hasRearPhoto = hasPhoto
-            "left" -> hasLeftPhoto = hasPhoto
-            "right" -> hasRightPhoto = hasPhoto
-            "plate" -> {
-                hasPlatePhoto = hasPhoto
-                if (hasPhoto) binding.tvPlateError.visibility = View.GONE
-            }
-        }
-    }
-
-    private fun deletePhoto(slot: String) {
-        when (slot) {
-            "front" -> binding.ivFront.also { it.setImageResource(R.drawable.front) }
-            "rear" -> binding.ivRear.also { it.setImageResource(R.drawable.rear) }
-            "left" -> binding.ivLeft.also { it.setImageResource(R.drawable.left) }
-            "right" -> binding.ivRight.also { it.setImageResource(R.drawable.right) }
-            "plate" -> binding.ivPlate.also { it.setImageResource(R.drawable.ic_scan_corners) }
-            else -> return
-        }
-        setPhotoState(slot, false)
+    /** Parks the captured photos of an unconfirmed entry before the form clears them. */
+    private fun keepPhotosFor(entryId: String) {
+        val dir = File(filesDir, "photos")
+        PendingPhotoStore.keep(
+            this, entryId,
+            slots.filter { it.takenAt != null }.associate { it.key to File(dir, "${it.key}.jpg") },
+        )
     }
 
     private fun deleteAllPhotoFiles() {
-        val photoDir = File(filesDir, "photos")
-        if (!photoDir.exists()) return
-        photoDir.listFiles()?.forEach { it.delete() }
+        File(filesDir, "photos").listFiles()?.forEach { it.delete() }
     }
 
-    private fun sendPlateForOcr(uri: Uri) {
-        lifecycleScope.launch(Dispatchers.IO) {
-            try {
-                withContext(Dispatchers.Main) {
-                    binding.tvDbStatus.text = getString(R.string.plate_sending)
-                }
+    // endregion
 
-                val bytes = contentResolver.openInputStream(uri)?.use { it.readBytes() } ?: return@launch
-                val requestBody = bytes.toRequestBody("image/jpeg".toMediaTypeOrNull())
-                val imagePart = MultipartBody.Part.createFormData("image", "plate.jpg", requestBody)
+    // region Form
 
-                val response = parkingApi.recognizePlate(imagePart)
-
-                withContext(Dispatchers.Main) {
-                    if (response.isSuccessful) {
-                        val body = response.body()
-                        if (body != null && body.success) {
-                            binding.etPlateNumber.setText(body.plate)
-                            binding.tvDbStatus.text = getString(R.string.plate_validation_status)
-                        } else {
-                            binding.tvDbStatus.text = body?.message ?: getString(R.string.plate_ocr_error)
-                        }
-                    } else {
-                        binding.tvDbStatus.text = getString(R.string.plate_ocr_error)
-                    }
-                }
-            } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
-                    binding.tvDbStatus.text = getString(R.string.plate_ocr_error)
-                }
+    private fun setupPlateField() {
+        val field = binding.etPlateNumber
+        field.filters = arrayOf(InputFilter.AllCaps(), InputFilter.LengthFilter(15))
+        field.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: Editable?) {
+                field.error = null
+                renderSlots()
             }
-        }
+        })
     }
 
-    private fun setupVehicleButtons() {
-        selectedVehicleType = "motorcycle"
-        binding.btnMoto.isSelected = true
-
-        val buttons = listOf(
-            binding.btnMoto to "motorcycle",
-            binding.btnAuto to "light",
-            binding.btnCamioneta to "light",
-            binding.btnCamion to "heavy",
+    private fun renderTypeChips() {
+        val row = binding.llTypeChips
+        row.removeAllViews()
+        val types = listOf(
+            R.string.vehicle_type_auto to "light",
+            R.string.vehicle_type_camion to "heavy",
+            R.string.vehicle_type_moto to "motorcycle",
         )
-
-        buttons.forEach { (button, type) ->
-            button.setOnClickListener {
-                buttons.forEach { (b, _) -> b.isSelected = false }
-                button.isSelected = true
+        types.forEach { (label, type) ->
+            PcUi.addChip(row, getString(label), checked = selectedVehicleType == type, fill = true) {
                 selectedVehicleType = type
+                renderTypeChips()
+                updateRate()
             }
         }
     }
 
-    private fun setupBranchSelector() {
-        binding.btnBranchSelector.setOnClickListener { showBranchSelector() }
-        binding.tvBranchName.setOnClickListener { showBranchSelector() }
+    private fun updateEntryTime() {
+        binding.tvEntryTime.text = getString(R.string.pc_entry_time, ParkingFormat.hhmm())
     }
+
+    private fun updateRate() {
+        val branch = selectedBranch
+        if (branch == null) {
+            binding.tvRate.text = ""
+            return
+        }
+        val rate = when (selectedVehicleType) {
+            "motorcycle" -> branch.motorcycleRate
+            "heavy" -> branch.heavyVehicleRate
+            else -> branch.lightVehicleRate
+        }
+        binding.tvRate.text = getString(R.string.pc_rate_per_day, ParkingFormat.money(rate, branch.currency))
+    }
+
+    private fun canSubmit(): Boolean {
+        val plate = binding.etPlateNumber.text?.toString()?.trim().orEmpty()
+        return !isSending && plate.length >= 3 && hasPlatePhoto()
+    }
+
+    private fun updateConfirmState() {
+        val enabled = canSubmit()
+        binding.btnConfirmEntry.isEnabled = enabled
+        binding.btnConfirmEntry.alpha = if (enabled) 1f else 0.4f
+    }
+
+    private fun validateAndSend() {
+        if (selectedBranch == null) {
+            Toast.makeText(this, getString(R.string.branch_required_for_entry), Toast.LENGTH_LONG).show()
+            showBranchSelector()
+            return
+        }
+        val plate = binding.etPlateNumber.text?.toString()?.trim().orEmpty()
+        when {
+            plate.length < 3 -> binding.etPlateNumber.error = getString(R.string.plate_too_short)
+            plate.length > 15 -> binding.etPlateNumber.error = getString(R.string.plate_too_long)
+            !hasPlatePhoto() -> Toast.makeText(this, R.string.pc_required, Toast.LENGTH_SHORT).show()
+            else -> sendToApi()
+        }
+    }
+
+    private fun showDone(titleRes: Int, plate: String, vehicleType: String, photos: Int, member: Membership?) {
+        binding.done.tvDoneTitle.setText(titleRes)
+        binding.done.tvDonePlate.text = plate
+        val kind = member?.memberName ?: ParkingFormat.vehicleType(this, vehicleType)
+        binding.done.tvDoneMeta.text =
+            resources.getQuantityString(R.plurals.pc_entry_done_meta, photos, ParkingFormat.hhmm(), kind, photos)
+        binding.form.visibility = View.GONE
+        binding.done.root.visibility = View.VISIBLE
+        binding.homeScrollView.smoothScrollTo(0, 0)
+        selectedBranch?.let { refreshBranchMeta(it) }
+    }
+
+    private fun resetForm() {
+        deleteAllPhotoFiles()
+        binding.etPlateNumber.setText("")
+        binding.etPlateNumber.error = null
+        slots.forEach { it.takenAt = null }
+        selectedVehicleType = "motorcycle"
+        renderTypeChips()
+        updateRate()
+        clearSelectedMember()
+        renderSlots()
+    }
+
+    // endregion
+
+    // region Membership
 
     private fun setupMembershipSelector() {
         binding.btnSelectMember.setOnClickListener { showMemberSelector() }
@@ -358,9 +374,7 @@ class HomeActivity : BaseActivity() {
             Toast.makeText(this, R.string.membership_dialog_empty, Toast.LENGTH_SHORT).show()
             return
         }
-
-        val names = activeMembers.map { "${it.memberName}  •  ${it.tier}" }.toTypedArray()
-
+        val names = activeMembers.map { "${it.memberName} · ${it.tier}" }.toTypedArray()
         AlertDialog.Builder(this)
             .setTitle(R.string.membership_dialog_title)
             .setItems(names) { dialog, which ->
@@ -376,50 +390,19 @@ class HomeActivity : BaseActivity() {
         binding.btnSelectMember.visibility = View.GONE
         binding.layoutMemberInfo.visibility = View.VISIBLE
         binding.tvMemberName.text = membership.memberName
-        binding.tvMemberTier.text = membership.tier
+        binding.tvMemberTier.text = getString(R.string.pc_member_label, membership.tier)
+        binding.tvMemberUntil.text = getString(R.string.pc_member_until, formatDate(membership.endDate.take(10)))
     }
 
     private fun clearSelectedMember() {
         selectedMembership = null
         binding.btnSelectMember.visibility = View.VISIBLE
         binding.layoutMemberInfo.visibility = View.GONE
-        binding.tvMemberName.text = ""
-        binding.tvMemberTier.text = ""
     }
 
-    private fun showBranchSelector() {
-        if (branches.isEmpty()) {
-            AlertDialog.Builder(this)
-                .setTitle(getString(R.string.dialog_no_branches_title))
-                .setMessage(getString(R.string.dialog_no_branches_message))
-                .setPositiveButton(getString(R.string.dialog_setup)) { _, _ ->
-                    startActivity(android.content.Intent(this, BranchListActivity::class.java))
-                }
-                .setNegativeButton(getString(R.string.dialog_cancel), null)
-                .show()
-            return
-        }
+    // endregion
 
-        val names = branches.map { it.name }.toTypedArray()
-        val selectedIndex = if (selectedBranch != null) branches.indexOf(selectedBranch) else 0
-
-        AlertDialog.Builder(this)
-            .setTitle(getString(R.string.dialog_select_branch_title))
-            .setSingleChoiceItems(names, if (selectedIndex >= 0) selectedIndex else 0) { dialog, which ->
-                val branch = branches[which]
-                selectedBranch = branch
-                sessionManager.saveSelectedBranchId(branch.id)
-                binding.tvBranchName.text = branch.name
-                clearSelectedMember()
-                loadMemberships()
-                dialog.dismiss()
-            }
-            .setPositiveButton(getString(R.string.dialog_manage_branches)) { _, _ ->
-                startActivity(android.content.Intent(this, BranchListActivity::class.java))
-            }
-            .setNegativeButton(getString(R.string.dialog_cancel), null)
-            .show()
-    }
+    // region Branch
 
     private fun loadBranches() {
         lifecycleScope.launch(Dispatchers.IO) {
@@ -431,7 +414,7 @@ class HomeActivity : BaseActivity() {
                         restoreOrSelectBranch()
                     }
                     is Result.Error -> {
-                        binding.tvBranchName.text = getString(R.string.branch_load_error)
+                        binding.header.tvBranchMeta.text = getString(R.string.branch_load_error)
                     }
                 }
             }
@@ -440,83 +423,65 @@ class HomeActivity : BaseActivity() {
 
     private fun restoreOrSelectBranch() {
         val savedId = sessionManager.getSelectedBranchId()
-        val saved = if (savedId != null) branches.find { it.id == savedId } else null
-
-        if (saved != null) {
-            selectedBranch = saved
-            binding.tvBranchName.text = saved.name
-        } else if (branches.isNotEmpty()) {
-            selectedBranch = branches.first()
-            sessionManager.saveSelectedBranchId(selectedBranch!!.id)
-            binding.tvBranchName.text = selectedBranch!!.name
-        } else {
-            binding.tvBranchName.text = getString(R.string.branch_no_branch)
+        val branch = branches.find { it.id == savedId } ?: branches.firstOrNull()
+        if (branch == null) {
+            binding.header.tvBranchMeta.text = getString(R.string.branch_no_branch)
+            return
         }
+        applyBranch(branch)
+    }
+
+    private fun applyBranch(branch: Branch) {
+        selectedBranch = branch
+        sessionManager.saveSelectedBranchId(branch.id)
+        refreshBranchMeta(branch)
+        updateRate()
+        clearSelectedMember()
         loadMemberships()
     }
 
-    private fun setupConfirmButton() {
-        binding.etPlateNumber.setOnFocusChangeListener { _, _ ->
-            binding.etPlateNumber.error = null
-        }
-        binding.btnConfirmEntry.setOnClickListener { validateAndSend() }
-    }
-
-    private fun validateAndSend(): Boolean {
-        var firstErrorView: View? = null
-
-        if (selectedBranch == null) {
-            Toast.makeText(this, getString(R.string.branch_required_for_entry), Toast.LENGTH_LONG).show()
-            showBranchSelector()
-            return false
-        }
-
-        val rawPlate = binding.etPlateNumber.text?.toString()?.trim() ?: ""
-        binding.etPlateNumber.setText(rawPlate)
-
-        if (rawPlate.isEmpty()) {
-            binding.etPlateNumber.error = getString(R.string.field_required_plain)
-            if (firstErrorView == null) firstErrorView = binding.etPlateNumber
-        } else if (rawPlate.length < 3) {
-            binding.etPlateNumber.error = getString(R.string.plate_too_short)
-            if (firstErrorView == null) firstErrorView = binding.etPlateNumber
-        } else if (rawPlate.length > 15) {
-            binding.etPlateNumber.error = getString(R.string.plate_too_long)
-            if (firstErrorView == null) firstErrorView = binding.etPlateNumber
-        }
-
-        val allowedTypes = listOf("motorcycle", "light", "heavy")
-        if (selectedVehicleType !in allowedTypes) {
-            selectedVehicleType = "motorcycle"
-        }
-
-        if (!hasPlatePhoto) {
-            binding.tvPlateError.visibility = View.VISIBLE
-            if (firstErrorView == null) firstErrorView = binding.cardPlateCapture
-        } else {
-            binding.tvPlateError.visibility = View.GONE
-        }
-
-        if (firstErrorView != null) {
-            scrollToView(firstErrorView)
-            return false
-        }
-        sendToApi()
-        return true
-    }
-
-    private fun scrollToView(view: View) {
-        binding.homeScrollView.post {
-            binding.homeScrollView.smoothScrollTo(0, 0)
+    private fun refreshBranchMeta(branch: Branch) {
+        lifecycleScope.launch {
+            val occupied = withContext(Dispatchers.IO) {
+                vehicleEntryRepository.getActiveEntriesLocal(branch.id).size
+            }
+            val capacity = branch.lightVehicleCapacity + branch.heavyVehicleCapacity + branch.motorcycleCapacity
+            binding.header.tvBranchMeta.text =
+                getString(R.string.pc_branch_meta, branch.name, ParkingFormat.pad2(occupied), capacity)
         }
     }
+
+    private fun showBranchSelector() {
+        if (branches.isEmpty()) {
+            AlertDialog.Builder(this)
+                .setTitle(getString(R.string.dialog_no_branches_title))
+                .setMessage(getString(R.string.dialog_no_branches_message))
+                .setPositiveButton(getString(R.string.dialog_setup)) { _, _ ->
+                    startActivity(Intent(this, BranchListActivity::class.java))
+                }
+                .setNegativeButton(getString(R.string.dialog_cancel), null)
+                .show()
+            return
+        }
+        val names = branches.map { it.name }.toTypedArray()
+        val selectedIndex = branches.indexOf(selectedBranch).coerceAtLeast(0)
+        AlertDialog.Builder(this)
+            .setTitle(getString(R.string.dialog_select_branch_title))
+            .setSingleChoiceItems(names, selectedIndex) { dialog, which ->
+                applyBranch(branches[which])
+                dialog.dismiss()
+            }
+            .setNegativeButton(getString(R.string.dialog_cancel), null)
+            .show()
+    }
+
+    // endregion
 
     private fun sendToApi() {
         if (isSending) return
         isSending = true
 
         val plate = binding.etPlateNumber.text?.toString()?.trim()?.uppercase() ?: ""
-        binding.etPlateNumber.setText(plate)
         val vehicleType = selectedVehicleType
         val branchId = selectedBranch?.id ?: ""
 
@@ -535,11 +500,10 @@ class HomeActivity : BaseActivity() {
             createdAt = now, exitedAt = null, duration = null, fee = null, branch = null
         )
 
-        with(binding) {
-            btnConfirmEntry.isEnabled = false
-            btnConfirmEntry.text = getString(R.string.action_sending)
-            loadingOverlay.visibility = View.VISIBLE
-        }
+        val photoCount = photoCount()
+        val member = selectedMembership
+        binding.btnConfirmEntry.isEnabled = false
+        binding.btnConfirmEntry.text = getString(R.string.pc_sending)
 
         lifecycleScope.launch(Dispatchers.IO) {
             vehicleEntryRepository.updateCachedEntry(localEntry)
@@ -552,11 +516,14 @@ class HomeActivity : BaseActivity() {
                 val membershipIdPart = selectedMembership?.id
                     ?.toRequestBody("text/plain".toMediaTypeOrNull())
 
-                val platePhotoPart = platePhotoUri?.toMultipartPart("platePhoto")
-                val frontPart = frontPhotoUri?.toMultipartPart("front")
-                val rearPart = rearPhotoUri?.toMultipartPart("rear")
-                val leftPart = leftPhotoUri?.toMultipartPart("left")
-                val rightPart = rightPhotoUri?.toMultipartPart("right")
+                fun part(key: String, field: String) =
+                    slots.first { it.key == key }.takeIf { it.takenAt != null }?.uri?.toMultipartPart(field)
+
+                val platePhotoPart = part("plate", "platePhoto")
+                val frontPart = part("front", "front")
+                val rearPart = part("rear", "rear")
+                val leftPart = part("left", "left")
+                val rightPart = part("right", "right")
 
                 val response = parkingApi.registerEntry(
                     plate = plateBody, vehicleType = typeBody,
@@ -574,79 +541,36 @@ class HomeActivity : BaseActivity() {
 
                 withContext(Dispatchers.Main) {
                     if (response.isSuccessful) {
+                        showDone(R.string.pc_entry_done, plate, vehicleType, photoCount, member)
                         resetForm()
-                        if (selectedMembership != null) {
-                            Toast.makeText(this@HomeActivity, getString(R.string.confirm_entry_membership_success, selectedMembership!!.memberName), Toast.LENGTH_SHORT).show()
-                        } else {
-                            Toast.makeText(this@HomeActivity, R.string.confirm_entry_success, Toast.LENGTH_SHORT).show()
-                        }
                     } else {
                         val errorMsg = parseEntryError(response)
                         Toast.makeText(this@HomeActivity, getString(R.string.confirm_entry_error, errorMsg), Toast.LENGTH_LONG).show()
+                        keepPhotosFor(localId)
                         resetForm()
                     }
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
                     if (e is IOException) {
-                        Toast.makeText(this@HomeActivity, R.string.confirm_entry_queued, Toast.LENGTH_LONG).show()
+                        showDone(R.string.pc_entry_queued, plate, vehicleType, photoCount, member)
                     } else {
                         Toast.makeText(this@HomeActivity, getString(R.string.confirm_entry_error, e.message ?: "Unknown error"), Toast.LENGTH_LONG).show()
                     }
+                    // The entry stays saved locally and syncs later; its photos must not be lost.
+                    keepPhotosFor(localId)
                     resetForm()
                 }
             } finally {
                 SyncCoordinator.isApiInProgress = false
                 syncCoordinator.onMutation()
                 withContext(Dispatchers.Main) {
-                    with(binding) {
-                        btnConfirmEntry.isEnabled = true
-                        btnConfirmEntry.text = getString(R.string.action_confirm_entry)
-                        loadingOverlay.visibility = View.GONE
-                    }
+                    binding.btnConfirmEntry.text = getString(R.string.pc_register_entry)
                     isSending = false
+                    updateConfirmState()
                 }
             }
         }
-    }
-
-    private fun resetForm() {
-        deleteAllPhotoFiles()
-        binding.etPlateNumber.setText("")
-        binding.etPlateNumber.error = null
-        binding.tvDbStatus.text = getString(R.string.plate_validation_status)
-
-        binding.btnMoto.isSelected = true
-        binding.btnAuto.isSelected = false
-        binding.btnCamioneta.isSelected = false
-        binding.btnCamion.isSelected = false
-        selectedVehicleType = "motorcycle"
-
-        binding.ivPlate.setImageResource(R.drawable.ic_scan_corners)
-        binding.ivFront.setImageResource(R.drawable.front)
-        binding.ivRear.setImageResource(R.drawable.rear)
-        binding.ivLeft.setImageResource(R.drawable.left)
-        binding.ivRight.setImageResource(R.drawable.right)
-
-        hasFrontPhoto = false
-        hasRearPhoto = false
-        hasLeftPhoto = false
-        hasRightPhoto = false
-        hasPlatePhoto = false
-
-        binding.btnRetakePlate.visibility = View.GONE
-        binding.btnDeletePlate.visibility = View.GONE
-        binding.tvPlateError.visibility = View.GONE
-        binding.btnRetakeFront.visibility = View.GONE
-        binding.btnDeleteFront.visibility = View.GONE
-        binding.btnRetakeRear.visibility = View.GONE
-        binding.btnDeleteRear.visibility = View.GONE
-        binding.btnRetakeLeft.visibility = View.GONE
-        binding.btnDeleteLeft.visibility = View.GONE
-        binding.btnRetakeRight.visibility = View.GONE
-        binding.btnDeleteRight.visibility = View.GONE
-
-        clearSelectedMember()
     }
 
     private fun parseEntryError(response: retrofit2.Response<*>): String {
@@ -671,60 +595,6 @@ class HomeActivity : BaseActivity() {
             MultipartBody.Part.createFormData(fieldName, "${fieldName}.jpg", requestBody)
         } catch (_: Exception) {
             null
-        }
-    }
-
-    private fun setupBottomNav() {
-        binding.bottomNavigation.setOnItemSelectedListener { item ->
-            when (item.itemId) {
-                R.id.nav_register -> {
-                    BottomNavIndicator.animateTo(
-                        bottomNav = binding.bottomNavigation,
-                        indicator = binding.bottomNavIndicator,
-                        itemId = R.id.nav_register,
-                    )
-                    true
-                }
-                R.id.nav_profile -> {
-                    BottomNavIndicator.animateTo(
-                        bottomNav = binding.bottomNavigation,
-                        indicator = binding.bottomNavIndicator,
-                        itemId = R.id.nav_profile,
-                    )
-                    TabNavigator.navigate(this, R.id.nav_profile)
-                    true
-                }
-                else -> {
-                    BottomNavIndicator.animateTo(
-                        bottomNav = binding.bottomNavigation,
-                        indicator = binding.bottomNavIndicator,
-                        itemId = item.itemId,
-                    )
-                    TabNavigator.navigate(this, item.itemId)
-                    true
-                }
-            }
-        }
-    }
-
-    private fun setupWindowInsets() {
-        ViewCompat.setOnApplyWindowInsetsListener(binding.headerBar) { view, insets ->
-            val statusBarInsets = insets.getInsets(WindowInsetsCompat.Type.statusBars())
-            view.updatePadding(top = statusBarInsets.top)
-            insets
-        }
-
-        ViewCompat.setOnApplyWindowInsetsListener(binding.bottomNavigation) { view, insets ->
-            val navBarInsets = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
-            view.updatePadding(bottom = navBarInsets.bottom)
-            insets
-        }
-
-        ViewCompat.setOnApplyWindowInsetsListener(binding.homeScrollView) { view, insets ->
-            val bottomNavH = resources.getDimensionPixelSize(R.dimen.bottom_nav_height)
-            val navBarInsets = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
-            view.updatePadding(bottom = bottomNavH + navBarInsets.bottom)
-            insets
         }
     }
 }

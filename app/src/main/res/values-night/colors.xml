@@ -2,7 +2,15 @@
 <resources>
 
     <!-- Profile icon backgrounds (Midnight / Dark) -->
-    <color name="profile_icon_security_bg">#14251C</color>
-    <color name="profile_icon_about_bg">#1A2836</color>
+    <color name="profile_icon_security_bg">#0B0D10</color>
+    <color name="profile_icon_about_bg">#0B0D10</color>
+
+    <!-- Branch list UI (LRGutierrez dark) -->
+    <color name="branch_green_neon">#F5A524</color>
+    <color name="branch_gray_muted">#7C8592</color>
+    <color name="branch_green_badge_bg">#1AF5A524</color>
+    <color name="branch_gray_badge_bg">#1A7C8592</color>
+    <color name="branch_dark_card">#0B0D10</color>
+    <color name="branch_green_light_text">#F5A524</color>
 
 </resources>

@@ -1,6 +1,7 @@
 package com.beta.auraos.data.audit
 
 import com.beta.auraos.data.model.Branch
+import com.beta.auraos.data.model.VehicleEntry
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -8,6 +9,14 @@ import java.util.TimeZone
 import kotlin.math.max
 
 object FeeCalculator {
+
+    /**
+     * What the operator charges at the exit. Members pay a monthly fee instead of the
+     * daily rate, so their exits are free; everyone else pays [computeFee].
+     */
+    fun exitFee(entry: VehicleEntry, branch: Branch?): Double? =
+        if (entry.membershipId != null) 0.0
+        else computeFee(entry.createdAt, entry.vehicleType, branch)
 
     fun computeFee(createdAt: String, vehicleType: String, branch: Branch?): Double? {
         if (branch == null) return null

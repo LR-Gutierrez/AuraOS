@@ -1,151 +1,248 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<!--
+    Registro · Salida (Parqueo·Control). Search + vehicles on site; picking one opens the
+    checkout panel (times, photos, total) with the exit action.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="?attr/homeSurfaceBackground"
+    android:orientation="vertical"
     tools:context=".ui.exit.ExitActivity">
-
-    <com.google.android.material.appbar.AppBarLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@android:color/transparent"
-        app:elevation="@dimen/elevation_none">
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/header_bar"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/home_header_height"
-            android:background="?attr/navbarBackground"
-            android:paddingHorizontal="@dimen/spacing_large">
-
-            <ImageButton
-                android:id="@+id/btn_back"
-                android:layout_width="@dimen/icon_size_large"
-                android:layout_height="@dimen/icon_size_large"
-                android:background="?attr/glassCardBackgroundCustom"
-                android:contentDescription="@string/action_back"
-                android:src="@android:drawable/ic_menu_revert"
-                app:tint="?attr/textPrimaryCustom"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <TextView
-                android:id="@+id/tv_title"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/spacing_medium"
-                android:fontFamily="sans-serif-black"
-                android:text="@string/exit_title"
-                android:textColor="?attr/textPrimaryCustom"
-                android:textSize="@dimen/text_size_title"
-                android:textStyle="bold"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@id/btn_back"
-                app:layout_constraintTop_toTopOf="parent" />
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-    </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.core.widget.NestedScrollView
         android:id="@+id/scrollView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:clipToPadding="true"
-        android:fillViewport="true"
-        android:scrollbars="none"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:clipToPadding="false"
+        android:scrollbars="none">
 
         <LinearLayout
-            android:id="@+id/contentContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingHorizontal="@dimen/container_padding"
-            android:paddingTop="@dimen/spacing_large"
-            android:paddingBottom="@dimen/spacing_xxlarge">
+            android:paddingHorizontal="20dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="32dp">
 
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/search_card"
+            <include
+                android:id="@+id/header"
+                layout="@layout/view_pc_register_header" />
+
+            <include
+                android:id="@+id/done"
+                layout="@layout/view_pc_done"
                 android:layout_width="match_parent"
-                android:layout_height="42dp"
-                android:layout_marginBottom="@dimen/spacing_medium"
-                app:cardCornerRadius="999dp"
-                app:cardBackgroundColor="?attr/branchSurfaceCustom"
-                app:strokeColor="?attr/dividerColorCustom"
-                app:strokeWidth="@dimen/stroke_thin"
-                app:cardElevation="0dp">
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:visibility="gone" />
+
+            <!-- Vehicle list -->
+            <LinearLayout
+                android:id="@+id/list_section"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:orientation="vertical">
+
+                <EditText
+                    android:id="@+id/et_search_plate"
+                    style="@style/Widget.Pc.Field"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:hint="@string/pc_search_plate"
+                    android:importantForAutofill="no"
+                    android:inputType="textCapCharacters|textNoSuggestions"
+                    android:letterSpacing="0.06"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/tv_result_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingVertical="16dp"
+                    android:textAppearance="@style/TextAppearance.Pc.Mono"
+                    tools:text="38 vehículos en sitio · Sede Centro" />
+
+                <com.google.android.material.progressindicator.LinearProgressIndicator
+                    android:id="@+id/loading_overlay"
+                    style="@style/Widget.Pc.Progress"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:indeterminate="true"
+                    android:visibility="gone" />
+
+                <LinearLayout
+                    android:id="@+id/ll_results"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" />
+
+                <TextView
+                    android:id="@+id/tv_empty_state"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingVertical="14dp"
+                    android:text="@string/pc_on_site_empty"
+                    android:textAppearance="@style/TextAppearance.Pc.Hint"
+                    android:textSize="14sp"
+                    android:visibility="gone" />
+            </LinearLayout>
+
+            <!-- Checkout -->
+            <LinearLayout
+                android:id="@+id/checkout_section"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:orientation="vertical"
+                android:visibility="gone"
+                tools:visibility="visible">
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center_vertical"
-                    android:paddingHorizontal="@dimen/spacing_medium">
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_lrg_card"
+                    android:orientation="vertical"
+                    android:padding="20dp">
 
-                    <ImageView
-                        android:layout_width="18dp"
-                        android:layout_height="18dp"
-                        android:src="@android:drawable/ic_menu_search"
-                        app:tint="?attr/textSecondaryCustom" />
-
-                    <EditText
-                        android:id="@+id/et_search_plate"
+                    <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_marginStart="12dp"
-                        android:background="@null"
-                        android:fontFamily="sans-serif"
-                        android:hint="@string/history_search_hint"
-                        android:inputType="text"
-                        android:importantForAutofill="no"
-                        android:textColor="?attr/textPrimaryCustom"
-                        android:textColorHint="?attr/textSecondaryCustom"
-                        android:textSize="14sp" />
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
 
+                        <TextView
+                            android:id="@+id/tv_co_plate"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:ellipsize="end"
+                            android:maxLines="1"
+                            android:textAppearance="@style/TextAppearance.Pc.PlateHero"
+                            tools:text="AB123CD" />
+
+                        <TextView
+                            android:id="@+id/tv_co_type"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="12dp"
+                            android:textAppearance="@style/TextAppearance.Lrg.Label"
+                            tools:text="Auto" />
+                    </LinearLayout>
+
+                    <View
+                        style="@style/Widget.Pc.Hairline"
+                        android:layout_marginTop="16dp" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:paddingTop="14dp">
+
+                        <include
+                            android:id="@+id/kv_in"
+                            layout="@layout/view_pc_kv" />
+
+                        <include
+                            android:id="@+id/kv_duration"
+                            layout="@layout/view_pc_kv" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:paddingTop="14dp">
+
+                        <include
+                            android:id="@+id/kv_photos"
+                            layout="@layout/view_pc_kv" />
+
+                        <include
+                            android:id="@+id/kv_out"
+                            layout="@layout/view_pc_kv" />
+                    </LinearLayout>
+
+                    <View
+                        style="@style/Widget.Pc.Hairline"
+                        android:layout_marginTop="16dp" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:baselineAligned="true"
+                        android:orientation="horizontal"
+                        android:paddingTop="14dp">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/pc_total_due"
+                            android:textAppearance="@style/TextAppearance.Pc.Body"
+                            android:textColor="?attr/textSecondaryCustom" />
+
+                        <TextView
+                            android:id="@+id/tv_co_amount"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textAppearance="@style/TextAppearance.Pc.H2"
+                            android:textSize="32sp"
+                            tools:text="$4.50" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/tv_co_amount_note"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:layout_marginTop="2dp"
+                        android:text="@string/pc_included_in_plan"
+                        android:textAppearance="@style/TextAppearance.Pc.Mono"
+                        android:visibility="gone" />
                 </LinearLayout>
 
-            </com.google.android.material.card.MaterialCardView>
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_checkout"
+                    style="@style/Widget.Pc.Button.Primary"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    tools:text="Cobrar y registrar salida" />
 
-            <TextView
-                android:id="@+id/tv_empty_state"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/spacing_xxxlarge"
-                android:gravity="center"
-                android:padding="@dimen/spacing_xlarge"
-                android:text="@string/exit_empty"
-                android:textAlignment="center"
-                android:textColor="?attr/textSecondaryCustom"
-                android:textSize="@dimen/text_size_body"
-                android:visibility="gone" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:gravity="center"
+                    android:orientation="horizontal">
 
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_view_photos"
+                        style="@style/Widget.Pc.TextLink"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="24dp"
+                        android:text="@string/pc_view_photos" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_clear_selection"
+                        style="@style/Widget.Pc.TextLink"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/pc_pick_another" />
+                </LinearLayout>
+            </LinearLayout>
         </LinearLayout>
-
     </androidx.core.widget.NestedScrollView>
 
-    <FrameLayout
-        android:id="@+id/loading_overlay"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="#99000000"
-        android:clickable="true"
-        android:focusable="true"
-        android:visibility="gone">
+    <include
+        android:id="@+id/tab_bar"
+        layout="@layout/view_pc_tab_bar" />
 
-        <com.google.android.material.progressindicator.CircularProgressIndicator
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:indeterminate="true"
-            app:indicatorColor="?attr/colorPrimary"
-            app:indicatorSize="48dp"
-            app:trackThickness="4dp" />
-
-    </FrameLayout>
-
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+</LinearLayout>

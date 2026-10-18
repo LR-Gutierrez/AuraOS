@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Registro header shared by the entry and exit screens: title, branch meta, Entrada / Salida segment. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/tv_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:accessibilityHeading="true"
+        android:text="@string/pc_register_title"
+        android:textAppearance="@style/TextAppearance.Pc.H2" />
+
+    <TextView
+        android:id="@+id/tv_branch_meta"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:background="?attr/selectableItemBackground"
+        android:textAppearance="@style/TextAppearance.Pc.Mono"
+        tools:text="Sede Centro · 38 / 120" />
+
+    <com.google.android.material.button.MaterialButtonToggleGroup
+        android:id="@+id/segment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:background="@drawable/bg_pc_segment"
+        android:padding="2dp"
+        app:selectionRequired="true"
+        app:singleSelection="true">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/seg_entry"
+            style="@style/Widget.Pc.Segment"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/pc_entry" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/seg_exit"
+            style="@style/Widget.Pc.Segment"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="2dp"
+            android:layout_weight="1"
+            android:text="@string/pc_exit" />
+    </com.google.android.material.button.MaterialButtonToggleGroup>
+</LinearLayout>

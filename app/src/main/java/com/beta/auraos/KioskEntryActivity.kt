@@ -6,11 +6,14 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.text.Editable
+import android.text.InputFilter
+import android.text.TextWatcher
+import android.view.View
 import android.os.Environment
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AlertDialog
 import androidx.core.content.FileProvider
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -19,11 +22,13 @@ import androidx.lifecycle.lifecycleScope
 import com.beta.auraos.data.VehicleEntryRepository
 
 import com.beta.auraos.data.local.SyncCoordinator
+import com.beta.auraos.data.local.PendingPhotoStore
 import com.beta.auraos.data.local.room.AppDatabase
 import com.beta.auraos.data.model.VehicleEntry
 import com.beta.auraos.data.remote.ApiClient
 import com.beta.auraos.data.remote.ParkingApi
 import com.beta.auraos.databinding.ActivityKioskEntryBinding
+import com.beta.auraos.util.ParkingFormat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -43,11 +48,13 @@ import java.util.UUID
 
 class KioskEntryActivity : BaseActivity() {
 
+    private enum class Step { PLATE, CAPTURE, SENDING, TICKET }
+
     private lateinit var binding: ActivityKioskEntryBinding
 
     private var branchId: String = ""
+    private var branchName: String = ""
     private var membershipId: String? = null
-    private var memberName: String? = null
     private var mode: String = "ticket"
 
     private var plateBitmap: Bitmap? = null
@@ -62,11 +69,12 @@ class KioskEntryActivity : BaseActivity() {
     private val permissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { results ->
-        val allGranted = results.values.all { it }
-        if (allGranted) {
+        if (results.values.all { it }) {
             openCameraForPlate()
         } else {
+            // Without the camera the plate photo stays optional, as before.
             Toast.makeText(this, R.string.permission_camera_denied, Toast.LENGTH_SHORT).show()
+            confirmEntry()
         }
     }
 
@@ -74,15 +82,13 @@ class KioskEntryActivity : BaseActivity() {
         ActivityResultContracts.TakePicture()
     ) { success ->
         if (success && platePhotoPath != null) {
-            val bitmap = BitmapFactory.decodeFile(platePhotoPath)
-            if (bitmap != null) {
+            BitmapFactory.decodeFile(platePhotoPath)?.let { bitmap ->
                 plateBitmap = bitmap
                 binding.ivPlate.setImageBitmap(bitmap)
-                binding.btnRetakePlate.visibility = android.view.View.VISIBLE
-                binding.btnDeletePlate.visibility = android.view.View.VISIBLE
-                binding.cardPlateCapture.setOnClickListener(null)
+                binding.ivPlate.visibility = View.VISIBLE
             }
         }
+        confirmEntry()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -94,8 +100,8 @@ class KioskEntryActivity : BaseActivity() {
         setupWindowInsets()
 
         branchId = intent.getStringExtra("branchId") ?: ""
+        branchName = intent.getStringExtra("branchName") ?: ""
         membershipId = intent.getStringExtra("membershipId")
-        memberName = intent.getStringExtra("memberName")
         mode = intent.getStringExtra("mode") ?: "ticket"
 
         if (branchId.isEmpty()) {
@@ -104,36 +110,52 @@ class KioskEntryActivity : BaseActivity() {
             return
         }
 
-        setupMemberInfo()
-        setupClickHandlers()
-    }
-
-    private fun setupMemberInfo() {
-        if (mode == "membership" && memberName != null) {
-            binding.containerMemberInfo.visibility = android.view.View.VISIBLE
-            binding.tvMemberName.text = memberName
-        } else {
-            binding.containerMemberInfo.visibility = android.view.View.GONE
-        }
-    }
-
-    private fun setupClickHandlers() {
+        binding.tvHeader.text = getString(R.string.pc_kiosk_header, branchName)
         binding.btnBack.setOnClickListener { finish() }
-
-        binding.cardPlateCapture.setOnClickListener { checkCameraPermissionAndCapture() }
-        binding.btnRetakePlate.setOnClickListener { checkCameraPermissionAndCapture() }
-        binding.btnDeletePlate.setOnClickListener { deletePlatePhoto() }
-
-        binding.btnConfirmEntry.setOnClickListener { confirmEntry() }
+        binding.btnDone.setOnClickListener { finish() }
+        binding.btnConfirmEntry.setOnClickListener {
+            if (plate().length >= MIN_PLATE) startCapture()
+        }
+        binding.etPlateNumber.filters = arrayOf(InputFilter.AllCaps(), InputFilter.LengthFilter(15))
+        binding.etPlateNumber.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: Editable?) {
+                binding.tvPlateError.visibility = View.GONE
+                updateContinue()
+            }
+        })
+        updateContinue()
+        showStep(Step.PLATE)
     }
 
-    private fun checkCameraPermissionAndCapture() {
-        val permissions = mutableListOf<String>()
-        if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            permissions.add(Manifest.permission.CAMERA)
+    private fun plate(): String = binding.etPlateNumber.text.toString().trim().uppercase()
+
+    private fun updateContinue() {
+        val ok = plate().length >= MIN_PLATE
+        binding.btnConfirmEntry.isEnabled = ok
+        binding.btnConfirmEntry.alpha = if (ok) 1f else 0.4f
+    }
+
+    private fun showStep(step: Step) {
+        binding.sectionPlate.visibility = if (step == Step.PLATE) View.VISIBLE else View.GONE
+        binding.sectionCapture.visibility =
+            if (step == Step.CAPTURE || step == Step.SENDING) View.VISIBLE else View.GONE
+        binding.sectionTicket.visibility = if (step == Step.TICKET) View.VISIBLE else View.GONE
+        binding.loadingOverlay.visibility = if (step == Step.SENDING) View.VISIBLE else View.GONE
+        if (step == Step.CAPTURE || step == Step.SENDING) {
+            binding.tvCapturePlate.text = plate()
+            binding.tvCaptureTitle.setText(if (step == Step.SENDING) R.string.pc_registering else R.string.pc_capturing)
+            binding.tvCaptureHint.setText(
+                if (step == Step.SENDING) R.string.pc_registering_hint else R.string.pc_capturing_hint
+            )
         }
-        if (permissions.isNotEmpty()) {
-            permissionLauncher.launch(permissions.toTypedArray())
+    }
+
+    private fun startCapture() {
+        showStep(Step.CAPTURE)
+        if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            permissionLauncher.launch(arrayOf(Manifest.permission.CAMERA))
         } else {
             openCameraForPlate()
         }
@@ -143,14 +165,11 @@ class KioskEntryActivity : BaseActivity() {
         val photoFile = createImageFile()
         if (photoFile == null) {
             Toast.makeText(this, R.string.error_camera_unavailable, Toast.LENGTH_SHORT).show()
+            confirmEntry()
             return
         }
         platePhotoPath = photoFile.absolutePath
-        val uri = FileProvider.getUriForFile(
-            this,
-            "${packageName}.fileprovider",
-            photoFile
-        )
+        val uri = FileProvider.getUriForFile(this, "${packageName}.fileprovider", photoFile)
         cameraLauncher.launch(uri)
     }
 
@@ -164,26 +183,41 @@ class KioskEntryActivity : BaseActivity() {
         }
     }
 
+    private fun keepPlatePhoto(entryId: String) {
+        platePhotoPath?.let { PendingPhotoStore.keep(this, entryId, mapOf("plate" to File(it))) }
+        platePhotoPath = null
+    }
+
     private fun deletePlatePhoto() {
         plateBitmap = null
         platePhotoPath?.let { File(it).delete() }
         platePhotoPath = null
-        binding.ivPlate.setImageResource(R.drawable.ic_scan_corners)
-        binding.btnRetakePlate.visibility = android.view.View.GONE
-        binding.btnDeletePlate.visibility = android.view.View.GONE
-        binding.cardPlateCapture.setOnClickListener { checkCameraPermissionAndCapture() }
+        binding.ivPlate.setImageDrawable(null)
+        binding.ivPlate.visibility = View.GONE
+    }
+
+    private fun showTicket(plate: String, entryId: String, queued: Boolean) {
+        binding.tvTicketTitle.setText(if (queued) R.string.pc_kiosk_saved_offline else R.string.pc_kiosk_go_ahead)
+        binding.tvTicketHint.setText(
+            if (queued) R.string.pc_kiosk_saved_offline_hint else R.string.pc_kiosk_ticket_hint
+        )
+        binding.tvTicketCode.text = "T-" + entryId.filter { it.isLetterOrDigit() }.take(6).uppercase()
+        binding.tvTicketPlate.text = plate
+        binding.tvTicketTime.text = getString(R.string.pc_entry_time, ParkingFormat.hhmm())
+        binding.tvTicketBranch.text = branchName
+        deletePlatePhoto()
+        showStep(Step.TICKET)
+    }
+
+    private fun showError(message: String) {
+        deletePlatePhoto()
+        binding.tvPlateError.text = message
+        binding.tvPlateError.visibility = View.VISIBLE
+        showStep(Step.PLATE)
     }
 
     private fun confirmEntry() {
-        val plateText = binding.etPlateNumber.text.toString().trim().uppercase()
-        binding.etPlateNumber.setText(plateText)
-
-        if (plateText.isEmpty()) {
-            binding.tvPlateError.visibility = android.view.View.VISIBLE
-            binding.etPlateNumber.requestFocus()
-            return
-        }
-        binding.tvPlateError.visibility = android.view.View.GONE
+        val plateText = plate()
 
         val now = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US).apply {
             timeZone = TimeZone.getTimeZone("UTC")
@@ -210,7 +244,7 @@ class KioskEntryActivity : BaseActivity() {
             branch = null
         )
 
-        showLoading(true)
+        showStep(Step.SENDING)
 
         lifecycleScope.launch(Dispatchers.IO) {
             vehicleEntryRepository.updateCachedEntry(localEntry)
@@ -250,40 +284,29 @@ class KioskEntryActivity : BaseActivity() {
                     right = null
                 )
 
-                if (response.isSuccessful) {
-                    val serverEntry = response.body()?.data
-                    if (serverEntry != null) {
-                        vehicleEntryRepository.replaceLocalWithServerEntry(localId, serverEntry)
-                    }
+                val serverEntry = if (response.isSuccessful) response.body()?.data else null
+                if (serverEntry != null) {
+                    vehicleEntryRepository.replaceLocalWithServerEntry(localId, serverEntry)
                 }
 
                 withContext(Dispatchers.Main) {
-                    showLoading(false)
                     if (response.isSuccessful) {
-                        AlertDialog.Builder(this@KioskEntryActivity)
-                            .setTitle(R.string.entry_success_title)
-                            .setMessage(getString(R.string.confirm_entry_success))
-                            .setPositiveButton(R.string.dialog_ok) { dialog, _ ->
-                                dialog.dismiss()
-                                finish()
-                            }
-                            .setCancelable(false)
-                            .show()
+                        showTicket(plateText, serverEntry?.id ?: localId, queued = false)
                     } else {
                         val errorBody = response.errorBody()?.string() ?: getString(R.string.error_generic)
-                        Toast.makeText(this@KioskEntryActivity, getString(R.string.confirm_entry_error, errorBody), Toast.LENGTH_LONG).show()
-                        resetForm()
+                        keepPlatePhoto(localId)
+                        showError(getString(R.string.confirm_entry_error, errorBody))
                     }
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
-                    showLoading(false)
+                    // The entry stays saved locally and syncs later; keep its plate photo.
+                    keepPlatePhoto(localId)
                     if (e is IOException) {
-                        Toast.makeText(this@KioskEntryActivity, R.string.confirm_entry_queued, Toast.LENGTH_LONG).show()
+                        showTicket(plateText, localId, queued = true)
                     } else {
-                        Toast.makeText(this@KioskEntryActivity, getString(R.string.confirm_entry_error, e.message ?: getString(R.string.error_network)), Toast.LENGTH_LONG).show()
+                        showError(getString(R.string.confirm_entry_error, e.message ?: getString(R.string.error_network)))
                     }
-                    resetForm()
                 }
             } finally {
                 SyncCoordinator.isApiInProgress = false
@@ -292,27 +315,16 @@ class KioskEntryActivity : BaseActivity() {
         }
     }
 
-    private fun resetForm() {
-        binding.etPlateNumber.setText("")
-        binding.tvPlateError.visibility = android.view.View.GONE
-        binding.tvDbStatus.text = getString(R.string.plate_validation_status)
-        deletePlatePhoto()
-    }
-
     private fun setupWindowInsets() {
-        ViewCompat.setOnApplyWindowInsetsListener(binding.headerBar) { view, insets ->
-            val statusBarInsets = insets.getInsets(WindowInsetsCompat.Type.statusBars())
-            view.updatePadding(top = statusBarInsets.top)
-            insets
-        }
-        ViewCompat.setOnApplyWindowInsetsListener(binding.entryScrollView) { view, insets ->
-            val navBarInsets = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
-            view.updatePadding(bottom = navBarInsets.bottom)
+        val basePadding = binding.entryRoot.paddingBottom
+        ViewCompat.setOnApplyWindowInsetsListener(binding.entryRoot) { view, insets ->
+            val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.ime())
+            view.updatePadding(top = bars.top, bottom = basePadding + bars.bottom)
             insets
         }
     }
 
-    private fun showLoading(show: Boolean) {
-        binding.loadingOverlay.visibility = if (show) android.view.View.VISIBLE else android.view.View.GONE
+    companion object {
+        private const val MIN_PLATE = 3
     }
 }

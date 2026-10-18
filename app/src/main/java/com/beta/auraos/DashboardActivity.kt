@@ -1,56 +1,64 @@
 package com.beta.auraos
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
+import androidx.biometric.BiometricManager
+import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG
+import androidx.biometric.BiometricManager.Authenticators.DEVICE_CREDENTIAL
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.beta.auraos.data.BranchRepository
 import com.beta.auraos.data.DashboardRepository
+import com.beta.auraos.data.LoginDataSource
 import com.beta.auraos.data.MembershipRepository
 import com.beta.auraos.data.VehicleEntryRepository
+import com.beta.auraos.data.audit.FeeCalculator
+import com.beta.auraos.data.local.BiometricKeyManager
+import com.beta.auraos.data.local.DashboardCalculator
+import com.beta.auraos.data.local.DashboardLocalDataSource
 import com.beta.auraos.data.local.SessionManager
+import com.beta.auraos.data.local.room.AppDatabase
 import com.beta.auraos.data.model.Branch
 import com.beta.auraos.data.model.DashboardResponse
+import com.beta.auraos.data.model.VehicleEntry
 import com.beta.auraos.data.remote.ApiClient
 import com.beta.auraos.data.remote.BranchApi
 import com.beta.auraos.databinding.ActivityDashboardBinding
+import com.beta.auraos.databinding.ItemPcBranchRowBinding
+import com.beta.auraos.databinding.ItemPcVehicleRowBinding
 import com.beta.auraos.ui.branches.BranchListActivity
 import com.beta.auraos.ui.dashboard.DashboardUiState
 import com.beta.auraos.ui.dashboard.DashboardViewModel
 import com.beta.auraos.ui.dashboard.DashboardViewModelFactory
-import com.beta.auraos.util.BorderGlowDrawable
-import com.beta.auraos.util.BottomNavIndicator
+import com.beta.auraos.ui.dashboard.HomeSnapshot
+import com.beta.auraos.ui.exit.ExitActivity
+import com.beta.auraos.ui.memberships.MembershipListActivity
+import com.beta.auraos.util.ParkingFormat
+import com.beta.auraos.util.PcUi
 import com.beta.auraos.util.TabNavigator
-import com.google.android.material.color.MaterialColors
-import com.beta.auraos.data.LoginDataSource
-import com.beta.auraos.data.Result
-import com.beta.auraos.data.local.BiometricKeyManager
-import com.beta.auraos.data.local.DashboardCalculator
-import com.beta.auraos.data.local.DashboardLocalDataSource
-import com.beta.auraos.data.local.room.AppDatabase
-import com.beta.auraos.data.local.room.BranchDao
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import androidx.biometric.BiometricManager
-import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG
-import androidx.biometric.BiometricManager.Authenticators.DEVICE_CREDENTIAL
-import androidx.lifecycle.lifecycleScope
 
 class DashboardActivity : BaseActivity() {
 
     private lateinit var binding: ActivityDashboardBinding
     private lateinit var sessionManager: SessionManager
     private lateinit var biometricKeyManager: BiometricKeyManager
-    private lateinit var branchRepository: BranchRepository
-    private var viewModel: DashboardViewModel? = null
+    private lateinit var viewModel: DashboardViewModel
 
     private var branches: List<Branch> = emptyList()
+    private var online = true
+    private var lastFromCache = false
     private var selectedBranch: Branch? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -63,43 +71,15 @@ class DashboardActivity : BaseActivity() {
         binding = ActivityDashboardBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.bottomNavigation.selectedItemId = R.id.nav_dashboard
+        TabNavigator.setup(this, binding.tabBar, R.id.nav_dashboard)
+        PcUi.applyWordmark(binding.tvWordmark)
+        PcUi.underline(binding.btnSeeAll)
+        binding.tvToday.text = ParkingFormat.todayLabel()
 
-        BottomNavIndicator.attach(
-            bottomNav = binding.bottomNavigation,
-            indicator = binding.bottomNavIndicator,
-            initialItemId = R.id.nav_dashboard,
-        )
-
-        binding.bottomNavigation.setOnItemSelectedListener { item ->
-            when (item.itemId) {
-                R.id.nav_dashboard -> {
-                    BottomNavIndicator.animateTo(
-                        bottomNav = binding.bottomNavigation,
-                        indicator = binding.bottomNavIndicator,
-                        itemId = R.id.nav_dashboard,
-                    )
-                    true
-                }
-                R.id.nav_profile -> {
-                    BottomNavIndicator.animateTo(
-                        bottomNav = binding.bottomNavigation,
-                        indicator = binding.bottomNavIndicator,
-                        itemId = R.id.nav_profile,
-                    )
-                    TabNavigator.navigate(this, R.id.nav_profile)
-                    true
-                }
-                else -> {
-                    BottomNavIndicator.animateTo(
-                        bottomNav = binding.bottomNavigation,
-                        indicator = binding.bottomNavIndicator,
-                        itemId = item.itemId,
-                    )
-                    TabNavigator.navigate(this, item.itemId)
-                    true
-                }
-            }
+        ViewCompat.setOnApplyWindowInsetsListener(binding.homeScrollView) { view, insets ->
+            val statusBar = insets.getInsets(WindowInsetsCompat.Type.statusBars())
+            view.updatePadding(top = statusBar.top)
+            insets
         }
 
         val email = intent.getStringExtra(EXTRA_EMAIL)
@@ -115,227 +95,205 @@ class DashboardActivity : BaseActivity() {
             }
         }
 
-        val db = AppDatabase.getInstance(this)
-        val branchApi = ApiClient.createApi<BranchApi>()
-        branchRepository = BranchRepository(branchApi, db)
-
-        setupBranchSelector()
-        loadBranches()
-
-        ViewCompat.setOnApplyWindowInsetsListener(binding.headerBar) { view, insets ->
-            val statusBarInsets = insets.getInsets(WindowInsetsCompat.Type.statusBars())
-            view.updatePadding(top = statusBarInsets.top)
-            insets
+        binding.btnRegisterEntry.setOnClickListener {
+            TabNavigator.navigate(this, R.id.nav_register, R.id.nav_dashboard)
         }
-
-        ViewCompat.setOnApplyWindowInsetsListener(binding.bottomNavigation) { view, insets ->
-            val navBarInsets = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
-            view.updatePadding(bottom = navBarInsets.bottom)
-            insets
-        }
-
-        ViewCompat.setOnApplyWindowInsetsListener(binding.homeScrollView) { view, insets ->
-            val bottomNavH = resources.getDimensionPixelSize(R.dimen.bottom_nav_height)
-            val navBarInsets = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
-            view.updatePadding(bottom = bottomNavH + navBarInsets.bottom)
-            insets
-        }
-
-        val cornerRadiusPx = resources.getDimension(R.dimen.card_corner_radius_large)
-        val successColor = MaterialColors.getColor(binding.cardRevenue, R.attr.semanticSuccessCustom)
-        val primaryColor = MaterialColors.getColor(binding.cardMemberships, android.R.attr.colorPrimary)
-
-        startBorderGlow(binding.glowRevenue, successColor, cornerRadiusPx)
-        startBorderGlow(binding.glowMemberships, primaryColor, cornerRadiusPx)
-
-        binding.cardBranches.setOnClickListener {
-            startActivity(android.content.Intent(this, BranchListActivity::class.java))
-        }
-
-        binding.cardMemberships.setOnClickListener {
-            startActivity(android.content.Intent(this, com.beta.auraos.ui.memberships.MembershipListActivity::class.java))
-        }
-
-        binding.cardExit.setOnClickListener {
-            startActivity(android.content.Intent(this, com.beta.auraos.ui.exit.ExitActivity::class.java))
-        }
-
+        binding.btnRegisterExit.setOnClickListener { openExit(null) }
+        binding.btnSeeAll.setOnClickListener { openExit(null) }
         binding.cardKiosk.setOnClickListener {
-            startActivity(android.content.Intent(this, KioskActivity::class.java))
+            startActivity(Intent(this, KioskActivity::class.java))
         }
-
-        binding.cardAudit.setOnClickListener {
-            startActivity(android.content.Intent(this, com.beta.auraos.ui.audit.AuditActivity::class.java))
+        binding.rowMembershipAlert.setOnClickListener {
+            startActivity(Intent(this, MembershipListActivity::class.java))
         }
 
         setupViewModel()
-        observeDashboard()
-
+        observeViewModel()
+        // Figures are always computed locally (local-first); "offline" depends on the network only.
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                connectivityObserver.isOnline.collect {
+                    online = it
+                    updateCachedBadge()
+                }
+            }
+        }
+        viewModel.loadBranches()
     }
 
     override fun onResume() {
         super.onResume()
-        loadDashboard()
-    }
-
-    private fun setupBranchSelector() {
-        binding.btnBranchSelector.setOnClickListener { showBranchSelector() }
-        binding.tvBranchName.setOnClickListener { showBranchSelector() }
-    }
-
-    private fun loadBranches() {
-        lifecycleScope.launch(Dispatchers.IO) {
-            val result = branchRepository.getBranches()
-            withContext(Dispatchers.Main) {
-                when (result) {
-                    is Result.Success -> {
-                        branches = result.data
-                        restoreOrSelectBranch()
-                    }
-                    is Result.Error -> {
-                        binding.tvBranchName.text = getString(R.string.branch_load_error)
-                    }
-                }
-            }
-        }
-    }
-
-    private fun restoreOrSelectBranch() {
-        val savedId = sessionManager.getSelectedBranchId()
-        val saved = if (savedId != null) branches.find { it.id == savedId } else null
-
-        if (saved != null) {
-            selectedBranch = saved
-            binding.tvBranchName.text = saved.name
-        } else if (branches.isNotEmpty()) {
-            selectedBranch = branches.first()
-            sessionManager.saveSelectedBranchId(selectedBranch!!.id)
-            binding.tvBranchName.text = selectedBranch!!.name
-        } else {
-            binding.tvBranchName.text = getString(R.string.branch_no_branch)
-        }
-        loadDashboard()
-    }
-
-    private fun showBranchSelector() {
-        if (branches.isEmpty()) {
-            AlertDialog.Builder(this)
-                .setTitle(getString(R.string.dialog_no_branches_title))
-                .setMessage(getString(R.string.dialog_no_branches_message))
-                .setPositiveButton(getString(R.string.dialog_setup)) { _, _ ->
-                    startActivity(android.content.Intent(this, BranchListActivity::class.java))
-                }
-                .setNegativeButton(getString(R.string.dialog_cancel), null)
-                .show()
-            return
-        }
-
-        val names = branches.map { it.name }.toTypedArray()
-        val selectedIndex = if (selectedBranch != null) branches.indexOf(selectedBranch) else 0
-
-        AlertDialog.Builder(this)
-            .setTitle(getString(R.string.dialog_select_branch_title))
-            .setSingleChoiceItems(names, if (selectedIndex >= 0) selectedIndex else 0) { dialog, which ->
-                val branch = branches[which]
-                selectedBranch = branch
-                sessionManager.saveSelectedBranchId(branch.id)
-                binding.tvBranchName.text = branch.name
-                dialog.dismiss()
-                loadDashboard()
-            }
-            .setPositiveButton(getString(R.string.dialog_manage_branches)) { _, _ ->
-                startActivity(android.content.Intent(this, BranchListActivity::class.java))
-            }
-            .setNegativeButton(getString(R.string.dialog_cancel), null)
-            .show()
+        if (branches.isNotEmpty()) loadDashboard()
     }
 
     private fun setupViewModel() {
         val db = AppDatabase.getInstance(this)
-        val localDataSource = DashboardLocalDataSource(db)
-        val calculator = DashboardCalculator(db)
-        val repository = DashboardRepository(sessionManager.getToken(), localDataSource, calculator)
-        val membershipRepo = MembershipRepository(db)
-        val vehicleEntryRepo = VehicleEntryRepository(db)
-        val factory = DashboardViewModelFactory(repository, membershipRepo, vehicleEntryRepo)
+        val repository = DashboardRepository(
+            sessionManager.getToken(),
+            DashboardLocalDataSource(db),
+            DashboardCalculator(db),
+        )
+        val factory = DashboardViewModelFactory(
+            repository,
+            MembershipRepository(db),
+            VehicleEntryRepository(db),
+            BranchRepository(ApiClient.createApi<BranchApi>(), db),
+            db,
+        )
         viewModel = ViewModelProvider(this, factory)[DashboardViewModel::class.java]
     }
 
-    private fun observeDashboard() {
-        val vm = viewModel ?: return
-        vm.uiState.observe(this) { state ->
+    private fun observeViewModel() {
+        viewModel.branches.observe(this) { list ->
+            if (list == null) return@observe
+            branches = list
+            val savedId = sessionManager.getSelectedBranchId()
+            selectedBranch = list.find { it.id == savedId } ?: list.firstOrNull()
+            selectedBranch?.let { sessionManager.saveSelectedBranchId(it.id) }
+            renderBranchChips()
+            renderBranchName()
+            loadDashboard()
+        }
+        viewModel.uiState.observe(this) { state ->
             when (state) {
                 is DashboardUiState.Success -> bindData(state.data, state.isFromCache)
                 is DashboardUiState.Error -> showError(state.message)
-                is DashboardUiState.Loading -> { }
+                is DashboardUiState.Loading -> Unit
+            }
+        }
+        viewModel.home.observe(this) { bindHome(it) }
+    }
+
+    private fun loadDashboard() {
+        selectedBranch?.let { viewModel.loadDashboard(it.id) }
+    }
+
+    private fun selectBranch(branch: Branch) {
+        if (branch.id == selectedBranch?.id) return
+        selectedBranch = branch
+        sessionManager.saveSelectedBranchId(branch.id)
+        renderBranchChips()
+        renderBranchName()
+        loadDashboard()
+    }
+
+    private fun renderBranchChips() {
+        val row = binding.llBranchChips
+        row.removeAllViews()
+        if (branches.isEmpty()) {
+            PcUi.addChip(row, getString(R.string.pc_no_branches_chip), checked = false) {
+                startActivity(Intent(this, BranchListActivity::class.java))
+            }
+            return
+        }
+        branches.forEach { branch ->
+            PcUi.addChip(row, branch.name, checked = branch.id == selectedBranch?.id) {
+                selectBranch(branch)
             }
         }
     }
 
-    private fun loadDashboard() {
-        val vm = viewModel
-        if (vm == null) {
-            showError("Sesión no iniciada. Inicia sesión para ver el dashboard.")
-            return
-        }
-        val branchId = sessionManager.getSelectedBranchId()
-        if (branchId != null) {
-            vm.loadDashboard(branchId)
+    private fun renderBranchName() {
+        val name = selectedBranch?.name ?: getString(R.string.branch_no_branch)
+        binding.tvOccupancyLabel.text = getString(R.string.pc_occupancy_label, name)
+        binding.tvKioskSub.text = getString(R.string.pc_kiosk_sub, name)
+        // Capacity from the cached branch, so the hero reads "00 / 90" before the server answers.
+        selectedBranch?.let { b ->
+            val capacity = b.lightVehicleCapacity + b.heavyVehicleCapacity + b.motorcycleCapacity
+            binding.tvCapacity.text = getString(R.string.pc_capacity, capacity)
         }
     }
 
-    private fun bindData(data: DashboardResponse, isFromCache: Boolean = false) {
-        val percent = data.occupancyPercent.toInt()
-        binding.tvOccupancyTitle.text = getString(R.string.dashboard_occupancy_title, percent)
-        binding.tvBaysCounter.text = if (data.totalBays > 0) {
-            getString(R.string.dashboard_bays_counter, data.occupiedBays, data.totalBays)
-        } else {
-            getString(R.string.dashboard_bays_counter, data.occupiedBays, 0)
-        }
-        binding.pbOccupancy.progress = percent
+    private fun bindData(data: DashboardResponse, isFromCache: Boolean) {
+        val percent = data.occupancyPercent.toInt().coerceIn(0, 100)
+        binding.tvOccupied.text = ParkingFormat.pad2(data.occupiedBays)
+        binding.tvCapacity.text = getString(R.string.pc_capacity, data.totalBays)
+        binding.pbOccupancy.setProgressCompat(percent, true)
+        binding.tvOccupancyPct.text = getString(R.string.pc_occupancy_pct, percent)
+        val free = (data.totalBays - data.occupiedBays).coerceAtLeast(0)
+        binding.tvFree.text = resources.getQuantityString(R.plurals.pc_free, free, free)
+        binding.tvRevenueToday.text = ParkingFormat.money(data.dailyRevenue, selectedBranch?.currency)
+        lastFromCache = isFromCache
+        updateCachedBadge()
 
-        val trend = data.trendPercent
-        if (trend >= 0) {
-            binding.tvTrend.text = getString(R.string.dashboard_trend_up, trend.toInt())
-            binding.tvTrend.setTextColor(
-                MaterialColors.getColor(binding.tvTrend, R.attr.semanticSuccessCustom)
+        val expiring = data.expiringMemberships
+        binding.rowMembershipAlert.visibility = if (expiring.isEmpty()) View.GONE else View.VISIBLE
+        expiring.firstOrNull()?.let { m ->
+            binding.tvMembershipAlertLabel.text =
+                resources.getQuantityString(R.plurals.pc_memberships_expiring, expiring.size, ParkingFormat.pad2(expiring.size))
+            binding.tvMembershipAlert.text =
+                getString(R.string.pc_membership_alert, m.memberName, m.tier, m.timeLeft)
+        }
+    }
+
+    private fun updateCachedBadge() {
+        binding.cachedBadge.visibility = if (lastFromCache && !online) View.VISIBLE else View.GONE
+    }
+
+    private fun bindHome(home: HomeSnapshot) {
+        binding.tvEntriesToday.text = ParkingFormat.pad2(home.entriesToday)
+        binding.tvExitsToday.text = ParkingFormat.pad2(home.exitsToday)
+
+        // All branches
+        binding.tvTotalVehicles.text =
+            home.branches.sumOf { it.occupied }.let { resources.getQuantityString(R.plurals.pc_vehicles_count, it, it) }
+        val rows = binding.llBranchRows
+        rows.removeAllViews()
+        home.branches.forEachIndexed { index, row ->
+            if (index > 0) {
+                layoutInflater.inflate(R.layout.view_pc_hairline, rows, true)
+            }
+            val item = ItemPcBranchRowBinding.inflate(layoutInflater, rows, true)
+            val isSelected = row.branch.id == selectedBranch?.id
+            item.vMark.setBackgroundResource(
+                if (isSelected) R.drawable.bg_pc_circle_accent else R.drawable.bg_pc_circle_outline
             )
-        } else {
-            binding.tvTrend.text = getString(R.string.dashboard_trend_down, (-trend).toInt())
-            binding.tvTrend.setTextColor(
-                MaterialColors.getColor(binding.tvTrend, com.google.android.material.R.attr.colorError)
+            item.tvName.text = row.branch.name
+            item.tvCount.text = getString(
+                R.string.pc_count_of_cap, ParkingFormat.pad2(row.occupied), row.capacity
             )
+            item.pbBranch.progress =
+                if (row.capacity > 0) row.occupied * 100 / row.capacity else 0
+            item.root.setOnClickListener { selectBranch(row.branch) }
         }
+        rows.visibility = if (home.branches.isEmpty()) View.GONE else View.VISIBLE
 
-        binding.tvRevenueAmount.text = getString(R.string.dashboard_revenue_amount, data.dailyRevenue)
-        binding.tvMembershipsCount.text = getString(
-            R.string.dashboard_memberships_count,
-            data.activeMemberships,
-            data.totalMemberships
-        )
+        // On site
+        binding.btnSeeAll.text = resources.getQuantityString(R.plurals.pc_see_all, home.onSite.size, home.onSite.size)
+        binding.btnSeeAll.visibility = if (home.onSite.isEmpty()) View.GONE else View.VISIBLE
+        binding.tvOnSiteEmpty.visibility = if (home.onSite.isEmpty()) View.VISIBLE else View.GONE
+        val list = binding.llOnSite
+        list.removeAllViews()
+        home.onSite.take(ON_SITE_PREVIEW).forEach { entry ->
+            val item = ItemPcVehicleRowBinding.inflate(layoutInflater, list, true)
+            bindVehicleRow(item, entry, home.memberNames)
+            item.root.setOnClickListener { openExit(entry.id) }
+        }
+    }
 
-        binding.badgeCritical.text = getString(R.string.dashboard_badge_critical, data.criticalAlertsCount)
-        binding.badgeCritical.visibility = if (data.criticalAlertsCount > 0) View.VISIBLE else View.GONE
-
-        binding.cachedBadge?.visibility = if (isFromCache) View.VISIBLE else View.GONE
-
-        if (data.expiringMemberships.isNotEmpty()) {
-            val m = data.expiringMemberships[0]
-            binding.alertTitle1.text = getString(R.string.dashboard_alert_membership_title, m.memberName)
-            binding.alertSubtitle1.text = getString(R.string.dashboard_alert_membership_subtitle, m.tier, m.timeLeft)
+    private fun bindVehicleRow(
+        item: ItemPcVehicleRowBinding,
+        entry: VehicleEntry,
+        memberNames: Map<String, String>,
+    ) {
+        val member = entry.membershipId?.let { memberNames[it] }
+        item.tvPlate.text = if (entry.plate == "NFC" && member != null) member else entry.plate
+        val kind = if (entry.membershipId != null) {
+            getString(R.string.pc_member)
         } else {
-            binding.alertTitle1.text = getString(R.string.dashboard_alert_none)
-            binding.alertSubtitle1.text = ""
+            ParkingFormat.vehicleType(this, entry.vehicleType)
         }
+        item.tvMeta.text = getString(R.string.pc_meta, kind, ParkingFormat.duration(entry.createdAt))
+        val fee = if (entry.membershipId != null) 0.0
+        else entry.fee ?: FeeCalculator.exitFee(entry, selectedBranch)
+        item.tvAmount.text = ParkingFormat.money(fee, selectedBranch?.currency)
+        item.tvSince.text = getString(R.string.pc_since, ParkingFormat.hhmm(entry.createdAt))
+    }
 
-        if (data.vipArrivals.isNotEmpty()) {
-            val v = data.vipArrivals[0]
-            binding.alertTitle2.text = getString(R.string.dashboard_alert_vip_title, v.guestName)
-            binding.alertSubtitle2.text = getString(R.string.dashboard_alert_vip_subtitle, v.slot)
-        } else {
-            binding.alertTitle2.text = getString(R.string.dashboard_alert_vip_none)
-            binding.alertSubtitle2.text = ""
-        }
+    private fun openExit(entryId: String?) {
+        val intent = Intent(this, ExitActivity::class.java)
+        if (entryId != null) intent.putExtra(ExitActivity.EXTRA_ENTRY_ID, entryId)
+        TabNavigator.open(this, intent, R.id.nav_register, R.id.nav_dashboard)
     }
 
     private fun showError(message: String) {
@@ -345,19 +303,6 @@ class DashboardActivity : BaseActivity() {
             return
         }
         Toast.makeText(this, getString(R.string.dashboard_load_error, message), Toast.LENGTH_SHORT).show()
-    }
-
-    private fun startBorderGlow(overlay: View, color: Int, cornerRadiusPx: Float) {
-        val drawable = BorderGlowDrawable(color, cornerRadiusPx)
-        overlay.background = drawable
-
-        val updater = object : Runnable {
-            override fun run() {
-                drawable.setPhase(System.nanoTime() / 3e9f)
-                overlay.postOnAnimation(this)
-            }
-        }
-        overlay.postOnAnimation(updater)
     }
 
     private fun hasBiometricHardware(): Boolean {
@@ -412,6 +357,7 @@ class DashboardActivity : BaseActivity() {
     }
 
     companion object {
+        private const val ON_SITE_PREVIEW = 5
         const val EXTRA_EMAIL = "extra_email"
         const val EXTRA_DISPLAY_NAME = "extra_display_name"
         const val EXTRA_PASSWORD = "extra_password"

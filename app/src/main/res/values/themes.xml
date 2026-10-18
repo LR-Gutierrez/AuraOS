@@ -12,21 +12,21 @@
     -->
     <style name="Theme.AuraOS" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
         <!-- Material color roles -->
-        <item name="colorPrimary">@color/crystal_primary</item>
-        <item name="colorOnPrimary">@color/crystal_on_primary</item>
-        <item name="colorPrimaryContainer">@color/crystal_primary_container</item>
-        <item name="colorOnPrimaryContainer">@color/crystal_on_primary_container</item>
-        <item name="colorSecondary">@color/crystal_secondary</item>
-        <item name="colorOnSecondary">@color/crystal_on_secondary</item>
-        <item name="colorSecondaryContainer">@color/crystal_secondary_container</item>
-        <item name="colorOnSecondaryContainer">@color/crystal_on_secondary_container</item>
-        <item name="colorSurface">@color/crystal_surface</item>
-        <item name="colorOnSurface">@color/crystal_on_surface</item>
-        <item name="colorOnSurfaceVariant">@color/crystal_on_surface_variant</item>
-        <item name="colorOutline">@color/crystal_outline</item>
-        <item name="colorOutlineVariant">@color/crystal_outline_variant</item>
-        <item name="colorBackground">@color/crystal_background</item>
-        <item name="colorOnBackground">@color/crystal_on_background</item>
+        <item name="colorPrimary">@color/lrg_accent</item>
+        <item name="colorOnPrimary">@color/lrg_light_on_accent</item>
+        <item name="colorPrimaryContainer">@color/lrg_light_surface</item>
+        <item name="colorOnPrimaryContainer">@color/lrg_light_text_primary</item>
+        <item name="colorSecondary">@color/lrg_light_text_secondary</item>
+        <item name="colorOnSecondary">@color/lrg_light_bg</item>
+        <item name="colorSecondaryContainer">@color/lrg_light_surface</item>
+        <item name="colorOnSecondaryContainer">@color/lrg_light_text_primary</item>
+        <item name="colorSurface">@color/lrg_light_surface</item>
+        <item name="colorOnSurface">@color/lrg_light_text_primary</item>
+        <item name="colorOnSurfaceVariant">@color/lrg_light_text_secondary</item>
+        <item name="colorOutline">@color/lrg_light_border_control</item>
+        <item name="colorOutlineVariant">@color/lrg_light_border</item>
+        <item name="colorBackground">@color/lrg_light_bg</item>
+        <item name="colorOnBackground">@color/lrg_light_text_primary</item>
         <item name="colorError">@color/crystal_error</item>
         <item name="colorOnError">@color/crystal_on_error</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
@@ -34,42 +34,63 @@
 
         <!-- Custom attrs -->
         <item name="appLogoCustom">@drawable/ic_logo_crystal_light</item>
-        <item name="loginBackgroundCustom">@drawable/login_background_light</item>
-        <item name="glassCardBackgroundCustom">@drawable/bg_glass_card</item>
+        <item name="loginBackgroundCustom">@color/lrg_light_bg</item>
+        <item name="glassCardBackgroundCustom">@drawable/bg_lrg_card</item>
         <item name="status_info">@color/status_info</item>
-        <item name="textPrimaryCustom">@color/crystal_on_surface</item>
-        <item name="textSecondaryCustom">@color/crystal_on_surface_variant</item>
-        <item name="dividerColorCustom">@color/crystal_border</item>
+        <item name="textPrimaryCustom">@color/lrg_light_text_primary</item>
+        <item name="textSecondaryCustom">@color/lrg_light_text_secondary</item>
+        <item name="dividerColorCustom">@color/lrg_light_border</item>
 
         <!-- Home attrs -->
-        <item name="homeSurfaceBackground">@color/crystal_surface_bright</item>
-        <item name="navbarBackground">@drawable/bg_top_app_bar_blur</item>
-        <item name="navbarBorderColor">@color/crystal_border</item>
-        <item name="bottomNavbarBackground">@drawable/bg_bottom_nav_blur</item>
-        <item name="bottomNavbarBorderColor">@color/crystal_border</item>
+        <item name="homeSurfaceBackground">@color/lrg_light_bg</item>
+        <item name="navbarBackground">@drawable/bg_lrg_top_bar</item>
+        <item name="navbarBorderColor">@color/lrg_light_border</item>
+        <item name="bottomNavbarBackground">@drawable/bg_lrg_bottom_bar</item>
+        <item name="bottomNavbarBorderColor">@color/lrg_light_border</item>
 
         <!-- Input & Button drawables -->
-        <item name="hollowInputBackground">@drawable/bg_hollow_input</item>
-        <item name="primaryButtonBackground">@drawable/bg_primary_button</item>
+        <item name="hollowInputBackground">@drawable/bg_lrg_input</item>
+        <item name="primaryButtonBackground">@drawable/bg_lrg_primary_button</item>
 
         <!-- Dashboard semantic colors -->
-        <item name="cardGlassFillColorCustom">@color/glass_fill_light</item>
-        <item name="semanticSuccessCustom">#2E7D32</item>
+        <item name="cardGlassFillColorCustom">@color/lrg_light_surface</item>
+        <item name="semanticSuccessCustom">@color/lrg_light_accent_text</item>
 
         <!-- Home card outlines -->
-        <item name="homeOutlineCustom">@color/crystal_surface_variant</item>
-        <item name="bottomNavItemColorCustom">@color/crystal_secondary</item>
-        <item name="photoPlaceholderTintCustom">@color/crystal_outline</item>
-        <item name="videoFeedBackgroundCustom">@color/crystal_surface_container_high</item>
+        <item name="homeOutlineCustom">@color/lrg_light_border</item>
+        <item name="bottomNavItemColorCustom">@color/lrg_light_text_secondary</item>
+        <item name="photoPlaceholderTintCustom">@color/lrg_light_text_muted</item>
+        <item name="videoFeedBackgroundCustom">@color/lrg_light_surface</item>
         <item name="liveBadgeBackgroundCustom">#40000000</item>
         <item name="liveBadgeTextCustom">@color/crystal_error</item>
 
         <item name="photoOverlayCustom">@drawable/bg_glass_photo_overlay</item>
 
         <!-- Branch surfaces (Crystal Edition) -->
-        <item name="branchSurfaceCustom">@color/branch_surface_light</item>
-        <item name="branchProgressTrackCustom">@color/branch_progress_track_light</item>
-        <item name="branchSurfaceTextCustom">@color/crystal_on_surface</item>
+        <item name="branchSurfaceCustom">@color/lrg_light_surface</item>
+        <item name="branchProgressTrackCustom">@color/lrg_light_border</item>
+        <item name="branchSurfaceTextCustom">@color/lrg_light_text_primary</item>
+    
+        <!-- LRGutierrez design system (BCV Tracker family) -->
+        <item name="textMutedCustom">@color/lrg_light_text_muted</item>
+        <item name="accentTextCustom">@color/lrg_light_accent_text</item>
+        <item name="accentCustom">@color/lrg_accent</item>
+        <item name="onAccentCustom">@color/lrg_light_on_accent</item>
+        <item name="borderControlCustom">@color/lrg_light_border_control</item>
+        <item name="android:windowBackground">@color/lrg_light_bg</item>
+        <item name="android:fontFamily">@font/aura_sans</item>
+        <item name="fontFamily">@font/aura_sans</item>
+        <item name="android:textColorPrimary">@color/lrg_light_text_primary</item>
+        <item name="android:textColorSecondary">@color/lrg_light_text_secondary</item>
+        <item name="colorControlNormal">@color/lrg_light_text_secondary</item>
+        <item name="colorControlActivated">@color/lrg_accent</item>
+        <item name="android:colorEdgeEffect">@color/lrg_light_border</item>
+        <item name="shapeAppearanceSmallComponent">@style/ShapeAppearance.Lrg.Control</item>
+        <item name="shapeAppearanceMediumComponent">@style/ShapeAppearance.Lrg.Card</item>
+        <item name="textAppearanceButton">@style/TextAppearance.Lrg.Button</item>
+        <item name="materialButtonStyle">@style/Widget.Lrg.Button</item>
+        <item name="alertDialogTheme">@style/ThemeOverlay.Pc.Dialog</item>
+        <item name="materialAlertDialogTheme">@style/ThemeOverlay.Pc.Dialog</item>
     </style>
 
     <style name="Theme.AuraOS.NoActionBar" parent="Theme.AuraOS">

@@ -1,6 +1,7 @@
 package com.beta.auraos
 
 import android.app.Application
+import androidx.appcompat.app.AppCompatDelegate
 import com.beta.auraos.data.local.ChangeJournal
 import com.beta.auraos.data.local.ConnectivityObserver
 import com.beta.auraos.data.local.SeedDataInitializer
@@ -35,6 +36,14 @@ class AuraApplication : Application() {
 
         connectivityObserver = ConnectivityObserver(this)
         sessionManager = SessionManager(this)
+        // Apply the saved theme before any activity inflates; without a choice, follow the system.
+        AppCompatDelegate.setDefaultNightMode(
+            when (sessionManager.darkModePreference()) {
+                true -> AppCompatDelegate.MODE_NIGHT_YES
+                false -> AppCompatDelegate.MODE_NIGHT_NO
+                null -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+            }
+        )
         changeJournal = ChangeJournal(AppDatabase.getInstance(this), this)
         syncNotificationManager = SyncNotificationManager(this)
 
@@ -49,7 +58,9 @@ class AuraApplication : Application() {
             scope = appScope
         )
 
-        appScope.launch(Dispatchers.IO) {
+        // Demo user, branch and entries are for development only: a release install starts empty
+        // and signs in against the backend.
+        if (BuildConfig.SEED_DEMO_DATA) appScope.launch(Dispatchers.IO) {
             SeedDataInitializer(this@AuraApplication, sessionManager, AppDatabase.getInstance(this@AuraApplication)).seedIfNeeded()
         }
     }

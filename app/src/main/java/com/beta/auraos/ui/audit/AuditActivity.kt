@@ -1,36 +1,48 @@
 package com.beta.auraos.ui.audit
 
 import android.content.Intent
-
 import android.os.Bundle
 import android.view.View
 import android.widget.TextView
 import android.widget.Toast
-
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
-import com.beta.auraos.BaseActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
 import androidx.lifecycle.ViewModelProvider
+import com.beta.auraos.BaseActivity
 import com.beta.auraos.R
+import com.beta.auraos.data.BranchRepository
 import com.beta.auraos.data.MembershipRepository
 import com.beta.auraos.data.audit.AuditEngine
+import com.beta.auraos.data.audit.AuditPeriodSummary
+import com.beta.auraos.data.audit.AuditRecord
 import com.beta.auraos.data.audit.ClosureBatch
 import com.beta.auraos.data.local.SessionManager
+import com.beta.auraos.data.local.room.AppDatabase
+import com.beta.auraos.data.model.Branch
+import com.beta.auraos.data.remote.ApiClient
+import com.beta.auraos.data.remote.BranchApi
 import com.beta.auraos.databinding.ActivityAuditBinding
-import com.google.android.material.color.MaterialColors
+import com.beta.auraos.databinding.ItemPcAmountRowBinding
+import com.beta.auraos.databinding.ItemPcMovementBinding
+import com.beta.auraos.util.ParkingFormat
+import com.beta.auraos.util.PcUi
+import com.beta.auraos.util.TabNavigator
 import com.google.android.material.snackbar.Snackbar
-import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+/** Caja y auditoría: period revenue, closure and history for the selected branch. */
 class AuditActivity : BaseActivity() {
 
     private lateinit var binding: ActivityAuditBinding
     private lateinit var sessionManager: SessionManager
     private lateinit var viewModel: AuditViewModel
+
+    private var branches: List<Branch> = emptyList()
+    private var pendingCount = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,127 +50,165 @@ class AuditActivity : BaseActivity() {
 
         sessionManager = SessionManager(this)
 
-        val db = com.beta.auraos.data.local.room.AppDatabase.getInstance(this)
-        val auditEngine = AuditEngine(applicationContext)
-        val membershipRepo = MembershipRepository(db)
-        val userId = sessionManager.getUserId() ?: ""
-        val factory = AuditViewModelFactory(auditEngine, membershipRepo, userId)
+        val db = AppDatabase.getInstance(this)
+        val factory = AuditViewModelFactory(
+            AuditEngine(applicationContext),
+            MembershipRepository(db),
+            BranchRepository(ApiClient.createApi<BranchApi>(), db),
+            sessionManager.getUserId() ?: "",
+        )
         viewModel = ViewModelProvider(this, factory)[AuditViewModel::class.java]
 
         binding = ActivityAuditBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        setupWindowInsets()
-        setupClickHandlers()
-        observeViewModel()
-
-        val branchId = sessionManager.getSelectedBranchId()
-        if (branchId != null) {
-            binding.tvBranchName.text = sessionManager.getLastDisplayName() ?: getString(R.string.audit_branch_default)
-            viewModel.loadSummary(branchId)
-        } else {
-            binding.tvPeriodRange.text = getString(R.string.audit_error_no_branch)
-            binding.btnExecuteClosure.alpha = 0.4f
-        }
-    }
-
-    private fun setupWindowInsets() {
-        ViewCompat.setOnApplyWindowInsetsListener(binding.headerBar) { view, insets ->
-            val statusBarInsets = insets.getInsets(WindowInsetsCompat.Type.statusBars())
-            view.updatePadding(top = statusBarInsets.top)
-            insets
-        }
+        TabNavigator.setup(this, binding.tabBar, R.id.nav_cash)
         ViewCompat.setOnApplyWindowInsetsListener(binding.scrollView) { view, insets ->
-            val navBarInsets = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
-            view.updatePadding(bottom = navBarInsets.bottom)
+            val statusBar = insets.getInsets(WindowInsetsCompat.Type.statusBars())
+            view.updatePadding(top = statusBar.top)
             insets
         }
-    }
 
-    private fun setupClickHandlers() {
         binding.btnExecuteClosure.setOnClickListener {
-            val pending = binding.tvPendingCount.text.toString().toIntOrNull() ?: 0
-            if (pending == 0) {
+            if (pendingCount == 0) {
                 Snackbar.make(binding.root, R.string.audit_no_pending_message, Snackbar.LENGTH_SHORT).show()
             } else {
                 showClosureConfirmDialog()
             }
         }
+
+        observeViewModel()
+        viewModel.loadBranches()
+        loadSummary()
+    }
+
+    private fun loadSummary() {
+        val branchId = sessionManager.getSelectedBranchId()
+        if (branchId != null) {
+            viewModel.loadSummary(branchId)
+        } else {
+            binding.tvPeriodRange.text = getString(R.string.audit_error_no_branch)
+            setClosureEnabled(false)
+        }
     }
 
     private fun observeViewModel() {
+        viewModel.branches.observe(this) { list ->
+            branches = list
+            renderBranchChips()
+        }
         viewModel.uiState.observe(this) { state ->
+            binding.loadingOverlay.visibility = if (state is AuditUiState.Loading) View.VISIBLE else View.GONE
             when (state) {
-                is AuditUiState.Loading -> {
-                    binding.loadingOverlay.visibility = View.VISIBLE
-                }
-                is AuditUiState.Summary -> {
-                    binding.loadingOverlay.visibility = View.GONE
-                    bindSummary(state.periodSummary, state.closureHistory)
-                }
-                is AuditUiState.ClosureResult -> {
-                    binding.loadingOverlay.visibility = View.GONE
-                    showClosureResultDialog(state.report)
-                }
-                is AuditUiState.Error -> {
-                    binding.loadingOverlay.visibility = View.GONE
-                    Toast.makeText(this, state.message, Toast.LENGTH_LONG).show()
+                is AuditUiState.Summary ->
+                    bindSummary(state.periodSummary, state.closureHistory, state.pendingRecords)
+                is AuditUiState.ClosureResult -> showClosureResultDialog(state.report)
+                is AuditUiState.Error -> Toast.makeText(this, state.message, Toast.LENGTH_LONG).show()
+                is AuditUiState.Loading -> Unit
+            }
+        }
+    }
+
+    private fun currentBranch(): Branch? =
+        branches.find { it.id == sessionManager.getSelectedBranchId() }
+
+    private fun renderBranchChips() {
+        val row = binding.llBranchChips
+        row.removeAllViews()
+        val selectedId = sessionManager.getSelectedBranchId()
+        branches.forEach { branch ->
+            PcUi.addChip(row, branch.name, checked = branch.id == selectedId) {
+                if (branch.id != sessionManager.getSelectedBranchId()) {
+                    sessionManager.saveSelectedBranchId(branch.id)
+                    renderBranchChips()
+                    loadSummary()
                 }
             }
         }
     }
 
+    private fun setClosureEnabled(enabled: Boolean) {
+        binding.btnExecuteClosure.alpha = if (enabled) 1f else 0.4f
+    }
+
     private fun bindSummary(
-        summary: com.beta.auraos.data.audit.AuditPeriodSummary,
-        history: List<ClosureBatch>
+        summary: AuditPeriodSummary,
+        history: List<ClosureBatch>,
+        pending: List<AuditRecord>,
     ) {
-        val dateFormat = SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.getDefault())
-
-        val periodText = if (summary.lastClosureDate != null) {
-            getString(R.string.audit_period_since, dateFormat.format(Date(summary.lastClosureDate)))
+        val branchName = currentBranch()?.name ?: getString(R.string.audit_branch_default)
+        val currency = currentBranch()?.currency
+        val operator = sessionManager.getLastDisplayName().orEmpty()
+        binding.tvPeriodRange.text = if (summary.lastClosureDate != null) {
+            getString(R.string.pc_period_since, ParkingFormat.dateTime(Date(summary.lastClosureDate)), operator)
         } else {
-            getString(R.string.audit_period_first)
-        }
-        binding.tvPeriodRange.text = periodText
-        binding.tvPendingCount.text = summary.pendingClosureRecords.toString()
-        binding.tvPeriodRevenue.text = getString(R.string.audit_revenue_format, summary.vehicleRevenue)
+            getString(R.string.pc_period_first, operator)
+        }.trimEnd(' ', '·')
 
+        pendingCount = summary.pendingClosureRecords
+        binding.tvPeriodRevenue.text = ParkingFormat.money(summary.totalRevenue, currency)
+        binding.tvPeriodMeta.text =
+            resources.getQuantityString(R.plurals.pc_charges, summary.exitCount, ParkingFormat.pad2(summary.exitCount), branchName)
+
+        // Breakdown: vehicle revenue by type, memberships kept apart.
+        val breakdown = binding.llBreakdown
+        breakdown.removeAllViews()
+        pending.groupBy { it.vehicleType }.toSortedMap().forEach { (type, records) ->
+            val row = ItemPcAmountRowBinding.inflate(layoutInflater, breakdown, true)
+            row.tvLabel.text = ParkingFormat.vehicleType(this, type)
+            row.tvSub.text = resources.getQuantityString(R.plurals.pc_charges_short, records.size, ParkingFormat.pad2(records.size))
+            row.tvAmount.text = ParkingFormat.money(records.sumOf { it.totalFee }, currency)
+        }
+        if (summary.membershipRevenue > 0) {
+            val row = ItemPcAmountRowBinding.inflate(layoutInflater, breakdown, true)
+            row.tvLabel.setText(R.string.pc_memberships)
+            row.tvSub.text = ""
+            row.tvAmount.text = ParkingFormat.money(summary.membershipRevenue, currency)
+        }
+        breakdown.visibility = if (breakdown.childCount == 0) View.GONE else View.VISIBLE
+
+        binding.tvPendingCount.text = ParkingFormat.pad2(summary.pendingClosureRecords)
+        binding.tvVehicleRevenue.text = ParkingFormat.money(summary.vehicleRevenue, currency)
+        binding.tvToClose.text = ParkingFormat.money(summary.totalRevenue, currency)
+        setClosureEnabled(summary.pendingClosureRecords > 0)
+
+        // Movements
+        val movements = binding.llMovements
+        movements.removeAllViews()
+        pending.take(MOVEMENTS_PREVIEW).forEach { record ->
+            val row = ItemPcMovementBinding.inflate(layoutInflater, movements, true)
+            row.tvTime.text = ParkingFormat.hhmm(record.exitTime)
+            row.tvPlate.text = record.plate
+            val kind = ParkingFormat.vehicleType(this, record.vehicleType)
+            row.tvKind.text = record.durationMinutes?.let {
+                getString(R.string.pc_meta, kind, ParkingFormat.durationMinutes(it))
+            } ?: kind
+            row.tvAmount.text = ParkingFormat.money(record.totalFee, currency)
+        }
+        binding.tvNoMovements.visibility = if (pending.isEmpty()) View.VISIBLE else View.GONE
+
+        // History
         binding.tvEmptyHistory.visibility = if (history.isEmpty()) View.VISIBLE else View.GONE
         binding.closureHistoryContainer.removeAllViews()
-
         for (batch in history.take(10)) {
             val card = layoutInflater.inflate(R.layout.item_audit_closure, binding.closureHistoryContainer, false)
-            val tvDate = card.findViewById<TextView>(R.id.tv_closure_date)
-            val tvRevenue = card.findViewById<TextView>(R.id.tv_closure_revenue)
-            val tvCount = card.findViewById<TextView>(R.id.tv_closure_count)
-            val tvVerified = card.findViewById<TextView>(R.id.tv_closure_verified)
-
-            tvDate.text = dateFormat.format(Date(batch.closedAt))
-            tvRevenue.text = getString(R.string.audit_revenue_format, batch.totalRevenue)
-            tvCount.text = getString(R.string.audit_exit_count, batch.exitCount)
-            tvVerified.text = if (batch.isVerified) {
-                getString(R.string.audit_verified)
-            } else {
-                getString(R.string.audit_pending_verify)
-            }
-            tvVerified.setTextColor(
-                if (batch.isVerified) {
-                    MaterialColors.getColor(binding.root, R.attr.semanticSuccessCustom)
-                } else {
-                    MaterialColors.getColor(binding.root, com.google.android.material.R.attr.colorError)
-                }
+            card.findViewById<TextView>(R.id.tv_closure_date).text =
+                getString(R.string.pc_meta, ParkingFormat.dateLabel(Date(batch.closedAt), ParkingFormat.dayMonthPattern()), branchName)
+            card.findViewById<TextView>(R.id.tv_closure_revenue).text =
+                ParkingFormat.money(batch.totalRevenue, currency)
+            card.findViewById<TextView>(R.id.tv_closure_count).text =
+                resources.getQuantityString(R.plurals.pc_closure_meta, batch.exitCount, ParkingFormat.hhmm(Date(batch.closedAt)), batch.exitCount)
+            card.findViewById<TextView>(R.id.tv_closure_verified).setText(
+                if (batch.isVerified) R.string.audit_verified else R.string.audit_pending_verify
             )
-
             card.setOnClickListener { showClosureDetailDialog(batch) }
             binding.closureHistoryContainer.addView(card)
         }
-
-        binding.btnExecuteClosure.alpha = if (summary.pendingClosureRecords > 0) 1f else 0.4f
     }
 
     private fun showClosureConfirmDialog() {
         val branchId = sessionManager.getSelectedBranchId() ?: return
-        val pending = binding.tvPendingCount.text.toString()
+        val pending = pendingCount.toString()
 
         AlertDialog.Builder(this)
             .setTitle(R.string.audit_closure_confirm_title)
@@ -189,9 +239,8 @@ class AuditActivity : BaseActivity() {
     }
 
     private fun buildClosureResultSummary(report: com.beta.auraos.data.audit.ClosureReport): String {
-        val dateFormat = SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.getDefault())
         return buildString {
-            append(getString(R.string.audit_result_date, dateFormat.format(Date(report.closure.closedAt))))
+            append(getString(R.string.audit_result_date, ParkingFormat.dateTime(Date(report.closure.closedAt))))
             append("\n\n")
             append(getString(R.string.audit_result_entries, report.totalEntries))
             append("\n")
@@ -205,7 +254,7 @@ class AuditActivity : BaseActivity() {
             append("\n\n")
             append(getString(R.string.audit_result_total, report.closure.totalRevenue))
             if (report.discrepancies.isNotEmpty()) {
-                append("\n\n⚠ ")
+                append("\n\n")
                 append(getString(R.string.audit_result_discrepancies, report.discrepancies.size))
             }
             if (report.expiringMembershipsCount > 0) {
@@ -234,9 +283,8 @@ class AuditActivity : BaseActivity() {
     }
 
     private fun buildClosureSummary(batch: ClosureBatch): String {
-        val dateFormat = SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.getDefault())
         return buildString {
-            append(getString(R.string.audit_result_date, dateFormat.format(Date(batch.closedAt))))
+            append(getString(R.string.audit_result_date, ParkingFormat.dateTime(Date(batch.closedAt))))
             append("\n\n")
             append(getString(R.string.audit_result_entries, batch.entryCount))
             append("\n")
@@ -252,5 +300,9 @@ class AuditActivity : BaseActivity() {
             append("\n")
             append(if (batch.isVerified) getString(R.string.audit_verified) else getString(R.string.audit_pending_verify))
         }
+    }
+
+    companion object {
+        private const val MOVEMENTS_PREVIEW = 8
     }
 }

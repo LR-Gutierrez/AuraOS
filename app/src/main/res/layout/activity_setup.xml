@@ -1,0 +1,425 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    No-server setup: the device's first account and branch, created locally when there is no
+    backend. Same language as BCV Tracker: mono labels, bordered fields, one amber 52dp CTA.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/setup_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?attr/homeSurfaceBackground"
+    android:orientation="vertical"
+    tools:context=".ui.setup.SetupActivity">
+
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/scroll"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:clipToPadding="false"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="20dp"
+            android:paddingBottom="24dp">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_back"
+                style="@style/Widget.Pc.TextLink"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/pc_back_arrow" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:accessibilityHeading="true"
+                android:text="@string/setup_title"
+                android:textAppearance="@style/TextAppearance.Pc.H2" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/setup_lede"
+                android:textAppearance="@style/TextAppearance.Lrg.Body" />
+
+            <!-- Account -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="28dp"
+                android:text="@string/setup_section_account"
+                android:textAppearance="@style/TextAppearance.Lrg.Label" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:labelFor="@id/et_name"
+                android:text="@string/setup_name"
+                android:textAppearance="@style/TextAppearance.Pc.Body"
+                android:textColor="?attr/textSecondaryCustom"
+                android:textSize="14sp" />
+
+            <EditText
+                android:id="@+id/et_name"
+                style="@style/Widget.Pc.Input"
+                android:layout_width="match_parent"
+                android:layout_marginTop="8dp"
+                android:importantForAutofill="no"
+                android:inputType="textPersonName|textCapWords" />
+
+            <TextView
+                android:id="@+id/et_name_error"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:textAppearance="@style/TextAppearance.Pc.FieldError"
+                android:visibility="gone" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:labelFor="@id/et_email"
+                android:text="@string/setup_email"
+                android:textAppearance="@style/TextAppearance.Pc.Body"
+                android:textColor="?attr/textSecondaryCustom"
+                android:textSize="14sp" />
+
+            <EditText
+                android:id="@+id/et_email"
+                style="@style/Widget.Pc.Input"
+                android:layout_width="match_parent"
+                android:layout_marginTop="8dp"
+                android:importantForAutofill="no"
+                android:inputType="textEmailAddress" />
+
+            <TextView
+                android:id="@+id/et_email_error"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:textAppearance="@style/TextAppearance.Pc.FieldError"
+                android:visibility="gone" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:labelFor="@id/et_password"
+                android:text="@string/setup_password"
+                android:textAppearance="@style/TextAppearance.Pc.Body"
+                android:textColor="?attr/textSecondaryCustom"
+                android:textSize="14sp" />
+
+            <EditText
+                android:id="@+id/et_password"
+                style="@style/Widget.Pc.Input"
+                android:layout_width="match_parent"
+                android:layout_marginTop="8dp"
+                android:importantForAutofill="no"
+                android:inputType="textPassword" />
+
+            <TextView
+                android:id="@+id/et_password_error"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:textAppearance="@style/TextAppearance.Pc.FieldError"
+                android:visibility="gone" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:labelFor="@id/et_confirm"
+                android:text="@string/setup_confirm"
+                android:textAppearance="@style/TextAppearance.Pc.Body"
+                android:textColor="?attr/textSecondaryCustom"
+                android:textSize="14sp" />
+
+            <EditText
+                android:id="@+id/et_confirm"
+                style="@style/Widget.Pc.Input"
+                android:layout_width="match_parent"
+                android:layout_marginTop="8dp"
+                android:importantForAutofill="no"
+                android:inputType="textPassword" />
+
+            <TextView
+                android:id="@+id/et_confirm_error"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:textAppearance="@style/TextAppearance.Pc.FieldError"
+                android:visibility="gone" />
+
+            <!-- First branch -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="28dp"
+                android:text="@string/setup_section_branch"
+                android:textAppearance="@style/TextAppearance.Lrg.Label" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:labelFor="@id/et_branch"
+                android:text="@string/setup_branch_name"
+                android:textAppearance="@style/TextAppearance.Pc.Body"
+                android:textColor="?attr/textSecondaryCustom"
+                android:textSize="14sp" />
+
+            <EditText
+                android:id="@+id/et_branch"
+                style="@style/Widget.Pc.Input"
+                android:layout_width="match_parent"
+                android:layout_marginTop="8dp"
+                android:importantForAutofill="no"
+                android:inputType="textCapWords" />
+
+            <TextView
+                android:id="@+id/et_branch_error"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:textAppearance="@style/TextAppearance.Pc.FieldError"
+                android:visibility="gone" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="@string/setup_capacity"
+                android:textAppearance="@style/TextAppearance.Pc.Body"
+                android:textColor="?attr/textSecondaryCustom"
+                android:textSize="14sp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:baselineAligned="false"
+                android:orientation="horizontal">
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:labelFor="@id/et_cap_light"
+                        android:text="@string/vehicle_type_auto"
+                        android:textAppearance="@style/TextAppearance.Pc.Mono" />
+
+                    <EditText
+                        android:id="@+id/et_cap_light"
+                        style="@style/Widget.Pc.Input"
+                        android:layout_width="match_parent"
+                        android:layout_marginTop="6dp"
+                        android:fontFamily="@font/aura_mono"
+                        android:hint="0"
+                        android:importantForAutofill="no"
+                        android:inputType="number"
+                        android:paddingStart="12dp"
+                        android:paddingEnd="12dp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1" android:layout_marginStart="8dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:labelFor="@id/et_cap_heavy"
+                        android:text="@string/vehicle_type_camion"
+                        android:textAppearance="@style/TextAppearance.Pc.Mono" />
+
+                    <EditText
+                        android:id="@+id/et_cap_heavy"
+                        style="@style/Widget.Pc.Input"
+                        android:layout_width="match_parent"
+                        android:layout_marginTop="6dp"
+                        android:fontFamily="@font/aura_mono"
+                        android:hint="0"
+                        android:importantForAutofill="no"
+                        android:inputType="number"
+                        android:paddingStart="12dp"
+                        android:paddingEnd="12dp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1" android:layout_marginStart="8dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:labelFor="@id/et_cap_moto"
+                        android:text="@string/vehicle_type_moto"
+                        android:textAppearance="@style/TextAppearance.Pc.Mono" />
+
+                    <EditText
+                        android:id="@+id/et_cap_moto"
+                        style="@style/Widget.Pc.Input"
+                        android:layout_width="match_parent"
+                        android:layout_marginTop="6dp"
+                        android:fontFamily="@font/aura_mono"
+                        android:hint="0"
+                        android:importantForAutofill="no"
+                        android:inputType="number"
+                        android:paddingStart="12dp"
+                        android:paddingEnd="12dp" />
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/capacity_error"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:textAppearance="@style/TextAppearance.Pc.FieldError"
+                android:visibility="gone" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="@string/setup_rates"
+                android:textAppearance="@style/TextAppearance.Pc.Body"
+                android:textColor="?attr/textSecondaryCustom"
+                android:textSize="14sp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:baselineAligned="false"
+                android:orientation="horizontal">
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:labelFor="@id/et_rate_light"
+                        android:text="@string/vehicle_type_auto"
+                        android:textAppearance="@style/TextAppearance.Pc.Mono" />
+
+                    <EditText
+                        android:id="@+id/et_rate_light"
+                        style="@style/Widget.Pc.Input"
+                        android:layout_width="match_parent"
+                        android:layout_marginTop="6dp"
+                        android:fontFamily="@font/aura_mono"
+                        android:hint="0"
+                        android:importantForAutofill="no"
+                        android:inputType="numberDecimal"
+                        android:paddingStart="12dp"
+                        android:paddingEnd="12dp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1" android:layout_marginStart="8dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:labelFor="@id/et_rate_heavy"
+                        android:text="@string/vehicle_type_camion"
+                        android:textAppearance="@style/TextAppearance.Pc.Mono" />
+
+                    <EditText
+                        android:id="@+id/et_rate_heavy"
+                        style="@style/Widget.Pc.Input"
+                        android:layout_width="match_parent"
+                        android:layout_marginTop="6dp"
+                        android:fontFamily="@font/aura_mono"
+                        android:hint="0"
+                        android:importantForAutofill="no"
+                        android:inputType="numberDecimal"
+                        android:paddingStart="12dp"
+                        android:paddingEnd="12dp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1" android:layout_marginStart="8dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:labelFor="@id/et_rate_moto"
+                        android:text="@string/vehicle_type_moto"
+                        android:textAppearance="@style/TextAppearance.Pc.Mono" />
+
+                    <EditText
+                        android:id="@+id/et_rate_moto"
+                        style="@style/Widget.Pc.Input"
+                        android:layout_width="match_parent"
+                        android:layout_marginTop="6dp"
+                        android:fontFamily="@font/aura_mono"
+                        android:hint="0"
+                        android:importantForAutofill="no"
+                        android:inputType="numberDecimal"
+                        android:paddingStart="12dp"
+                        android:paddingEnd="12dp" />
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/rates_error"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:textAppearance="@style/TextAppearance.Pc.FieldError"
+                android:visibility="gone" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="@string/setup_footnote"
+                android:textAppearance="@style/TextAppearance.Pc.Mono"
+                android:textSize="12sp" />
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <View style="@style/Widget.Pc.Hairline" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_create"
+        style="@style/Widget.Pc.Button.Primary"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginVertical="12dp"
+        android:text="@string/setup_create" />
+</LinearLayout>

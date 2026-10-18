@@ -18,14 +18,23 @@ class BranchRepository(
 ) {
     private val journal: ChangeJournal? get() = changeJournal ?: ChangeJournalProvider.get()
 
+    /** Branches cached on the device, for painting screens before the network answers. */
+    suspend fun getBranchesLocal(): List<Branch> =
+        database?.branchDao()?.getAll()?.map { it.toModel() }.orEmpty()
+
     suspend fun getBranches(): Result<List<Branch>> {
         return try {
             val response = api.getBranches()
             if (response.isSuccessful) {
                 val branches = response.body() ?: emptyList()
                 database?.branchDao()?.let { dao ->
+                    // Branches created offline and not pushed yet are absent from the server
+                    // list; keep them across the refresh or they vanish from the device.
+                    val pending = pendingLocalCreates()
                     dao.deleteAll()
                     dao.insertAll(branches.map { it.toEntity() })
+                    val serverIds = branches.map { it.id }.toSet()
+                    dao.insertAll(pending.filter { it.id !in serverIds })
                 }
                 val merged = mergeLocalPending(branches)
                 Result.Success(merged)
@@ -40,6 +49,13 @@ class BranchRepository(
                 Result.Error(IOException("Error de conexión: ${e.localizedMessage ?: "Error desconocido"}"))
             }
         }
+    }
+
+    private suspend fun pendingLocalCreates(): List<BranchEntity> {
+        val journal = journal ?: return emptyList()
+        return journal.getUnsyncedChanges()
+            .filter { it.entityType == "branch" && it.operation == ChangeJournal.OP_CREATE }
+            .mapNotNull { database?.branchDao()?.getById(it.entityId) }
     }
 
     private suspend fun mergeLocalPending(serverList: List<Branch>): List<Branch> {
@@ -98,7 +114,11 @@ class BranchRepository(
         }
     }
 
-    suspend fun createBranch(input: CreateBranchInput): Result<Branch> {
+    /**
+     * Saves the branch locally and journals it for sync. With [localOnly] the server is not
+     * contacted at all (no-server setup), so the call never waits on a network timeout.
+     */
+    suspend fun createBranch(input: CreateBranchInput, localOnly: Boolean = false): Result<Branch> {
         val localId = UUID.randomUUID().toString()
         val now = nowUtcString()
 
@@ -126,6 +146,7 @@ class BranchRepository(
 
         database?.branchDao()?.insert(localEntry.toEntity())
         journal?.recordCreate("branch", localId, localEntry.toJournalMap())
+        if (localOnly) return Result.Success(localEntry)
 
         try {
             val response = api.createBranch(input)

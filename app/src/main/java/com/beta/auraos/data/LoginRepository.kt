@@ -30,10 +30,14 @@ class LoginRepository(
                 setLoggedInUser(remoteResult.data)
                 val token = sessionManager.getToken() ?: ""
                 localAuthDataSource.cacheUser(remoteResult.data, password, token)
+                // The backend knows this account now: from here on it syncs like any other.
+                sessionManager.setLocalOnlyAccount(false)
                 remoteResult
             }
             is Result.Error -> {
-                if (localAuthDataSource.isNetworkError(remoteResult.exception)) {
+                // A device-only account (no-server setup) is unknown to the backend, so a
+                // rejection there must not lock its owner out: verify it locally instead.
+                if (localAuthDataSource.isNetworkError(remoteResult.exception) || isLocalOnlyFor(email)) {
                     val localResult = localAuthDataSource.login(email, password)
                     if (localResult is Result.Success) {
                         setLoggedInUser(localResult.data)
@@ -45,6 +49,10 @@ class LoginRepository(
             }
         }
     }
+
+    private fun isLocalOnlyFor(email: String): Boolean =
+        sessionManager.isLocalOnlyAccount() &&
+            sessionManager.getLocalUserProfile()?.email.equals(email, ignoreCase = true)
 
     fun hasBiometricCredentials(): Boolean {
         return sessionManager.hasSavedCredentials()
@@ -75,7 +83,7 @@ class LoginRepository(
                 remoteResult
             }
             is Result.Error -> {
-                if (localAuthDataSource.isNetworkError(remoteResult.exception)) {
+                if (localAuthDataSource.isNetworkError(remoteResult.exception) || sessionManager.isLocalOnlyAccount()) {
                     val localResult = localAuthDataSource.biometricLogin(userId)
                     if (localResult is Result.Success) {
                         setLoggedInUser(localResult.data)

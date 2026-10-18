@@ -1,6 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <!-- LRGutierrez design system (shared with BCV Tracker · ui/Theme.kt) -->
+    <!-- Light -->
+    <color name="lrg_light_bg">#FFFAFAFB</color>
+    <color name="lrg_light_surface">#FFF1F2F4</color>
+    <color name="lrg_light_border">#FFE2E5E9</color>
+    <color name="lrg_light_border_control">#FF7F8794</color>
+    <color name="lrg_light_text_primary">#FF0E1116</color>
+    <color name="lrg_light_text_secondary">#FF4A5260</color>
+    <color name="lrg_light_text_muted">#FF636B78</color>
+    <color name="lrg_light_accent_text">#FF9A5A00</color>
+    <color name="lrg_light_on_accent">#FF0E1116</color>
+    <!-- Dark -->
+    <color name="lrg_dark_bg">#FF0B0D10</color>
+    <color name="lrg_dark_surface">#FF13161B</color>
+    <color name="lrg_dark_border">#FF262B33</color>
+    <color name="lrg_dark_border_control">#FF5E6774</color>
+    <color name="lrg_dark_text_primary">#FFECEEF1</color>
+    <color name="lrg_dark_text_secondary">#FFA3AAB5</color>
+    <color name="lrg_dark_text_muted">#FF7C8592</color>
+    <color name="lrg_dark_accent_text">#FFF5A524</color>
+    <color name="lrg_dark_on_accent">#FF0B0D10</color>
+    <!-- Shared -->
+    <color name="lrg_accent">#FFF5A524</color>
+    <color name="lrg_backdrop">#B3000000</color>
+
+
     <!-- Crystal Edition (Light) - DESIGN.md tokens -->
     <color name="crystal_surface">#f9f9fb</color>
     <color name="crystal_surface_dim">#d9dadc</color>
@@ -83,18 +109,18 @@
     <color name="glass_border_dark">#26FFFFFF</color>
     <color name="glass_border_light_dark">#1AFFFFFF</color>
 
-    <!-- Branch list UI -->
-    <color name="branch_green_neon">#00E676</color>
-    <color name="branch_gray_muted">#9CA3AF</color>
-    <color name="branch_dark_card">#1A1A1C</color>
-    <color name="branch_blue_manage">#A8C5FF</color>
-    <color name="branch_green_badge_bg">#1A00E676</color>
-    <color name="branch_gray_badge_bg">#1A9CA3AF</color>
+    <!-- Branch list UI (retuned to the LRGutierrez palette; night values in values-night) -->
+    <color name="branch_green_neon">#9A5A00</color>
+    <color name="branch_gray_muted">#636B78</color>
+    <color name="branch_dark_card">#0E1116</color>
+    <color name="branch_blue_manage">#F5A524</color>
+    <color name="branch_green_badge_bg">#1AF5A524</color>
+    <color name="branch_gray_badge_bg">#1A636B78</color>
     <color name="branch_progress_track">#2A2A2D</color>
     <color name="branch_progress_track_light">#D1D5DB</color>
     <color name="branch_activate_bg">#2A2A2D</color>
     <color name="branch_activate_text">#9CA3AF</color>
-    <color name="branch_green_light_text">#00E676</color>
+    <color name="branch_green_light_text">#9A5A00</color>
     <color name="branch_surface_light">#EEEEF0</color>
 
     <!-- Home screen specific -->

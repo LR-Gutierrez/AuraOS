@@ -375,20 +375,51 @@ res/
 ### Compilación
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/LR-Gutierrez/AuraOS.git
 cd AuraOS
 ./gradlew assembleDebug
 ```
 
-### Configuración de Backend
+El build de *debug* crea una cuenta y datos de demostración al arrancar. Para probar el flujo de un dispositivo nuevo, compílalo sin ellos:
 
-La URL base del servidor se define en `data/remote/ApiClient.kt`:
-
-```kotlin
-private const val BASE_URL = "http://192.168.0.143:3000/"
+```bash
+./gradlew assembleDebug -PnoSeedData
 ```
 
-El backend actual es una aplicación Node.js que expone *endpoints* REST. Los contratos de API están definidos mediante interfaces Retrofit en el paquete `data/remote/`.
+### Uso sin servidor
+
+AuraOS funciona completo sin backend. En un dispositivo sin cuentas, la pantalla de inicio de sesión ofrece **"¿Sin servidor? Configura este dispositivo"**: crea la cuenta del operador y la primera sede en el teléfono, confirmando con el bloqueo de pantalla. Entradas, salidas, membresías, auditoría y analítica operan sobre Room. Si más adelante se conecta un servidor, basta con iniciar sesión con una cuenta que ese servidor reconozca para empezar a sincronizar.
+
+### Configuración de Backend
+
+El backend (Node.js con *endpoints* REST bajo `/api/v1/`) es opcional y no forma parte de este repositorio. Los contratos que espera la app están en las interfaces Retrofit de `data/remote/`.
+
+La dirección del servidor se resuelve en este orden:
+
+1. **La que se escribe en la app**: enlace **"Servidor"** al pie del inicio de sesión. Permite probar la conexión, guardarla o dejarla vacía para trabajar sin servidor. En un dispositivo que ya tiene datos, el cambio se confirma con el bloqueo de pantalla.
+2. **La compilada en el APK**, leída de `local.properties` (archivo no versionado):
+
+   ```properties
+   api.baseUrl.debug=http://10.0.2.2:3000/
+   api.baseUrl.release=https://api.tu-dominio.com/
+   ```
+
+   `10.0.2.2` es la máquina anfitriona vista desde el emulador; en un teléfono real usa la IP local de esa máquina. Si `api.baseUrl.release` no está definida, el APK de *release* sale **sin servidor**.
+
+Para un servidor accesible desde internet usa HTTPS: la app permite HTTP sin cifrar solo para facilitar despliegues en una red local.
+
+### Firma de Release
+
+El build de *release* se firma solo si existe `keystore.properties` en la raíz del proyecto (no versionado):
+
+```properties
+storeFile=/ruta/a/tu-keystore.jks
+storePassword=...
+keyAlias=...
+keyPassword=...
+```
+
+Sin ese archivo, `./gradlew assembleRelease` genera un APK sin firmar. Guarda una copia del keystore fuera del equipo de desarrollo: sin él no se pueden publicar actualizaciones de una app ya instalada.
 
 ### Gestión de Dependencias
 

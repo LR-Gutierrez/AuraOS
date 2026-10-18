@@ -20,7 +20,9 @@ android {
             if (parts.size == 2 && !line.trimStart().startsWith("#")) parts[0].trim() to parts[1].trim() else null
         }?.toMap() ?: emptyMap()
     val apiBaseUrlDebug = localProps["api.baseUrl.debug"] ?: "http://10.0.2.2:3000/"
-    val apiBaseUrlRelease = localProps["api.baseUrl.release"] ?: apiBaseUrlDebug
+    // Release has no default server: AuraOS works on its own, and whoever runs a backend
+    // either sets api.baseUrl.release before building or types the address in the app.
+    val apiBaseUrlRelease = localProps["api.baseUrl.release"] ?: ""
 
     val keystoreFile = rootProject.file("keystore.properties")
     if (keystoreFile.exists()) {
@@ -51,9 +53,12 @@ android {
     buildTypes {
         debug {
             buildConfigField("String", "API_BASE_URL", "\"$apiBaseUrlDebug\"")
+            // Demo account and sample data; build with -PnoSeedData to start from an empty device.
+            buildConfigField("boolean", "SEED_DEMO_DATA", (!project.hasProperty("noSeedData")).toString())
         }
         release {
             buildConfigField("String", "API_BASE_URL", "\"$apiBaseUrlRelease\"")
+            buildConfigField("boolean", "SEED_DEMO_DATA", "false")
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -67,6 +72,8 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+        // java.time (memberships) on minSdk 24–25.
+        isCoreLibraryDesugaringEnabled = true
     }
     kotlinOptions {
         jvmTarget = "11"
@@ -78,6 +85,7 @@ android {
 }
 
 dependencies {
+    coreLibraryDesugaring(libs.desugar.jdk.libs)
     implementation(libs.androidx.activity.ktx)
     implementation(libs.androidx.annotation)
     implementation(libs.androidx.appcompat)

@@ -40,7 +40,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/spacing_medium"
-                android:fontFamily="sans-serif-black"
+                android:fontFamily="@font/aura_sans"
                 android:text="@string/branch_list_title"
                 android:textColor="?attr/textPrimaryCustom"
                 android:textSize="@dimen/text_size_title"
@@ -80,16 +80,16 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/branch_subtitle"
-                    android:textColor="#9CA3AF"
+                    android:textColor="?attr/textMutedCustom"
                     android:textSize="@dimen/text_size_body"
-                    android:fontFamily="sans-serif" />
+                    android:fontFamily="@font/aura_sans" />
 
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/search_card"
                     android:layout_width="match_parent"
                     android:layout_height="52dp"
                     android:layout_marginTop="@dimen/spacing_medium"
-                    app:cardCornerRadius="999dp"
+                    app:cardCornerRadius="8dp"
                     app:cardBackgroundColor="?attr/branchSurfaceCustom"
                     app:strokeColor="?attr/dividerColorCustom"
                     app:strokeWidth="@dimen/stroke_thin"
@@ -118,7 +118,7 @@
                             android:textColorHint="?attr/textSecondaryCustom"
                             android:textColor="?attr/branchSurfaceTextCustom"
                             android:textSize="14sp"
-                            android:fontFamily="sans-serif"
+                            android:fontFamily="@font/aura_sans"
                             android:inputType="text"
                             android:importantForAutofill="no" />
 
@@ -140,7 +140,7 @@
                         android:layout_height="110dp"
                         android:layout_weight="1"
                         android:layout_marginEnd="6dp"
-                        app:cardCornerRadius="20dp"
+                        app:cardCornerRadius="12dp"
                         app:cardBackgroundColor="?attr/branchSurfaceCustom"
                         app:cardElevation="0dp"
                         app:strokeWidth="@dimen/stroke_thin"
@@ -161,7 +161,7 @@
                                 android:textSize="11sp"
                                 android:letterSpacing="0.08"
                                 android:textAllCaps="true"
-                                android:fontFamily="sans-serif" />
+                                android:fontFamily="@font/aura_sans" />
 
                             <TextView
                                 android:id="@+id/tv_active_fleet"
@@ -169,10 +169,10 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="6dp"
                                 android:text="0"
-                                android:textColor="@color/branch_green_neon"
+                                android:textColor="?attr/accentTextCustom"
                                 android:textSize="28sp"
                                 android:textStyle="bold"
-                                android:fontFamily="sans-serif" />
+                                android:fontFamily="@font/aura_sans" />
 
                         </LinearLayout>
 
@@ -184,7 +184,7 @@
                         android:layout_height="110dp"
                         android:layout_weight="1"
                         android:layout_marginStart="6dp"
-                        app:cardCornerRadius="20dp"
+                        app:cardCornerRadius="12dp"
                         app:cardBackgroundColor="?attr/branchSurfaceCustom"
                         app:cardElevation="0dp"
                         app:strokeWidth="@dimen/stroke_thin"
@@ -205,7 +205,7 @@
                                 android:textSize="11sp"
                                 android:letterSpacing="0.08"
                                 android:textAllCaps="true"
-                                android:fontFamily="sans-serif" />
+                                android:fontFamily="@font/aura_sans" />
 
                             <TextView
                                 android:id="@+id/tv_global_cap"
@@ -216,7 +216,7 @@
                                 android:textColor="?attr/branchSurfaceTextCustom"
                                 android:textSize="28sp"
                                 android:textStyle="bold"
-                                android:fontFamily="sans-serif" />
+                                android:fontFamily="@font/aura_sans" />
 
                         </LinearLayout>
 
@@ -233,7 +233,7 @@
                     android:padding="@dimen/spacing_xlarge"
                     android:text="@string/branch_empty_state"
                     android:textAlignment="center"
-                    android:textColor="#9CA3AF"
+                    android:textColor="?attr/textMutedCustom"
                     android:textSize="@dimen/text_size_body"
                     android:visibility="gone" />
 
@@ -252,7 +252,7 @@
                     android:layout_marginTop="@dimen/spacing_xxlarge"
                     android:indeterminate="true"
                     android:visibility="gone"
-                    app:indicatorColor="#00E676"
+                    app:indicatorColor="?attr/accentCustom"
                     app:indicatorSize="48dp"
                     app:trackThickness="4dp" />
 
@@ -265,7 +265,7 @@
                 android:layout_gravity="center"
                 android:gravity="center"
                 android:padding="@dimen/spacing_xlarge"
-                android:textColor="#FF5252"
+                android:textColor="?attr/colorError"
                 android:textSize="@dimen/text_size_body"
                 android:visibility="gone" />
 
@@ -281,8 +281,8 @@
         android:layout_margin="20dp"
         android:contentDescription="@string/branch_new_action"
         android:src="@android:drawable/ic_input_add"
-        app:backgroundTint="#00E676"
-        app:tint="#1A1A1C"
+        app:backgroundTint="?attr/accentCustom"
+        app:tint="?attr/onAccentCustom"
         app:fabSize="normal"
         app:elevation="4dp" />
 

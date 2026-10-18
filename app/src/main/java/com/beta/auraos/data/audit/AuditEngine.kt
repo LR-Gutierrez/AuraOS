@@ -15,9 +15,11 @@ class AuditEngine(private val context: Context) {
         feePaid: Double?,
         exitTime: String
     ) {
-        val calculatedFee = FeeCalculator.computeFee(entry.createdAt, entry.vehicleType, branch)
+        // Members pay monthly: their exit carries no daily or overnight charge.
+        val isMember = entry.membershipId != null
+        val calculatedFee = FeeCalculator.exitFee(entry, branch)
         val baseFee = calculatedFee ?: (feePaid ?: 0.0)
-        val days = if (branch != null) FeeCalculator.elapsedDays(entry.createdAt) else 1
+        val days = if (isMember) 0 else if (branch != null) FeeCalculator.elapsedDays(entry.createdAt) else 1
         val nights = max(0, days - 1)
 
         val rateApplied = when (entry.vehicleType) {
@@ -139,6 +141,11 @@ class AuditEngine(private val context: Context) {
 
     fun getClosureHistory(branchId: String): List<ClosureBatch> {
         return repository.getClosureBatches(branchId)
+    }
+
+    /** Exits recorded since the last closure, newest first. */
+    fun getPendingRecords(branchId: String): List<AuditRecord> {
+        return repository.getUnclosedRecords(branchId).sortedByDescending { it.exitTime }
     }
 
     fun getPeriodSummary(branchId: String): AuditPeriodSummary {

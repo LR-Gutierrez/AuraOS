@@ -1,0 +1,462 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    LRGutierrez design system, Android Views edition.
+    Mirrors BCV Tracker (ui/Theme.kt + ui/Components.kt): Geist / Geist Mono, 8dp controls,
+    12dp cards, 1dp hairline borders, amber accent reserved for primary actions and the active state.
+-->
+<resources>
+
+    <!-- Shapes -->
+    <style name="ShapeAppearance.Lrg.Control" parent="ShapeAppearance.MaterialComponents.SmallComponent">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">8dp</item>
+    </style>
+
+    <style name="ShapeAppearance.Lrg.Card" parent="ShapeAppearance.MaterialComponents.MediumComponent">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">12dp</item>
+    </style>
+
+    <!-- Type -->
+    <!-- TopBar title: 22sp SemiBold, tracking -0.015em -->
+    <style name="TextAppearance.Lrg.ScreenTitle" parent="">
+        <item name="android:fontFamily">@font/aura_sans</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">22sp</item>
+        <item name="android:letterSpacing">-0.015</item>
+        <item name="android:textColor">?attr/textPrimaryCustom</item>
+    </style>
+
+    <!-- Label: mono, uppercase, 12sp, tracked 0.06em, muted -->
+    <style name="TextAppearance.Lrg.Label" parent="">
+        <item name="android:fontFamily">@font/aura_mono</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:letterSpacing">0.06</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:textColor">?attr/textMutedCustom</item>
+    </style>
+
+    <!-- Hero figure: 28sp SemiBold, tabular numbers, tracking -0.02em -->
+    <style name="TextAppearance.Lrg.Figure" parent="">
+        <item name="android:fontFamily">@font/aura_sans</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">28sp</item>
+        <item name="android:letterSpacing">-0.02</item>
+        <item name="android:fontFeatureSettings">tnum</item>
+        <item name="android:textColor">?attr/textPrimaryCustom</item>
+    </style>
+
+    <!-- Secondary figure inside small cards: 20sp SemiBold, tabular -->
+    <style name="TextAppearance.Lrg.FigureSmall" parent="TextAppearance.Lrg.Figure">
+        <item name="android:textSize">20sp</item>
+    </style>
+
+    <!-- Row / card title: 15sp Medium -->
+    <style name="TextAppearance.Lrg.Title" parent="">
+        <item name="android:fontFamily">@font/aura_sans_medium</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:textColor">?attr/textPrimaryCustom</item>
+    </style>
+
+    <!-- Supporting text: 14sp regular, secondary -->
+    <style name="TextAppearance.Lrg.Body" parent="">
+        <item name="android:fontFamily">@font/aura_sans</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:lineSpacingExtra">4sp</item>
+        <item name="android:textColor">?attr/textSecondaryCustom</item>
+    </style>
+
+    <!-- Meta: mono 12sp muted (dates, counters) -->
+    <style name="TextAppearance.Lrg.Meta" parent="">
+        <item name="android:fontFamily">@font/aura_mono</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:textColor">?attr/textMutedCustom</item>
+    </style>
+
+    <style name="TextAppearance.Lrg.Button" parent="TextAppearance.MaterialComponents.Button">
+        <item name="android:fontFamily">@font/aura_sans_medium</item>
+        <item name="fontFamily">@font/aura_sans_medium</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:letterSpacing">0</item>
+    </style>
+
+    <!-- PrimaryButton: accent fill, 8dp corners, 44dp min height -->
+    <style name="Widget.Lrg.Button" parent="Widget.MaterialComponents.Button.UnelevatedButton">
+        <item name="android:minHeight">44dp</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="cornerRadius">8dp</item>
+        <item name="backgroundTint">?attr/accentCustom</item>
+        <item name="android:textColor">?attr/onAccentCustom</item>
+        <item name="android:textAppearance">@style/TextAppearance.Lrg.Button</item>
+    </style>
+
+    <!-- Card: surface fill, 1dp border, 12dp corners, no elevation -->
+    <style name="Widget.Lrg.Card" parent="Widget.MaterialComponents.CardView">
+        <item name="cardBackgroundColor">?attr/branchSurfaceCustom</item>
+        <item name="cardCornerRadius">12dp</item>
+        <item name="cardElevation">0dp</item>
+        <item name="strokeColor">?attr/dividerColorCustom</item>
+        <item name="strokeWidth">1dp</item>
+    </style>
+
+    <!-- List row inside a grouped card (BCV SettingRow): 64dp min, icon + text + chevron -->
+    <style name="Widget.Lrg.ListRow" parent="">
+        <item name="android:orientation">horizontal</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:minHeight">64dp</item>
+        <item name="android:paddingStart">16dp</item>
+        <item name="android:paddingEnd">12dp</item>
+        <item name="android:paddingTop">12dp</item>
+        <item name="android:paddingBottom">12dp</item>
+        <item name="android:background">?attr/selectableItemBackground</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+    </style>
+
+    <style name="Widget.Lrg.ListRow.Icon" parent="">
+        <item name="android:layout_width">20dp</item>
+        <item name="android:layout_height">20dp</item>
+        <item name="android:importantForAccessibility">no</item>
+        <item name="tint">?attr/textSecondaryCustom</item>
+    </style>
+
+    <style name="Widget.Lrg.ListRow.Text" parent="">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_marginStart">14dp</item>
+        <item name="android:layout_marginEnd">8dp</item>
+        <item name="android:orientation">vertical</item>
+    </style>
+
+    <style name="Widget.Lrg.ListRow.Chevron" parent="">
+        <item name="android:layout_width">18dp</item>
+        <item name="android:layout_height">18dp</item>
+        <item name="android:importantForAccessibility">no</item>
+        <item name="android:src">@drawable/ic_chevron_right_24</item>
+        <item name="tint">?attr/textMutedCustom</item>
+    </style>
+
+    <!-- ============================================================
+         Parqueo·Control screens (claude.ai/design "Parqueo App")
+         ============================================================ -->
+
+    <!-- Brand wordmark: mono 14sp medium -->
+    <style name="TextAppearance.Pc.Wordmark" parent="">
+        <item name="android:fontFamily">@font/aura_mono</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">?attr/textPrimaryCustom</item>
+    </style>
+
+    <!-- Hero occupancy number: 72sp semibold, tracking -0.035em -->
+    <style name="TextAppearance.Pc.Display" parent="">
+        <item name="android:fontFamily">@font/aura_sans</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">72sp</item>
+        <item name="android:letterSpacing">-0.035</item>
+        <item name="android:fontFeatureSettings">tnum</item>
+        <item name="android:includeFontPadding">false</item>
+        <item name="android:textColor">?attr/textPrimaryCustom</item>
+    </style>
+
+    <!-- Money hero (Caja / Analíticas): 48sp -->
+    <style name="TextAppearance.Pc.Amount" parent="TextAppearance.Pc.Display">
+        <item name="android:textSize">48sp</item>
+    </style>
+
+    <!-- Kiosk display headline: 44sp -->
+    <style name="TextAppearance.Pc.KioskDisplay" parent="TextAppearance.Pc.Display">
+        <item name="android:textSize">44sp</item>
+    </style>
+
+    <!-- Kiosk step title: 36sp, tracking -0.03em -->
+    <style name="TextAppearance.Pc.KioskTitle" parent="TextAppearance.Pc.Display">
+        <item name="android:textSize">36sp</item>
+        <item name="android:letterSpacing">-0.03</item>
+    </style>
+
+    <!-- Screen title: 28sp semibold, tracking -0.02em -->
+    <style name="TextAppearance.Pc.H2" parent="">
+        <item name="android:fontFamily">@font/aura_sans</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">28sp</item>
+        <item name="android:letterSpacing">-0.02</item>
+        <item name="android:textColor">?attr/textPrimaryCustom</item>
+    </style>
+
+    <!-- Section title: 18sp semibold, tracking -0.015em -->
+    <style name="TextAppearance.Pc.Section" parent="">
+        <item name="android:fontFamily">@font/aura_sans</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:letterSpacing">-0.015</item>
+        <item name="android:textColor">?attr/textPrimaryCustom</item>
+    </style>
+
+    <!-- Stat figure: 22sp semibold -->
+    <style name="TextAppearance.Pc.Stat" parent="TextAppearance.Pc.Section">
+        <item name="android:textSize">22sp</item>
+        <item name="android:fontFeatureSettings">tnum</item>
+    </style>
+
+    <!-- Body 15sp regular primary -->
+    <style name="TextAppearance.Pc.Body" parent="">
+        <item name="android:fontFamily">@font/aura_sans</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:textColor">?attr/textPrimaryCustom</item>
+    </style>
+
+    <!-- Row title 15sp medium -->
+    <style name="TextAppearance.Pc.RowTitle" parent="">
+        <item name="android:fontFamily">@font/aura_sans_medium</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:textColor">?attr/textPrimaryCustom</item>
+    </style>
+
+    <!-- Helper copy 13sp muted, 1.5 line height -->
+    <style name="TextAppearance.Pc.Hint" parent="">
+        <item name="android:fontFamily">@font/aura_sans</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:lineSpacingMultiplier">1.3</item>
+        <item name="android:textColor">?attr/textMutedCustom</item>
+    </style>
+
+    <!-- Mono meta 13sp muted -->
+    <style name="TextAppearance.Pc.Mono" parent="">
+        <item name="android:fontFamily">@font/aura_mono</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:fontFeatureSettings">tnum</item>
+        <item name="android:textColor">?attr/textMutedCustom</item>
+    </style>
+
+    <!-- Mono value 15sp medium primary -->
+    <style name="TextAppearance.Pc.MonoValue" parent="">
+        <item name="android:fontFamily">@font/aura_mono</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:fontFeatureSettings">tnum</item>
+        <item name="android:textColor">?attr/textPrimaryCustom</item>
+    </style>
+
+    <!-- Plate in lists: mono 16sp medium, tracking 0.04em -->
+    <style name="TextAppearance.Pc.Plate" parent="TextAppearance.Pc.MonoValue">
+        <item name="android:textSize">16sp</item>
+        <item name="android:letterSpacing">0.04</item>
+    </style>
+
+    <!-- Plate hero (cards): mono 30sp, tracking 0.08em -->
+    <style name="TextAppearance.Pc.PlateHero" parent="TextAppearance.Pc.MonoValue">
+        <item name="android:textSize">30sp</item>
+        <item name="android:letterSpacing">0.08</item>
+    </style>
+
+    <!-- Text link: accent text, 14sp, underlined in code -->
+    <style name="TextAppearance.Pc.Link" parent="">
+        <item name="android:fontFamily">@font/aura_sans</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:textColor">?attr/accentTextCustom</item>
+    </style>
+
+    <!-- Tab bar (BCV Tracker): unlabeled 20dp icons on the surface, 56dp tall -->
+    <style name="Widget.Pc.TabBar" parent="Widget.MaterialComponents.BottomNavigationView">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">56dp</item>
+        <item name="android:background">@android:color/transparent</item>
+        <item name="elevation">0dp</item>
+        <item name="itemIconSize">20dp</item>
+        <item name="itemIconTint">@color/lrg_nav_item</item>
+        <item name="itemTextColor">@color/lrg_nav_item</item>
+        <item name="itemRippleColor">?attr/dividerColorCustom</item>
+        <item name="itemBackground">@android:color/transparent</item>
+        <item name="labelVisibilityMode">unlabeled</item>
+        <item name="menu">@menu/home_bottom_menu</item>
+    </style>
+
+    <!-- Secondary action: transparent, control border, primary text, 44dp -->
+    <style name="Widget.Pc.Button.Outlined" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="android:minHeight">44dp</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="cornerRadius">8dp</item>
+        <item name="strokeColor">?attr/borderControlCustom</item>
+        <item name="strokeWidth">1dp</item>
+        <item name="backgroundTint">@android:color/transparent</item>
+        <item name="android:textColor">?attr/textPrimaryCustom</item>
+        <item name="rippleColor">?attr/dividerColorCustom</item>
+        <item name="android:textAppearance">@style/TextAppearance.Lrg.Button</item>
+    </style>
+
+    <!-- Full-width screen CTA: BCV Tracker ControlH.Large, 52dp -->
+    <style name="Widget.Pc.Button.Primary" parent="Widget.Lrg.Button">
+        <item name="android:minHeight">52dp</item>
+    </style>
+
+    <!-- Kiosk CTA: 64dp, 12dp corners, 18sp semibold -->
+    <style name="Widget.Pc.Button.Kiosk" parent="Widget.Lrg.Button">
+        <item name="android:minHeight">64dp</item>
+        <item name="cornerRadius">12dp</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="Widget.Pc.Button.KioskOutlined" parent="Widget.Pc.Button.Outlined">
+        <item name="android:minHeight">64dp</item>
+        <item name="cornerRadius">12dp</item>
+        <item name="android:textSize">18sp</item>
+    </style>
+
+    <!-- Underlined accent text link with a 44dp hit target -->
+    <style name="Widget.Pc.TextLink" parent="Widget.MaterialComponents.Button.TextButton">
+        <item name="android:minHeight">44dp</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:paddingStart">0dp</item>
+        <item name="android:paddingEnd">0dp</item>
+        <item name="android:textColor">?attr/accentTextCustom</item>
+        <item name="android:textAppearance">@style/TextAppearance.Pc.Link</item>
+        <item name="rippleColor">?attr/dividerColorCustom</item>
+    </style>
+
+    <!-- Toggle chip: 44dp, 8dp corners, amber fill when checked -->
+    <style name="Widget.Pc.Chip" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="android:checkable">true</item>
+        <item name="android:minHeight">44dp</item>
+        <item name="android:minWidth">0dp</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:paddingStart">14dp</item>
+        <item name="android:paddingEnd">14dp</item>
+        <item name="cornerRadius">8dp</item>
+        <item name="strokeWidth">1dp</item>
+        <item name="strokeColor">@color/chip_selector_stroke</item>
+        <item name="backgroundTint">@color/chip_selector_bg</item>
+        <item name="android:textColor">@color/chip_selector_text</item>
+        <item name="rippleColor">?attr/dividerColorCustom</item>
+        <item name="android:textAppearance">@style/TextAppearance.Pc.ChipText</item>
+    </style>
+
+    <style name="TextAppearance.Pc.ChipText" parent="TextAppearance.Lrg.Button">
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <!-- Segment inside a segmented control: 40dp, 6dp corners -->
+    <style name="Widget.Pc.Segment" parent="Widget.MaterialComponents.Button.UnelevatedButton">
+        <item name="android:checkable">true</item>
+        <item name="android:minHeight">40dp</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="cornerRadius">6dp</item>
+        <item name="backgroundTint">@color/pc_segment_bg</item>
+        <item name="android:textColor">@color/pc_segment_text</item>
+        <item name="rippleColor">?attr/dividerColorCustom</item>
+        <item name="android:textAppearance">@style/TextAppearance.Pc.ChipText</item>
+    </style>
+
+    <!-- Hairline divider -->
+    <style name="Widget.Pc.Hairline" parent="">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">1dp</item>
+        <item name="android:background">?attr/dividerColorCustom</item>
+    </style>
+
+    <!-- Thin occupancy bar: 4dp, amber -->
+    <style name="Widget.Pc.Progress" parent="Widget.MaterialComponents.LinearProgressIndicator">
+        <item name="trackThickness">4dp</item>
+        <item name="trackCornerRadius">2dp</item>
+        <item name="trackColor">?attr/dividerColorCustom</item>
+        <item name="indicatorColor">?attr/accentCustom</item>
+    </style>
+
+    <!-- Hairline bar for per-branch / breakdown rows: 2dp, muted -->
+    <style name="Widget.Pc.Progress.Hairline" parent="Widget.Pc.Progress">
+        <item name="trackThickness">2dp</item>
+        <item name="trackCornerRadius">1dp</item>
+        <item name="indicatorColor">?attr/textMutedCustom</item>
+    </style>
+
+    <!-- Large single-line text inputs (plates, cash) -->
+    <style name="Widget.Pc.Field" parent="">
+        <item name="android:background">@drawable/bg_pc_field</item>
+        <item name="android:paddingStart">16dp</item>
+        <item name="android:paddingEnd">16dp</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:fontFamily">@font/aura_mono</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">?attr/textPrimaryCustom</item>
+        <item name="android:textColorHint">?attr/textMutedCustom</item>
+        <item name="android:textCursorDrawable">@null</item>
+    </style>
+
+    <!-- Select-like control: outlined, primary text, chevron at the end -->
+    <style name="Widget.Pc.Select" parent="Widget.Pc.Button.Outlined">
+        <item name="android:paddingStart">12dp</item>
+        <item name="android:paddingEnd">8dp</item>
+        <item name="android:gravity">start|center_vertical</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:textSize">14sp</item>
+        <item name="icon">@drawable/ic_expand_more_24</item>
+        <item name="iconGravity">end</item>
+        <item name="iconSize">16dp</item>
+        <item name="iconPadding">2dp</item>
+        <item name="iconTint">?attr/textMutedCustom</item>
+    </style>
+
+    <!-- BcvSwitch: 44x26 pill, amber when on, 20dp thumb inside the border -->
+    <style name="Widget.Pc.Switch" parent="Widget.AppCompat.CompoundButton.Switch">
+        <item name="android:thumb">@drawable/pc_switch_thumb</item>
+        <item name="track">@drawable/pc_switch_track</item>
+        <item name="thumbTint">@color/pc_switch_thumb</item>
+        <item name="trackTint">@null</item>
+        <item name="android:minHeight">48dp</item>
+        <item name="showText">false</item>
+        <item name="android:background">@null</item>
+    </style>
+
+    <!-- Dialogs: surface card, hairline, 12dp, tokens for text and actions -->
+    <style name="ThemeOverlay.Pc.Dialog" parent="ThemeOverlay.MaterialComponents.Dialog.Alert">
+        <item name="android:windowBackground">@drawable/bg_pc_dialog</item>
+        <item name="android:textColorPrimary">?attr/textPrimaryCustom</item>
+        <item name="android:textColorSecondary">?attr/textSecondaryCustom</item>
+        <item name="android:textColorAlertDialogListItem">?attr/textPrimaryCustom</item>
+        <item name="colorAccent">?attr/accentTextCustom</item>
+        <item name="colorPrimary">?attr/accentTextCustom</item>
+        <item name="android:fontFamily">@font/aura_sans</item>
+        <item name="fontFamily">@font/aura_sans</item>
+        <item name="buttonBarPositiveButtonStyle">@style/Widget.Pc.DialogButton</item>
+        <item name="buttonBarNegativeButtonStyle">@style/Widget.Pc.DialogButton.Muted</item>
+        <item name="buttonBarNeutralButtonStyle">@style/Widget.Pc.DialogButton.Muted</item>
+    </style>
+
+    <style name="Widget.Pc.DialogButton" parent="Widget.MaterialComponents.Button.TextButton.Dialog">
+        <item name="android:textColor">?attr/accentTextCustom</item>
+        <item name="android:textAppearance">@style/TextAppearance.Lrg.Button</item>
+        <item name="android:minHeight">44dp</item>
+    </style>
+
+    <style name="Widget.Pc.DialogButton.Muted">
+        <item name="android:textColor">?attr/textSecondaryCustom</item>
+    </style>
+    <!-- Regular text input (forms): sans 16sp, 52dp, control border -->
+    <style name="Widget.Pc.Input" parent="">
+        <item name="android:layout_height">52dp</item>
+        <item name="android:background">@drawable/bg_pc_field</item>
+        <item name="android:paddingStart">16dp</item>
+        <item name="android:paddingEnd">16dp</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:fontFamily">@font/aura_sans</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">?attr/textPrimaryCustom</item>
+        <item name="android:textColorHint">?attr/textMutedCustom</item>
+    </style>
+
+    <!-- Inline field error: 13sp, primary text (amber is never an error color) -->
+    <style name="TextAppearance.Pc.FieldError" parent="TextAppearance.Pc.Hint">
+        <item name="android:textColor">?attr/textPrimaryCustom</item>
+    </style>
+</resources>

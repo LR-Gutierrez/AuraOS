@@ -23,19 +23,13 @@ import android.widget.ImageButton
 import android.widget.Toast
 import coil.load
 import coil.transform.CircleCropTransformation
+import com.beta.auraos.BuildConfig
 import com.beta.auraos.DashboardActivity
 import com.beta.auraos.R
 import com.beta.auraos.data.local.BiometricKeyManager
 import android.content.pm.PackageManager
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
-import android.widget.TextView
-import android.view.LayoutInflater
-import android.widget.LinearLayout
-import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import com.beta.auraos.util.PhotoUrlBuilder
 import com.beta.auraos.util.TabNavigator
 import com.beta.auraos.databinding.ActivityLoginBinding
@@ -59,6 +53,7 @@ class LoginActivity : AppCompatActivity() {
 
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        binding.tvBrand?.let { com.beta.auraos.util.PcUi.applyWordmark(it) }
 
         ViewCompat.setOnApplyWindowInsetsListener(binding.main) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -78,10 +73,12 @@ class LoginActivity : AppCompatActivity() {
         setupFullLogin()
         setupBiometric()
         setupFooterLinks()
+        setupOfflineSetupLink()
 
         if (isReturningUser) {
             startReturningUserFlow()
-        } else {
+        } else if (BuildConfig.SEED_DEMO_DATA) {
+            // Demo account from SeedDataInitializer; never prefilled in release builds.
             binding.username.setText("admin@smartpark.com")
             binding.password.setText("admin123")
         }
@@ -97,12 +94,8 @@ class LoginActivity : AppCompatActivity() {
             if (loginViewModel.isLoading.value != true) {
                 binding.login.isEnabled = loginState.isDataValid
             }
-            if (loginState.usernameError != null) {
-                binding.username.error = getString(loginState.usernameError)
-            }
-            if (loginState.passwordError != null) {
-                binding.password.error = getString(loginState.passwordError)
-            }
+            binding.username.error = loginState.usernameError?.let(::getString)
+            binding.password.error = loginState.passwordError?.let(::getString)
         })
 
         loginViewModel.loginResult.observe(this@LoginActivity) { loginResult ->
@@ -437,77 +430,7 @@ class LoginActivity : AppCompatActivity() {
                 .show()
         }
 
-        binding.tvNetworkStatus?.setOnClickListener {
-            val statusTextId = android.view.View.generateViewId()
-
-            val contentView = LinearLayout(this).apply {
-                orientation = LinearLayout.HORIZONTAL
-                setPadding(48, 32, 48, 32)
-                addView(android.widget.ProgressBar(this@LoginActivity).apply {
-                    layoutParams = LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.WRAP_CONTENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT
-                    ).also { it.setMarginEnd(24) }
-                })
-                addView(TextView(this@LoginActivity).apply {
-                    id = statusTextId
-                    text = getString(R.string.network_checking)
-                    textSize = 16f
-                })
-            }
-
-            val dialog = AlertDialog.Builder(this)
-                .setTitle(R.string.network_status)
-                .setView(contentView)
-                .setCancelable(false)
-                .show()
-
-            lifecycleScope.launch {
-                val apiStatus = withContext(Dispatchers.IO) {
-                    try {
-                        val api = com.beta.auraos.data.remote.ApiClient.createApi<com.beta.auraos.data.remote.HealthApi>()
-                        val response = api.health()
-                        response
-                    } catch (_: Exception) {
-                        null
-                    }
-                }
-
-                val statusText = contentView.findViewById<TextView>(statusTextId)
-                val spinner = contentView.getChildAt(0)
-                spinner.visibility = android.view.View.GONE
-
-                val message = if (apiStatus != null) {
-                    val statusLabel = when (apiStatus.status) {
-                        "ok" -> getString(R.string.health_status_ok)
-                        "error" -> getString(R.string.health_status_error)
-                        else -> apiStatus.status
-                    }
-                    val dbLabel = when (apiStatus.database) {
-                        "ok" -> getString(R.string.health_db_ok)
-                        "error" -> getString(R.string.health_db_error)
-                        else -> apiStatus.database
-                    }
-                    val uptimeSec = apiStatus.uptime.toLong()
-                    val uptimeLabel = if (uptimeSec >= 3600) {
-                        "%dh %dm".format(uptimeSec / 3600, (uptimeSec % 3600) / 60)
-                    } else {
-                        "%dm %ds".format(uptimeSec / 60, uptimeSec % 60)
-                    }
-                    getString(
-                        R.string.network_health_format,
-                        statusLabel,
-                        dbLabel,
-                        uptimeLabel
-                    )
-                } else {
-                    getString(R.string.network_offline)
-                }
-                statusText?.text = message
-                dialog.setCancelable(true)
-                dialog.setButton(AlertDialog.BUTTON_POSITIVE, getString(R.string.dialog_ok)) { d, _ -> d.dismiss() }
-            }
-        }
+        binding.tvServer?.setOnClickListener { ServerSettingsDialog(this).show() }
     }
 
     private fun hasBiometricHardware(): Boolean {
@@ -516,6 +439,17 @@ class LoginActivity : AppCompatActivity() {
             mgr.canAuthenticate(BIOMETRIC_STRONG or DEVICE_CREDENTIAL) == BiometricManager.BIOMETRIC_SUCCESS
         } catch (e: Exception) {
             false
+        }
+    }
+
+    /** "No server? Set up this device": only on a device with no account at all. */
+    private fun setupOfflineSetupLink() {
+        val link = binding.btnSetupOffline ?: return
+        val empty = com.beta.auraos.data.local.SessionManager(this).isDeviceEmpty()
+        link.visibility = if (empty) View.VISIBLE else View.GONE
+        com.beta.auraos.util.PcUi.underline(link)
+        link.setOnClickListener {
+            startActivity(Intent(this, com.beta.auraos.ui.setup.SetupActivity::class.java))
         }
     }
 

@@ -123,12 +123,13 @@ class LoginViewModel(private val loginRepository: LoginRepository) : ViewModel()
     fun getAvatarUrl(): String? = loginRepository.getAvatarUrl()
 
     fun loginDataChanged(username: String, password: String) {
-        if (!isUserNameValid(username)) {
-            _loginForm.value = LoginFormState(usernameError = R.string.invalid_username)
-        } else if (!isPasswordValid(password)) {
-            _loginForm.value = LoginFormState(passwordError = R.string.invalid_password)
-        } else {
-            _loginForm.value = LoginFormState(isDataValid = true)
+        // An empty field is unfinished, not wrong: it keeps the button disabled without an error.
+        _loginForm.value = when {
+            username.isBlank() -> LoginFormState()
+            !isUserNameValid(username) -> LoginFormState(usernameError = R.string.invalid_username)
+            password.isEmpty() -> LoginFormState()
+            !isPasswordValid(password) -> LoginFormState(passwordError = R.string.invalid_password)
+            else -> LoginFormState(isDataValid = true)
         }
     }
 

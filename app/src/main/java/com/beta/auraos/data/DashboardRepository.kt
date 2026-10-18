@@ -6,7 +6,6 @@ import com.beta.auraos.data.model.DashboardResponse
 import com.beta.auraos.data.remote.ApiClient
 import com.beta.auraos.data.remote.DashboardApi
 import okhttp3.Interceptor
-import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
@@ -29,7 +28,7 @@ class DashboardRepository(
                 chain.proceed(request)
             }
 
-            val client = OkHttpClient.Builder()
+            val client = ApiClient.okHttpClient.newBuilder()
                 .addInterceptor(authInterceptor)
                 .build()
 

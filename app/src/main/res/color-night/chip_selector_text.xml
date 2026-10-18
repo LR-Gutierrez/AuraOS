@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Chip text: on-accent when selected, primary otherwise (BCV Tracker ToggleChip). -->
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:state_checked="true" android:color="@color/midnight_on_primary" />
-    <item android:color="@color/midnight_on_surface_variant" />
+    <item android:state_checked="true" android:color="?attr/onAccentCustom" />
+    <item android:color="?attr/textPrimaryCustom" />
 </selector>

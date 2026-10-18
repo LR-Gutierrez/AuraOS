@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Hairline divider between rows of a grouped card, inset to the text column. -->
+<inset xmlns:android="http://schemas.android.com/apk/res/android"
+    android:insetLeft="50dp">
+    <shape android:shape="rectangle">
+        <solid android:color="?attr/dividerColorCustom" />
+        <size android:height="1dp" />
+    </shape>
+</inset>

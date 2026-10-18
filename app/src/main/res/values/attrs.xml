@@ -66,6 +66,13 @@
     <attr name="branchProgressTrackCustom" format="color" />
     <attr name="branchSurfaceTextCustom" format="color" />
 
+    <!-- LRGutierrez design system roles -->
+    <attr name="textMutedCustom" format="color" />
+    <attr name="accentTextCustom" format="color" />
+    <attr name="accentCustom" format="color" />
+    <attr name="onAccentCustom" format="color" />
+    <attr name="borderControlCustom" format="color" />
+
     <!-- Connectivity banner -->
     <attr name="connectivityOfflineCustom" format="color" />
     <attr name="connectivityOnlineCustom" format="color" />

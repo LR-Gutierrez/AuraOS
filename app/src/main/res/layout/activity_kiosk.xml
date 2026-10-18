@@ -1,322 +1,358 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<!--
+    Modo kiosko · autoservicio (Parqueo·Control). Welcome with free spots, a large amber
+    "Entrar" action, the membership (NFC) path, the NFC reader screen and its result.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/kiosk_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?attr/homeSurfaceBackground">
+    android:background="?attr/homeSurfaceBackground"
+    android:orientation="vertical"
+    android:paddingHorizontal="24dp"
+    android:paddingBottom="28dp"
+    tools:context=".KioskActivity">
 
-    <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/app_bar_layout"
+    <!-- Header: branch + exit -->
+    <LinearLayout
+        android:id="@+id/header_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@android:color/transparent"
-        app:elevation="@dimen/elevation_none">
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingTop="8dp">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/header_bar"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/home_header_height"
-            android:background="?attr/navbarBackground"
-            android:paddingHorizontal="@dimen/spacing_large">
+        <TextView
+            android:id="@+id/tv_branch_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="?attr/selectableItemBackground"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:minHeight="44dp"
+            android:gravity="center_vertical"
+            android:textAppearance="@style/TextAppearance.Lrg.Label"
+            tools:text="Autoservicio · Sede Centro" />
 
-            <TextView
-                android:id="@+id/tv_app_title"
-                android:layout_width="wrap_content"
-                android:layout_height="0dp"
-                android:fontFamily="sans-serif-black"
-                android:gravity="bottom"
-                android:text="@string/kiosk_title"
-                android:textColor="?attr/textPrimaryCustom"
-                android:textSize="@dimen/text_size_title"
-                android:textStyle="bold"
-                app:layout_constraintBottom_toTopOf="@id/tv_branch_name"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_exit_kiosk"
+            style="@style/Widget.Pc.Button.Outlined"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/aura_mono"
+            android:paddingHorizontal="12dp"
+            android:text="@string/pc_kiosk_exit"
+            android:textColor="?attr/textMutedCustom"
+            android:textSize="12sp"
+            app:strokeColor="?attr/dividerColorCustom" />
+    </LinearLayout>
 
-            <TextView
-                android:id="@+id/tv_branch_name"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="@dimen/spacing_small"
-                android:clickable="true"
-                android:focusable="true"
-                android:fontFamily="sans-serif-black"
-                android:text="@string/branch_no_branch"
-                android:textColor="?attr/colorPrimary"
-                android:textSize="@dimen/text_size_body"
-                android:textStyle="bold"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@id/btn_branch_selector"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/tv_app_title" />
-
-            <ImageButton
-                android:id="@+id/btn_branch_selector"
-                android:layout_width="@dimen/icon_size_large"
-                android:layout_height="@dimen/icon_size_large"
-                android:background="?attr/glassCardBackgroundCustom"
-                android:contentDescription="@string/branch_select_hint"
-                android:src="@android:drawable/arrow_down_float"
-                app:tint="?attr/textPrimaryCustom"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-    </com.google.android.material.appbar.AppBarLayout>
-
-    <androidx.core.widget.NestedScrollView
-        android:id="@+id/kioskScrollView"
+    <!-- Home -->
+    <LinearLayout
+        android:id="@+id/section_home"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:fillViewport="true"
-        android:scrollbars="none"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:accessibilityHeading="true"
+            android:text="@string/pc_welcome"
+            android:textAppearance="@style/TextAppearance.Pc.KioskDisplay" />
+
+        <TextView
+            android:id="@+id/tv_kiosk_subtitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:lineSpacingMultiplier="1.3"
+            android:textColor="?attr/textSecondaryCustom"
+            android:textSize="18sp"
+            tools:text="Hay 82 puestos libres en este momento." />
+
+        <LinearLayout
+            android:id="@+id/card_ticket"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingHorizontal="@dimen/container_padding"
-            android:paddingTop="@dimen/spacing_xxlarge"
-            android:paddingBottom="@dimen/spacing_xxlarge">
+            android:layout_marginTop="28dp"
+            android:background="@drawable/bg_pc_kiosk_primary"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground"
+            android:gravity="center_vertical"
+            android:minHeight="120dp"
+            android:orientation="horizontal"
+            android:padding="24dp">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/aura_sans"
+                    android:letterSpacing="-0.02"
+                    android:text="@string/pc_kiosk_enter"
+                    android:textColor="?attr/onAccentCustom"
+                    android:textSize="26sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:text="@string/pc_kiosk_enter_sub"
+                    android:textColor="?attr/onAccentCustom"
+                    android:textSize="15sp" />
+            </LinearLayout>
 
             <TextView
-                android:id="@+id/tv_kiosk_subtitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="sans-serif"
+                android:importantForAccessibility="no"
+                android:text="@string/pc_arrow"
+                android:textColor="?attr/onAccentCustom"
+                android:textSize="28sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/card_membership"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/bg_pc_outline_card"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground"
+            android:gravity="center_vertical"
+            android:minHeight="76dp"
+            android:orientation="horizontal"
+            android:paddingHorizontal="24dp">
+
+            <ImageView
+                android:layout_width="26dp"
+                android:layout_height="26dp"
+                android:importantForAccessibility="no"
+                android:src="@drawable/ic_pc_nfc"
+                app:tint="?attr/accentTextCustom" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="14dp"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:paddingVertical="14dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/pc_kiosk_member"
+                    android:textAppearance="@style/TextAppearance.Pc.Section" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="@string/pc_kiosk_member_sub"
+                    android:textAppearance="@style/TextAppearance.Lrg.Body" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:importantForAccessibility="no"
+                android:text="@string/pc_arrow"
+                android:textColor="?attr/accentTextCustom"
+                android:textSize="24sp" />
+        </LinearLayout>
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <View style="@style/Widget.Pc.Hairline" />
+
+        <TextView
+            android:id="@+id/tv_rates"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="14dp"
+            android:textAppearance="@style/TextAppearance.Pc.Mono"
+            android:textSize="12sp"
+            tools:text="Auto $2.00 · Camión $6.00 · Moto $1.00 por día" />
+    </LinearLayout>
+
+    <!-- NFC reader -->
+    <LinearLayout
+        android:id="@+id/card_nfc_scanning"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_nfc_cancel"
+            style="@style/Widget.Pc.TextLink"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/pc_back_arrow"
+            android:textSize="15sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:accessibilityHeading="true"
+            android:text="@string/pc_kiosk_nfc_title"
+            android:textAppearance="@style/TextAppearance.Pc.KioskTitle" />
+
+        <TextView
+            android:id="@+id/tv_nfc_status_subtitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:lineSpacingMultiplier="1.3"
+            android:text="@string/pc_kiosk_nfc_hint"
+            android:textColor="?attr/textSecondaryCustom"
+            android:textSize="16sp" />
+
+        <LinearLayout
+            android:id="@+id/nfc_reader_box"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginTop="24dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_pc_reader_idle"
+            android:gravity="center"
+            android:minHeight="300dp"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <FrameLayout
+                android:layout_width="180dp"
+                android:layout_height="180dp"
+                android:background="@drawable/bg_pc_circle_hairline">
+
+                <FrameLayout
+                    android:layout_width="124dp"
+                    android:layout_height="124dp"
+                    android:layout_gravity="center"
+                    android:background="@drawable/bg_pc_circle_outline">
+
+                    <FrameLayout
+                        android:layout_width="68dp"
+                        android:layout_height="68dp"
+                        android:layout_gravity="center"
+                        android:background="@drawable/bg_pc_circle_accent">
+
+                        <ImageView
+                            android:layout_width="30dp"
+                            android:layout_height="30dp"
+                            android:layout_gravity="center"
+                            android:importantForAccessibility="no"
+                            android:src="@drawable/ic_pc_nfc"
+                            app:tint="?attr/onAccentCustom" />
+                    </FrameLayout>
+                </FrameLayout>
+            </FrameLayout>
+
+            <TextView
+                android:id="@+id/tv_nfc_status_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:accessibilityLiveRegion="polite"
                 android:gravity="center"
-                android:text="@string/kiosk_select_mode"
-                android:textColor="?attr/textSecondaryCustom"
-                android:textSize="@dimen/text_size_body"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                android:textAppearance="@style/TextAppearance.Pc.Section"
+                tools:text="Esperando tarjeta…" />
 
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/card_ticket"
-                android:layout_width="match_parent"
+            <TextView
+                android:id="@+id/tv_nfc_member_info"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/spacing_large"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?attr/selectableItemBackground"
-                app:cardCornerRadius="@dimen/card_corner_radius_large"
-                app:cardBackgroundColor="?attr/branchSurfaceCustom"
-                app:strokeColor="?attr/dividerColorCustom"
-                app:strokeWidth="@dimen/stroke_thin"
-                app:layout_constraintTop_toBottomOf="@id/tv_kiosk_subtitle"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent">
-
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:padding="@dimen/spacing_large">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:fontFamily="sans-serif-black"
-                            android:text="@string/kiosk_ticket"
-                            android:textColor="?attr/textPrimaryCustom"
-                            android:textSize="22sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/spacing_xsmall"
-                            android:fontFamily="sans-serif"
-                            android:text="@string/kiosk_ticket_desc"
-                            android:textColor="?attr/textSecondaryCustom"
-                            android:textSize="@dimen/text_size_small" />
-
-                    </LinearLayout>
-
-                </RelativeLayout>
-
-            </com.google.android.material.card.MaterialCardView>
-
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/card_membership"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/spacing_medium"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?attr/selectableItemBackground"
-                app:cardCornerRadius="@dimen/card_corner_radius_large"
-                app:cardBackgroundColor="?attr/branchSurfaceCustom"
-                app:strokeColor="?attr/colorPrimary"
-                app:strokeWidth="@dimen/stroke_thin"
-                app:layout_constraintTop_toBottomOf="@id/card_ticket"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent">
-
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:padding="@dimen/spacing_large">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:fontFamily="sans-serif-black"
-                            android:text="@string/kiosk_membership"
-                            android:textColor="?attr/textPrimaryCustom"
-                            android:textSize="22sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/spacing_xsmall"
-                            android:fontFamily="sans-serif"
-                            android:text="@string/kiosk_membership_desc"
-                            android:textColor="?attr/textSecondaryCustom"
-                            android:textSize="@dimen/text_size_small" />
-
-                    </LinearLayout>
-
-                </RelativeLayout>
-
-            </com.google.android.material.card.MaterialCardView>
-
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/card_nfc_scanning"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/spacing_large"
+                android:layout_marginTop="6dp"
+                android:gravity="center"
+                android:textAppearance="@style/TextAppearance.Pc.Mono"
                 android:visibility="gone"
-                app:cardCornerRadius="@dimen/card_corner_radius_large"
-                app:cardBackgroundColor="?attr/branchSurfaceCustom"
-                app:strokeColor="?attr/colorPrimary"
-                app:strokeWidth="@dimen/stroke_thin"
-                app:layout_constraintTop_toBottomOf="@id/card_ticket"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent">
+                tools:text="Carlos Méndez" />
+        </LinearLayout>
+    </LinearLayout>
 
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:padding="@dimen/spacing_large">
+    <!-- NFC result -->
+    <LinearLayout
+        android:id="@+id/card_nfc_processing"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="center_vertical"
+        android:orientation="vertical"
+        android:visibility="gone">
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:orientation="vertical">
+        <FrameLayout
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:background="@drawable/bg_pc_circle_accent">
 
-                        <TextView
-                            android:id="@+id/tv_nfc_status_title"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:fontFamily="sans-serif-black"
-                            android:text="@string/kiosk_nfc_scan_title"
-                            android:textAlignment="center"
-                            android:textColor="?attr/textPrimaryCustom"
-                            android:textSize="22sp"
-                            android:textStyle="bold" />
+            <ImageView
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_gravity="center"
+                android:importantForAccessibility="no"
+                android:src="@drawable/ic_pc_check"
+                app:tint="?attr/onAccentCustom" />
+        </FrameLayout>
 
-                        <TextView
-                            android:id="@+id/tv_nfc_status_subtitle"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/spacing_small"
-                            android:fontFamily="sans-serif"
-                            android:text="@string/kiosk_nfc_scan_subtitle"
-                            android:textAlignment="center"
-                            android:textColor="?attr/textSecondaryCustom"
-                            android:textSize="@dimen/text_size_body" />
+        <TextView
+            android:id="@+id/tv_result_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:accessibilityLiveRegion="polite"
+            android:textAppearance="@style/TextAppearance.Pc.KioskTitle"
+            tools:text="Bienvenido, Carlos" />
 
-                        <TextView
-                            android:id="@+id/tv_nfc_member_info"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/spacing_medium"
-                            android:fontFamily="sans-serif-black"
-                            android:textAlignment="center"
-                            android:textColor="?attr/colorPrimary"
-                            android:textSize="@dimen/text_size_body"
-                            android:textStyle="bold"
-                            android:visibility="gone" />
+        <TextView
+            android:id="@+id/tv_nfc_processing"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:lineSpacingMultiplier="1.3"
+            android:textColor="?attr/textSecondaryCustom"
+            android:textSize="17sp"
+            tools:text="Entrada registrada con tu membresía. Adelante." />
 
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/btn_nfc_cancel"
-                            style="@style/Widget.Material3.Button.TextButton"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/spacing_large"
-                            android:text="@string/dialog_cancel"
-                            android:textColor="?attr/textSecondaryCustom" />
+        <TextView
+            android:id="@+id/tv_result_meta"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:textAppearance="@style/TextAppearance.Pc.Mono"
+            tools:text="Mensual · 07:42 · vigente hasta 30/11/2026" />
 
-                    </LinearLayout>
-
-                </RelativeLayout>
-
-            </com.google.android.material.card.MaterialCardView>
-
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/card_nfc_processing"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/spacing_large"
-                android:visibility="gone"
-                app:cardCornerRadius="@dimen/card_corner_radius_large"
-                app:cardBackgroundColor="?attr/branchSurfaceCustom"
-                app:strokeColor="?attr/colorPrimary"
-                app:strokeWidth="@dimen/stroke_thin"
-                app:layout_constraintTop_toBottomOf="@id/card_ticket"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent">
-
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:padding="@dimen/spacing_large">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:id="@+id/tv_nfc_processing"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:fontFamily="sans-serif-black"
-                            android:text="@string/kiosk_nfc_processing"
-                            android:textAlignment="center"
-                            android:textColor="?attr/textPrimaryCustom"
-                            android:textSize="22sp"
-                            android:textStyle="bold" />
-
-                    </LinearLayout>
-
-                </RelativeLayout>
-
-            </com.google.android.material.card.MaterialCardView>
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-    </androidx.core.widget.NestedScrollView>
-
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_result_home"
+            style="@style/Widget.Pc.TextLink"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="@string/pc_back_home"
+            android:textSize="15sp" />
+    </LinearLayout>
+</LinearLayout>

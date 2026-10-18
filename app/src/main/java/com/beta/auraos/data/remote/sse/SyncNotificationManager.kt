@@ -26,6 +26,8 @@ class SyncNotificationManager(context: Context) {
     }
 
     private fun createChannel() {
+        // Channels exist from Android 8; on 7 notifications post without one.
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
         val channel = NotificationChannel(
             CHANNEL_ID,
             CHANNEL_NAME,
@@ -98,6 +100,6 @@ class SyncNotificationManager(context: Context) {
         private const val CHANNEL_DESC = "Notificaciones cuando hay nuevos datos sincronizados"
         private const val REQUEST_CODE = 1001
         private const val SYNC_NOTIFICATION_ID_BASE = 2000
-        private val NOTIFICATION_COLOR = 0xFF3E90FF.toInt()
+        private val NOTIFICATION_COLOR = 0xFFF5A524.toInt()
     }
 }

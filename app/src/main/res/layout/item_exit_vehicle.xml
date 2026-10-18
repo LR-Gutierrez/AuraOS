@@ -42,7 +42,7 @@
                     android:id="@+id/tv_plate"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:fontFamily="sans-serif-black"
+                    android:fontFamily="@font/aura_sans"
                     android:textColor="?attr/textPrimaryCustom"
                     android:textSize="18sp"
                     android:textStyle="bold" />
@@ -52,7 +52,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/spacing_xxsmall"
-                    android:fontFamily="sans-serif"
+                    android:fontFamily="@font/aura_sans"
                     android:textColor="?attr/textSecondaryCustom"
                     android:textSize="13sp" />
 
@@ -80,14 +80,14 @@
                     android:textSize="9sp"
                     android:textAllCaps="true"
                     android:letterSpacing="0.08"
-                    android:fontFamily="sans-serif" />
+                    android:fontFamily="@font/aura_sans" />
 
                 <TextView
                     android:id="@+id/tv_duration_value"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
-                    android:fontFamily="sans-serif-mono"
+                    android:fontFamily="@font/aura_mono"
                     android:textColor="?attr/textPrimaryCustom"
                     android:textSize="14sp"
                     android:textStyle="bold" />
@@ -108,15 +108,15 @@
                     android:textSize="9sp"
                     android:textAllCaps="true"
                     android:letterSpacing="0.08"
-                    android:fontFamily="sans-serif" />
+                    android:fontFamily="@font/aura_sans" />
 
                 <TextView
                     android:id="@+id/tv_current_fee_value"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
-                    android:fontFamily="sans-serif-black"
-                    android:textColor="@color/branch_green_neon"
+                    android:fontFamily="@font/aura_sans"
+                    android:textColor="?attr/accentTextCustom"
                     android:textSize="16sp"
                     android:textStyle="bold" />
 
@@ -137,12 +137,12 @@
                 android:gravity="center"
                 android:paddingHorizontal="20dp"
                 android:text="@string/exit_confirm_action"
-                android:textColor="#1A1A1C"
+                android:textColor="?attr/onAccentCustom"
                 android:textSize="11sp"
                 android:textStyle="bold"
-                android:fontFamily="sans-serif"
+                android:fontFamily="@font/aura_sans"
                 android:letterSpacing="0.05"
-                android:background="#A8C5FF"
+                android:background="@drawable/bg_lrg_badge"
                 android:clickable="true"
                 android:focusable="true" />
 

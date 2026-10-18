@@ -1,12 +1,13 @@
 package com.beta.auraos.util
 
-import com.beta.auraos.data.remote.ApiClient
+import com.beta.auraos.data.remote.ServerConfig
 
 object PhotoUrlBuilder {
 
     fun build(relativePath: String?): String? {
         if (relativePath.isNullOrBlank()) return null
         val path = relativePath.trimStart('/')
-        return ApiClient.BASE_URL + path
+        val server = ServerConfig.baseUrl() ?: return null
+        return server.toString() + path
     }
 }

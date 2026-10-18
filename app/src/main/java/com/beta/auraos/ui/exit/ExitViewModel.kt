@@ -45,6 +45,14 @@ class ExitViewModel(
     private val _branch = MutableLiveData<Branch?>()
     val branch: LiveData<Branch?> = _branch
 
+    /** The entry that just left, with its final fee and duration; cleared via [consumeExit]. */
+    private val _lastExit = MutableLiveData<VehicleEntry?>()
+    val lastExit: LiveData<VehicleEntry?> = _lastExit
+
+    fun consumeExit() {
+        _lastExit.value = null
+    }
+
     fun loadEntries(branchId: String) {
         _uiState.value = ExitUiState.Loading
         viewModelScope.launch {
@@ -94,9 +102,7 @@ class ExitViewModel(
             val entry = state?.entries?.find { it.id == entryId }
 
             val exitTime = nowUtcString()
-            val fee = entry?.let {
-                FeeCalculator.computeFee(it.createdAt, it.vehicleType, branch)
-            } ?: 0.0
+            val fee = entry?.let { FeeCalculator.exitFee(it, branch) } ?: 0.0
             val duration = entry?.let {
                 FeeCalculator.computeDuration(it.createdAt)
             }
@@ -123,7 +129,8 @@ class ExitViewModel(
             if (result is Result.Success) {
                 val exited = result.data
                 val serverEntry = exited.copy(
-                    fee = exited.fee ?: fee,
+                    // Members never carry a per-visit fee, whatever the server echoes back.
+                    fee = if (exited.membershipId != null) 0.0 else exited.fee ?: fee,
                     duration = exited.duration ?: duration,
                     exitedAt = exited.exitedAt ?: exitTime
                 )
@@ -139,7 +146,8 @@ class ExitViewModel(
             }
 
             val entries = state?.entries?.filter { it.id != entryId } ?: emptyList()
-            _uiState.value = ExitUiState.Success(entries)
+            _uiState.value = ExitUiState.Success(entries, state?.membershipNameMap ?: emptyMap())
+            _lastExit.value = cachedEntry
         }
     }
 

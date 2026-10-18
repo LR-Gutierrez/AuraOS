@@ -1,659 +1,258 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<!--
+    Analíticas (Parqueo·Control). Period / branch / type filters, period revenue, a tappable
+    revenue bar chart, vehicles and average ticket, breakdowns and the exits behind the numbers.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="?attr/homeSurfaceBackground"
+    android:orientation="vertical"
     tools:context=".AnalyticsActivity">
-
-    <View
-        android:layout_width="300dp"
-        android:layout_height="300dp"
-        android:alpha="0.06"
-        android:background="@drawable/bg_aura_primary"
-        android:layout_gravity="top|start"
-        android:translationX="-100dp"
-        android:translationY="-100dp" />
-
-    <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/app_bar_layout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@android:color/transparent"
-        app:elevation="0dp">
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/header_bar"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/home_header_height"
-            android:background="?attr/navbarBackground"
-            android:paddingHorizontal="@dimen/spacing_large"
-            app:layout_scrollFlags="scroll|enterAlways">
-
-            <TextView
-                android:id="@+id/tv_app_title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:fontFamily="sans-serif-black"
-                android:gravity="bottom"
-                android:text="@string/analytics_title"
-                android:textColor="?attr/textPrimaryCustom"
-                android:textSize="@dimen/text_size_title"
-                android:textStyle="bold"
-                app:layout_constraintBottom_toTopOf="@id/tv_branch_name"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <TextView
-                android:id="@+id/tv_branch_name"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="@dimen/spacing_small"
-                android:clickable="true"
-                android:focusable="true"
-                android:fontFamily="sans-serif-black"
-                android:text="@string/branch_no_branch"
-                android:textColor="?attr/colorPrimary"
-                android:textSize="@dimen/text_size_body"
-                android:textStyle="bold"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@id/btn_branch_selector"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/tv_app_title" />
-
-            <ImageButton
-                android:id="@+id/btn_branch_selector"
-                android:layout_width="@dimen/icon_size_large"
-                android:layout_height="@dimen/icon_size_large"
-                android:background="?attr/glassCardBackgroundCustom"
-                android:contentDescription="@string/branch_select_hint"
-                android:src="@android:drawable/arrow_down_float"
-                app:tint="?attr/textPrimaryCustom"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-    </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.core.widget.NestedScrollView
         android:id="@+id/homeScrollView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:clipToPadding="false"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        android:scrollbars="none">
 
         <LinearLayout
-            android:id="@+id/content_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingHorizontal="24dp"
-            android:paddingTop="16dp"
-            android:paddingBottom="120dp">
-
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/card_revenue"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:cardCornerRadius="28dp"
-                app:cardBackgroundColor="?attr/cardGlassFillColorCustom"
-                app:strokeColor="?attr/dividerColorCustom"
-                app:strokeWidth="1dp"
-                app:cardElevation="0dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="24dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:letterSpacing="0.08"
-                        android:text="@string/history_today_revenue"
-                        android:textAllCaps="true"
-                        android:textColor="?attr/textSecondaryCustom"
-                        android:textSize="11sp" />
-
-                    <TextView
-                        android:id="@+id/tv_today_revenue"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="$18.00"
-                        android:textColor="?attr/textPrimaryCustom"
-                        android:textSize="34sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/tv_peak_text"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:alpha="0.6"
-                        android:text="$0.00 peak hour"
-                        android:textColor="?attr/textSecondaryCustom"
-                        android:textSize="13sp" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <LinearLayout
-                android:id="@+id/layout_traffic_row"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:orientation="horizontal">
-
-                <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/card_inbound_traffic"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginEnd="6dp"
-                    app:cardCornerRadius="24dp"
-                    app:cardBackgroundColor="?attr/cardGlassFillColorCustom"
-                    app:strokeColor="#4CAF50"
-                    app:strokeWidth="1dp"
-                    app:cardElevation="0dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:gravity="center"
-                        android:padding="16dp">
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/traffic_inbound_label"
-                            android:textSize="9sp"
-                            android:letterSpacing="0.1"
-                            android:textColor="#4CAF50"
-                            android:textAllCaps="true" />
-                        <TextView
-                            android:id="@+id/tv_inbound_count"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="0"
-                            android:textColor="?attr/textPrimaryCustom"
-                            android:textSize="22sp"
-                            android:textStyle="bold"
-                            android:layout_marginTop="4dp" />
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/traffic_card_inbound_subtitle"
-                            android:textColor="?attr/textSecondaryCustom"
-                            android:textSize="10sp"
-                            android:layout_marginTop="2dp"
-                            android:alpha="0.6" />
-                        <TextView
-                            android:id="@+id/tv_inbound_trend"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="+0%"
-                            android:textColor="@android:color/holo_green_light"
-                            android:textSize="9sp"
-                            android:layout_marginTop="4dp"
-                            android:alpha="0.8" />
-                    </LinearLayout>
-                </com.google.android.material.card.MaterialCardView>
-
-                <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/card_occupancy"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginHorizontal="6dp"
-                    app:cardCornerRadius="24dp"
-                    app:cardBackgroundColor="?attr/cardGlassFillColorCustom"
-                    app:strokeColor="#FFC107"
-                    app:strokeWidth="1dp"
-                    app:cardElevation="0dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:gravity="center"
-                        android:padding="16dp">
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/traffic_occupancy_label"
-                            android:textSize="9sp"
-                            android:letterSpacing="0.1"
-                            android:textColor="#FFC107"
-                            android:textAllCaps="true" />
-                        <TextView
-                            android:id="@+id/tv_occupancy_count"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="0"
-                            android:textColor="?attr/textPrimaryCustom"
-                            android:textSize="22sp"
-                            android:textStyle="bold"
-                            android:layout_marginTop="4dp" />
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/traffic_card_occupied_subtitle"
-                            android:textColor="?attr/textSecondaryCustom"
-                            android:textSize="10sp"
-                            android:layout_marginTop="2dp"
-                            android:alpha="0.6" />
-                        <TextView
-                            android:id="@+id/tv_occupancy_trend"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="+0%"
-                            android:textColor="@android:color/holo_green_light"
-                            android:textSize="9sp"
-                            android:layout_marginTop="4dp"
-                            android:alpha="0.8" />
-                    </LinearLayout>
-                </com.google.android.material.card.MaterialCardView>
-
-                <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/card_outbound_flow"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginStart="6dp"
-                    app:cardCornerRadius="24dp"
-                    app:cardBackgroundColor="?attr/cardGlassFillColorCustom"
-                    app:strokeColor="?attr/dividerColorCustom"
-                    app:strokeWidth="1dp"
-                    app:cardElevation="0dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:gravity="center"
-                        android:padding="16dp">
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/traffic_outbound_label"
-                            android:textSize="9sp"
-                            android:letterSpacing="0.1"
-                            android:textColor="?attr/textSecondaryCustom"
-                            android:textAllCaps="true" />
-                        <TextView
-                            android:id="@+id/tv_outbound_count"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="0"
-                            android:textColor="?attr/textPrimaryCustom"
-                            android:textSize="22sp"
-                            android:textStyle="bold"
-                            android:layout_marginTop="4dp" />
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/history_today_count"
-                            android:textColor="?attr/textSecondaryCustom"
-                            android:textSize="10sp"
-                            android:layout_marginTop="2dp"
-                            android:alpha="0.6" />
-                        <TextView
-                            android:id="@+id/tv_outbound_trend"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="+0%"
-                            android:textColor="@android:color/holo_green_light"
-                            android:textSize="9sp"
-                            android:layout_marginTop="4dp"
-                            android:alpha="0.8" />
-                    </LinearLayout>
-                </com.google.android.material.card.MaterialCardView>
-            </LinearLayout>
-
-            <GridLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:columnCount="2"
-                android:alignmentMode="alignMargins"
-                android:columnOrderPreserved="false">
-
-                <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/card_exits"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_columnWeight="1"
-                    android:layout_marginEnd="8dp"
-                    app:cardCornerRadius="24dp"
-                    app:cardBackgroundColor="?attr/cardGlassFillColorCustom"
-                    app:strokeColor="?attr/dividerColorCustom"
-                    app:strokeWidth="1dp"
-                    app:cardElevation="0dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="20dp">
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/history_today_count"
-                            android:textSize="11sp"
-                            android:letterSpacing="0.08"
-                            android:textColor="?attr/textSecondaryCustom"
-                            android:textAllCaps="true" />
-                        <TextView
-                            android:id="@+id/tv_today_count"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="2"
-                            android:textColor="?attr/textPrimaryCustom"
-                            android:textSize="28sp"
-                            android:textStyle="bold"
-                            android:layout_marginTop="4dp" />
-                        <TextView
-                            android:id="@+id/tv_trend_text"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="0% vs yesterday"
-                            android:textColor="?attr/semanticSuccessCustom"
-                            android:textSize="12sp"
-                            android:layout_marginTop="4dp" />
-                    </LinearLayout>
-                </com.google.android.material.card.MaterialCardView>
-
-                <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/card_duration"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_columnWeight="1"
-                    android:layout_marginStart="8dp"
-                    app:cardCornerRadius="24dp"
-                    app:cardBackgroundColor="?attr/cardGlassFillColorCustom"
-                    app:strokeColor="?attr/dividerColorCustom"
-                    app:strokeWidth="1dp"
-                    app:cardElevation="0dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="20dp">
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/history_avg_duration"
-                            android:textSize="11sp"
-                            android:letterSpacing="0.08"
-                            android:textColor="?attr/textSecondaryCustom"
-                            android:textAllCaps="true" />
-                        <TextView
-                            android:id="@+id/tv_avg_duration"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="0m"
-                            android:textColor="?attr/textPrimaryCustom"
-                            android:textSize="28sp"
-                            android:textStyle="bold"
-                            android:layout_marginTop="4dp" />
-                        <TextView
-                            android:id="@+id/tv_avg_duration_target"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/history_metric_target"
-                            android:textColor="?attr/textSecondaryCustom"
-                            android:textSize="12sp"
-                            android:layout_marginTop="4dp"
-                            android:alpha="0.6"/>
-                    </LinearLayout>
-                </com.google.android.material.card.MaterialCardView>
-            </GridLayout>
-
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/search_card"
-                android:layout_width="match_parent"
-                android:layout_height="56dp"
-                android:layout_marginTop="24dp"
-                app:cardCornerRadius="999dp"
-                app:cardBackgroundColor="?attr/branchSurfaceCustom"
-                app:strokeColor="?attr/dividerColorCustom"
-                app:strokeWidth="1dp"
-                app:cardElevation="0dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center_vertical"
-                    android:paddingHorizontal="20dp">
-                    <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:src="@android:drawable/ic_menu_search"
-                        app:tint="?attr/textSecondaryCustom" />
-                    <EditText
-                        android:id="@+id/et_search"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_marginStart="12dp"
-                        android:background="@null"
-                        android:hint="@string/history_search_hint"
-                        android:textColorHint="?attr/textSecondaryCustom"
-                        android:textColor="?attr/textPrimaryCustom"
-                        android:textSize="15sp" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <HorizontalScrollView
-                android:id="@+id/filter_chips_scroll"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:scrollbars="none">
-
-                <LinearLayout
-                    android:id="@+id/layout_filter_chips"
-                    android:layout_width="wrap_content"
-                    android:layout_height="40dp"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btn_filter_today"
-                        style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/btn_vehicle_selector"
-                        android:text="@string/history_filter_today"
-                        android:textAllCaps="false"
-                        android:textColor="@drawable/btn_vehicle_text_selector"
-                        android:textSize="12sp"
-                        app:cornerRadius="999dp" />
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btn_filter_all"
-                        style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="8dp"
-                        android:background="@drawable/btn_vehicle_selector"
-                        android:text="@string/history_filter_all"
-                        android:textAllCaps="false"
-                        android:textColor="@drawable/btn_vehicle_text_selector"
-                        android:textSize="12sp"
-                        app:cornerRadius="999dp" />
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btn_filter_range"
-                        style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="8dp"
-                        android:background="@drawable/btn_vehicle_selector"
-                        android:text="@string/history_filter_range"
-                        android:textAllCaps="false"
-                        android:textColor="@drawable/btn_vehicle_text_selector"
-                        android:textSize="12sp"
-                        app:cornerRadius="999dp" />
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btn_filter_rate"
-                        style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="8dp"
-                        android:background="@drawable/btn_vehicle_selector"
-                        android:text="@string/history_sort_fee"
-                        android:textAllCaps="false"
-                        android:textColor="@drawable/btn_vehicle_text_selector"
-                        android:textSize="12sp"
-                        app:cornerRadius="999dp" />
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btn_filter_duration"
-                        style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="8dp"
-                        android:background="@drawable/btn_vehicle_selector"
-                        android:text="@string/history_sort_duration"
-                        android:textAllCaps="false"
-                        android:textColor="@drawable/btn_vehicle_text_selector"
-                        android:textSize="12sp"
-                        app:cornerRadius="999dp" />
-                </LinearLayout>
-            </HorizontalScrollView>
-
-            <LinearLayout
-                android:id="@+id/layout_date_range"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:orientation="horizontal"
-                android:visibility="gone">
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_date_from"
-                    style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
-                    android:layout_width="0dp"
-                    android:layout_height="40dp"
-                    android:layout_weight="1"
-                    android:layout_marginEnd="4dp"
-                    android:background="@drawable/btn_vehicle_selector"
-                    android:text="@string/history_filter_from"
-                    android:textAllCaps="false"
-                    android:textColor="@drawable/btn_vehicle_text_selector"
-                    android:textSize="11sp"
-                    app:cornerRadius="999dp" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_date_to"
-                    style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
-                    android:layout_width="0dp"
-                    android:layout_height="40dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/btn_vehicle_selector"
-                    android:text="@string/history_filter_to"
-                    android:textAllCaps="false"
-                    android:textColor="@drawable/btn_vehicle_text_selector"
-                    android:textSize="11sp"
-                    app:cornerRadius="999dp" />
-            </LinearLayout>
+            android:paddingHorizontal="20dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="32dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="32dp"
-                android:text="@string/traffic_feed_title"
-                android:textColor="?attr/textPrimaryCustom"
-                android:textSize="18sp"
-                android:fontFamily="sans-serif-black" />
+                android:accessibilityHeading="true"
+                android:text="@string/title_activity_analytics"
+                android:textAppearance="@style/TextAppearance.Pc.H2" />
+
+            <!-- Filters -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:orientation="horizontal">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_period"
+                    style="@style/Widget.Pc.Select"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.8"
+                    tools:text="7 días" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_branch"
+                    style="@style/Widget.Pc.Select"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1"
+                    tools:text="Todas las sedes" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_type"
+                    style="@style/Widget.Pc.Select"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1"
+                    tools:text="Todos los tipos" />
+            </LinearLayout>
+
+            <com.google.android.material.progressindicator.LinearProgressIndicator
+                android:id="@+id/loading_overlay"
+                style="@style/Widget.Pc.Progress"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:indeterminate="true"
+                android:visibility="gone" />
+
+            <!-- Total -->
+            <TextView
+                android:id="@+id/tv_total_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:textAppearance="@style/TextAppearance.Lrg.Label"
+                tools:text="Ingresos · últimos 7 días" />
+
+            <TextView
+                android:id="@+id/tv_total"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="@string/pc_money_zero"
+                android:textAppearance="@style/TextAppearance.Pc.Amount" />
+
+            <TextView
+                android:id="@+id/tv_total_sub"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:textAppearance="@style/TextAppearance.Pc.Mono"
+                tools:text="+12.3 % vs periodo anterior" />
+
+            <!-- Chart -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:background="@drawable/bg_lrg_card"
+                android:orientation="vertical"
+                android:paddingHorizontal="16dp"
+                android:paddingTop="18dp"
+                android:paddingBottom="14dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:baselineAligned="true"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/tv_sel_label"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textAppearance="@style/TextAppearance.Pc.Mono"
+                        android:textColor="?attr/textSecondaryCustom"
+                        tools:text="mié 15 oct" />
+
+                    <TextView
+                        android:id="@+id/tv_sel_value"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="@style/TextAppearance.Pc.MonoValue"
+                        android:textSize="16sp"
+                        tools:text="$231.50" />
+                </LinearLayout>
+
+                <com.beta.auraos.ui.widget.BarChartView
+                    android:id="@+id/chart"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp" />
+            </LinearLayout>
+
+            <!-- Vehicles / average ticket -->
+            <View
+                style="@style/Widget.Pc.Hairline"
+                android:layout_marginTop="24dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:paddingVertical="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/pc_vehicles"
+                        android:textAppearance="@style/TextAppearance.Lrg.Label" />
+
+                    <TextView
+                        android:id="@+id/tv_vehicles"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:text="@string/pc_zero"
+                        android:textAppearance="@style/TextAppearance.Pc.Stat" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="match_parent"
+                    android:background="?attr/dividerColorCustom" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:paddingVertical="16dp"
+                    android:paddingStart="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/pc_avg_ticket"
+                        android:textAppearance="@style/TextAppearance.Lrg.Label" />
+
+                    <TextView
+                        android:id="@+id/tv_avg_ticket"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:text="@string/pc_money_zero"
+                        android:textAppearance="@style/TextAppearance.Pc.Stat" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <View style="@style/Widget.Pc.Hairline" />
+
+            <LinearLayout
+                android:id="@+id/ll_breakdowns"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+
+            <!-- Exits behind the numbers -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="28dp"
+                android:accessibilityHeading="true"
+                android:paddingBottom="4dp"
+                android:text="@string/pc_period_exits"
+                android:textAppearance="@style/TextAppearance.Pc.Section" />
+
+            <LinearLayout
+                android:id="@+id/ll_exits"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
 
             <TextView
                 android:id="@+id/tv_empty_state"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginTop="40dp"
-                android:text="@string/history_empty"
-                android:textColor="?attr/textSecondaryCustom"
-                android:textSize="15sp"
-                android:visibility="gone" />
-
-            <TextView
-                android:id="@+id/tv_showing_count"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginTop="8dp"
-                android:textColor="?attr/textSecondaryCustom"
-                android:textSize="12sp"
+                android:paddingVertical="14dp"
+                android:text="@string/pc_no_exits"
+                android:textAppearance="@style/TextAppearance.Pc.Hint"
+                android:textSize="14sp"
                 android:visibility="gone" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_load_more"
-                style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:layout_marginTop="16dp"
-                android:background="@drawable/btn_vehicle_selector"
-                android:text="@string/history_load_more"
-                android:textAllCaps="false"
-                android:textColor="@drawable/btn_vehicle_text_selector"
-                android:textSize="13sp"
+                style="@style/Widget.Pc.TextLink"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
                 android:visibility="gone"
-                app:cornerRadius="999dp" />
-
+                tools:text="Ver 20 más" />
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
-    <FrameLayout
-        android:id="@+id/loading_overlay"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="#99000000"
-        android:clickable="true"
-        android:focusable="true"
-        android:visibility="gone">
+    <include
+        android:id="@+id/tab_bar"
+        layout="@layout/view_pc_tab_bar" />
 
-        <com.google.android.material.progressindicator.CircularProgressIndicator
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:indeterminate="true"
-            app:indicatorColor="?attr/textPrimaryCustom" />
-    </FrameLayout>
-
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom">
-
-        <com.google.android.material.bottomnavigation.BottomNavigationView
-            android:id="@+id/bottom_navigation"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/bottom_nav_height"
-            android:background="?attr/homeSurfaceBackground"
-            app:elevation="@dimen/elevation_none"
-            app:itemIconTint="?attr/bottomNavItemColorCustom"
-            app:itemBackground="@drawable/bg_bottom_nav_item"
-            app:labelVisibilityMode="unlabeled"
-            app:menu="@menu/home_bottom_menu" />
-
-        <View
-            android:id="@+id/bottom_nav_indicator"
-            android:layout_width="@dimen/bottom_nav_indicator_width"
-            android:layout_height="3dp"
-            android:layout_gravity="top"
-            android:background="@drawable/bg_bottom_nav_indicator"
-            android:backgroundTint="?attr/bottomNavItemColorCustom"
-            android:visibility="invisible" />
-
-    </FrameLayout>
-
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+</LinearLayout>

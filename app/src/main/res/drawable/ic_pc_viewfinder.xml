@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Four 2dp corner brackets framing the plate capture (300x200 frame). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="136dp"
+    android:height="86dp"
+    android:viewportWidth="272"
+    android:viewportHeight="172">
+    <path
+        android:pathData="M1,29V1h28M243,1h28v28M271,143v28h-28M29,171H1v-28"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeWidth="2" />
+</vector>

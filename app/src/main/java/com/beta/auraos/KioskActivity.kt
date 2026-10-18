@@ -7,6 +7,7 @@ import android.nfc.Tag
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.ViewCompat
@@ -30,9 +31,12 @@ import com.beta.auraos.data.remote.BranchApi
 import com.beta.auraos.data.remote.NfcEntryRequest
 import com.beta.auraos.data.remote.ParkingApi
 import com.beta.auraos.databinding.ActivityKioskBinding
+import com.beta.auraos.util.ParkingFormat
+import com.beta.auraos.util.formatDate
 import com.beta.auraos.ui.branches.BranchListActivity
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -54,6 +58,7 @@ class KioskActivity : BaseActivity() {
     private var nfcAdapter: NfcAdapter? = null
     private var isNfcScanning = false
     private var isProcessingNfc = false
+    private var resultJob: Job? = null
 
     private val branchRepository: BranchRepository by lazy {
         BranchRepository(ApiClient.createApi<BranchApi>(), AppDatabase.getInstance(this@KioskActivity))
@@ -90,6 +95,18 @@ class KioskActivity : BaseActivity() {
         setupClickHandlers()
         setupWindowInsets()
         loadBranches()
+
+        // Back from the NFC reader or its result returns to the welcome screen, not out of the kiosk.
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (binding.sectionHome.visibility != View.VISIBLE) {
+                    stopNfcScanning()
+                } else {
+                    isEnabled = false
+                    onBackPressedDispatcher.onBackPressed()
+                }
+            }
+        })
     }
 
     override fun onResume() {
@@ -121,8 +138,31 @@ class KioskActivity : BaseActivity() {
     }
 
     private fun setupBranchSelector() {
-        binding.btnBranchSelector.setOnClickListener { showBranchSelector() }
         binding.tvBranchName.setOnClickListener { showBranchSelector() }
+    }
+
+    /** Header, free spots and daily rates for the selected branch. */
+    private fun renderBranch() {
+        val branch = selectedBranch
+        if (branch == null) {
+            binding.tvBranchName.text = getString(R.string.branch_no_branch)
+            return
+        }
+        binding.tvBranchName.text = getString(R.string.pc_kiosk_header, branch.name)
+        binding.tvRates.text = getString(
+            R.string.pc_kiosk_rates,
+            getString(R.string.vehicle_type_auto), ParkingFormat.money(branch.lightVehicleRate, branch.currency),
+            getString(R.string.vehicle_type_camion), ParkingFormat.money(branch.heavyVehicleRate, branch.currency),
+            getString(R.string.vehicle_type_moto), ParkingFormat.money(branch.motorcycleRate, branch.currency),
+        )
+        lifecycleScope.launch {
+            val occupied = withContext(Dispatchers.IO) {
+                vehicleEntryRepository.getActiveEntriesLocal(branch.id).size
+            }
+            val capacity = branch.lightVehicleCapacity + branch.heavyVehicleCapacity + branch.motorcycleCapacity
+            binding.tvKioskSubtitle.text =
+                (capacity - occupied).coerceAtLeast(0).let { resources.getQuantityString(R.plurals.pc_kiosk_free, it, it) }
+        }
     }
 
     private fun showBranchSelector() {
@@ -147,7 +187,7 @@ class KioskActivity : BaseActivity() {
                 val branch = branches[which]
                 selectedBranch = branch
                 sessionManager.saveSelectedBranchId(branch.id)
-                binding.tvBranchName.text = branch.name
+                renderBranch()
                 dialog.dismiss()
                 loadMemberships()
             }
@@ -181,14 +221,11 @@ class KioskActivity : BaseActivity() {
 
         if (saved != null) {
             selectedBranch = saved
-            binding.tvBranchName.text = saved.name
         } else if (branches.isNotEmpty()) {
             selectedBranch = branches.first()
             sessionManager.saveSelectedBranchId(selectedBranch!!.id)
-            binding.tvBranchName.text = selectedBranch!!.name
-        } else {
-            binding.tvBranchName.text = getString(R.string.branch_no_branch)
         }
+        renderBranch()
         loadMemberships()
     }
 
@@ -202,6 +239,7 @@ class KioskActivity : BaseActivity() {
             startActivity(Intent(this, KioskEntryActivity::class.java).apply {
                 putExtra("mode", "ticket")
                 putExtra("branchId", selectedBranch!!.id)
+                putExtra("branchName", selectedBranch!!.name)
             })
         }
 
@@ -215,6 +253,8 @@ class KioskActivity : BaseActivity() {
         }
 
         binding.btnNfcCancel.setOnClickListener { stopNfcScanning() }
+        binding.btnResultHome.setOnClickListener { stopNfcScanning() }
+        binding.btnExitKiosk.setOnClickListener { finish() }
     }
 
     private fun startNfcScanning() {
@@ -229,14 +269,11 @@ class KioskActivity : BaseActivity() {
         }
 
         isNfcScanning = true
-        binding.cardTicket.visibility = View.GONE
-        binding.cardMembership.visibility = View.GONE
-        binding.tvKioskSubtitle.visibility = View.GONE
+        resultJob?.cancel()
+        binding.sectionHome.visibility = View.GONE
         binding.cardNfcScanning.visibility = View.VISIBLE
         binding.cardNfcProcessing.visibility = View.GONE
-        binding.tvNfcStatusTitle.text = getString(R.string.kiosk_nfc_scan_title)
-        binding.tvNfcStatusSubtitle.visibility = View.VISIBLE
-        binding.tvNfcMemberInfo.visibility = View.GONE
+        showReaderStatus(getString(R.string.pc_kiosk_waiting), null, reading = false)
 
         enableNfcForegroundDispatch()
     }
@@ -247,18 +284,38 @@ class KioskActivity : BaseActivity() {
         if (lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
             disableNfcForegroundDispatch()
         }
+        resultJob?.cancel()
         binding.cardNfcScanning.visibility = View.GONE
         binding.cardNfcProcessing.visibility = View.GONE
-        binding.tvKioskSubtitle.visibility = View.VISIBLE
-        binding.cardTicket.visibility = View.VISIBLE
-        binding.cardMembership.visibility = View.VISIBLE
+        binding.sectionHome.visibility = View.VISIBLE
+        renderBranch()
     }
 
-    private fun showProcessingState(memberName: String?) {
+    private fun showProcessingState(@Suppress("UNUSED_PARAMETER") memberName: String?) {
+        showReaderStatus(getString(R.string.pc_kiosk_reading), null, reading = true)
+    }
+
+    /** Reader panel copy; the border turns amber while a card is being read. */
+    private fun showReaderStatus(title: String, member: String?, reading: Boolean) {
+        binding.nfcReaderBox.setBackgroundResource(
+            if (reading) R.drawable.bg_pc_reader_active else R.drawable.bg_pc_reader_idle
+        )
+        binding.tvNfcStatusTitle.text = title
+        binding.tvNfcMemberInfo.text = member
+        binding.tvNfcMemberInfo.visibility = if (member == null) View.GONE else View.VISIBLE
+    }
+
+    /** Full-screen confirmation that returns to the welcome screen on its own. */
+    private fun showResult(title: String, body: String, meta: String) {
         binding.cardNfcScanning.visibility = View.GONE
         binding.cardNfcProcessing.visibility = View.VISIBLE
-        if (memberName != null) {
-            binding.tvNfcProcessing.text = getString(R.string.kiosk_nfc_processing)
+        binding.tvResultTitle.text = title
+        binding.tvNfcProcessing.text = body
+        binding.tvResultMeta.text = meta
+        resultJob?.cancel()
+        resultJob = lifecycleScope.launch(Dispatchers.Main) {
+            delay(RESULT_TIMEOUT_MS)
+            stopNfcScanning()
         }
     }
 
@@ -324,23 +381,18 @@ class KioskActivity : BaseActivity() {
                         val membership = result.data
                         if (!membership.isActive) {
                             isProcessingNfc = false
-                            binding.cardNfcProcessing.visibility = View.GONE
-                            binding.cardNfcScanning.visibility = View.VISIBLE
-                            binding.tvNfcStatusTitle.text = getString(R.string.kiosk_nfc_error_inactive)
-                            binding.tvNfcStatusSubtitle.visibility = View.GONE
-                            binding.tvNfcMemberInfo.text = membership.memberName
-                            binding.tvNfcMemberInfo.visibility = View.VISIBLE
+                            showReaderStatus(
+                                getString(R.string.kiosk_nfc_error_inactive), membership.memberName, reading = false
+                            )
                             return@withContext
                         }
                         registerMembershipEntry(membership, cardUuid)
                     }
                     is Result.Error -> {
                         isProcessingNfc = false
-                        binding.cardNfcProcessing.visibility = View.GONE
-                        binding.cardNfcScanning.visibility = View.VISIBLE
-                        binding.tvNfcStatusTitle.text = getString(R.string.kiosk_nfc_error_card_not_found)
-                        binding.tvNfcStatusSubtitle.visibility = View.GONE
-                        binding.tvNfcMemberInfo.visibility = View.GONE
+                        showReaderStatus(
+                            getString(R.string.kiosk_nfc_error_card_not_found), null, reading = false
+                        )
                     }
                 }
             }
@@ -415,47 +467,35 @@ class KioskActivity : BaseActivity() {
 
     private fun showEntryError(errorMsg: String, membership: Membership) {
         isProcessingNfc = false
-        binding.cardNfcProcessing.visibility = View.GONE
-        binding.cardNfcScanning.visibility = View.VISIBLE
-        binding.tvNfcStatusTitle.text = errorMsg
-        binding.tvNfcStatusSubtitle.visibility = View.GONE
-        binding.tvNfcMemberInfo.text = membership.memberName
-        binding.tvNfcMemberInfo.visibility = View.VISIBLE
-
+        showReaderStatus(errorMsg, membership.memberName, reading = false)
         lifecycleScope.launch(Dispatchers.Main) {
             delay(3000)
-            stopNfcScanning()
+            if (isNfcScanning && !isProcessingNfc) {
+                showReaderStatus(getString(R.string.pc_kiosk_waiting), null, reading = false)
+            }
         }
     }
 
     private fun showEntryQueued(membership: Membership) {
         isProcessingNfc = false
-        binding.cardNfcProcessing.visibility = View.GONE
-        binding.cardNfcScanning.visibility = View.VISIBLE
-        binding.tvNfcStatusTitle.text = getString(R.string.kiosk_nfc_queued)
-        binding.tvNfcStatusSubtitle.text = getString(R.string.kiosk_nfc_queued_subtitle)
-        binding.tvNfcStatusSubtitle.visibility = View.VISIBLE
-        binding.tvNfcMemberInfo.text = membership.memberName
-        binding.tvNfcMemberInfo.visibility = View.VISIBLE
-
-        lifecycleScope.launch(Dispatchers.Main) {
-            delay(3000)
-            stopNfcScanning()
-        }
+        showResult(
+            getString(R.string.kiosk_nfc_queued),
+            getString(R.string.kiosk_nfc_queued_subtitle),
+            getString(R.string.pc_meta, membership.memberName, ParkingFormat.hhmm()),
+        )
     }
 
     private fun showEntrySuccess(membership: Membership) {
-        binding.cardNfcProcessing.visibility = View.GONE
-        binding.cardNfcScanning.visibility = View.VISIBLE
-        binding.tvNfcStatusTitle.text = getString(R.string.kiosk_nfc_success)
-        binding.tvNfcStatusSubtitle.visibility = View.GONE
-        binding.tvNfcMemberInfo.text = getString(R.string.kiosk_nfc_entry_success_format, membership.memberName)
-        binding.tvNfcMemberInfo.visibility = View.VISIBLE
-
-        lifecycleScope.launch(Dispatchers.Main) {
-            delay(2000)
-            stopNfcScanning()
-        }
+        isProcessingNfc = false
+        val first = membership.memberName.substringBefore(" ")
+        showResult(
+            getString(R.string.pc_kiosk_welcome_member, first),
+            getString(R.string.pc_kiosk_member_in),
+            getString(
+                R.string.pc_kiosk_member_meta,
+                membership.tier, ParkingFormat.hhmm(), formatDate(membership.endDate.take(10)),
+            ),
+        )
     }
 
     private fun loadMemberships() {
@@ -501,14 +541,16 @@ class KioskActivity : BaseActivity() {
     }
 
     private fun setupWindowInsets() {
-        ViewCompat.setOnApplyWindowInsetsListener(binding.headerBar) { view, insets ->
-            val statusBarInsets = insets.getInsets(WindowInsetsCompat.Type.statusBars())
-            view.updatePadding(top = statusBarInsets.top)
+        val basePadding = binding.kioskRoot.paddingBottom
+        ViewCompat.setOnApplyWindowInsetsListener(binding.kioskRoot) { view, insets ->
+            val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            view.updatePadding(top = bars.top, bottom = basePadding + bars.bottom)
             insets
         }
     }
 
     companion object {
         private const val DEFAULT_NFC_VEHICLE_TYPE = "light"
+        private const val RESULT_TIMEOUT_MS = 6000L
     }
 }

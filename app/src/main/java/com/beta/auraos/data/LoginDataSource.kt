@@ -32,8 +32,8 @@ import java.io.IOException
  * layer renders them uniformly as Toast messages.
  *
  * ## Base URL
- * Change [BASE_URL] to point to your environment (emulator → host uses
- * `10.0.2.2`; a real device on the same network uses the machine's local IP).
+ * The server comes from [com.beta.auraos.data.remote.ServerConfig]: the address typed in
+ * the app, else `api.baseUrl.*` from local.properties (emulator → host is `10.0.2.2`).
  */
 class LoginDataSource(
     private val sessionManager: SessionManager

@@ -1,252 +1,270 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<!--
+    Caja y auditoría (Parqueo·Control). Period revenue, breakdown by vehicle type and
+    memberships, the closure panel, pending movements and closure history.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="?attr/homeSurfaceBackground"
+    android:orientation="vertical"
     tools:context=".ui.audit.AuditActivity">
 
-    <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/app_bar_layout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@android:color/transparent"
-        app:elevation="@dimen/elevation_none">
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/header_bar"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/home_header_height"
-            android:background="?attr/navbarBackground"
-            android:paddingHorizontal="@dimen/spacing_large"
-            app:layout_scrollFlags="scroll|enterAlways">
-
-            <TextView
-                android:id="@+id/tv_app_title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="sans-serif-black"
-                android:gravity="bottom"
-                android:text="@string/audit_title"
-                android:textColor="?attr/textPrimaryCustom"
-                android:textSize="@dimen/text_size_title"
-                android:textStyle="bold"
-                app:layout_constraintBottom_toTopOf="@id/tv_branch_name"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <TextView
-                android:id="@+id/tv_branch_name"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="@dimen/spacing_small"
-                android:fontFamily="sans-serif-black"
-                android:text="@string/branch_no_branch"
-                android:textColor="?attr/colorPrimary"
-                android:textSize="@dimen/text_size_body"
-                android:textStyle="bold"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/tv_app_title" />
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-    </com.google.android.material.appbar.AppBarLayout>
-
     <androidx.core.widget.NestedScrollView
-        android:id="@+id/scroll_view"
+        android:id="@+id/scrollView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:clipToPadding="true"
-        android:fillViewport="true"
-        android:scrollbars="none"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:clipToPadding="false"
+        android:scrollbars="none">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/content_container"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingHorizontal="@dimen/container_padding"
-            android:paddingTop="@dimen/spacing_large"
-            android:paddingBottom="@dimen/dashboard_scroll_padding_bottom">
+            android:orientation="vertical"
+            android:paddingHorizontal="20dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="32dp">
 
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/card_period"
-                android:layout_width="0dp"
+            <TextView
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="@dimen/card_corner_radius_large"
-                app:cardBackgroundColor="?attr/branchSurfaceCustom"
-                app:strokeColor="?attr/dividerColorCustom"
-                app:strokeWidth="@dimen/stroke_thin"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent">
+                android:accessibilityHeading="true"
+                android:text="@string/pc_cash_title"
+                android:textAppearance="@style/TextAppearance.Pc.H2" />
+
+            <TextView
+                android:id="@+id/tv_period_range"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textAppearance="@style/TextAppearance.Pc.Mono"
+                tools:text="Desde 14 oct 19:02 · M. Rodríguez" />
+
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="-20dp"
+                android:layout_marginTop="28dp"
+                android:clipToPadding="false"
+                android:paddingHorizontal="20dp"
+                android:scrollbars="none">
+
+                <LinearLayout
+                    android:id="@+id/ll_branch_chips"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal" />
+            </HorizontalScrollView>
+
+            <!-- Period revenue -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="28dp"
+                android:text="@string/pc_period_revenue"
+                android:textAppearance="@style/TextAppearance.Lrg.Label" />
+
+            <TextView
+                android:id="@+id/tv_period_revenue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="@string/pc_money_zero"
+                android:textAppearance="@style/TextAppearance.Pc.Amount" />
+
+            <TextView
+                android:id="@+id/tv_period_meta"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:textAppearance="@style/TextAppearance.Pc.Mono"
+                tools:text="46 cobros · Sede Centro" />
+
+            <LinearLayout
+                android:id="@+id/ll_breakdown"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="28dp"
+                android:orientation="vertical" />
+
+            <!-- Closure panel -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="28dp"
+                android:background="@drawable/bg_lrg_card"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/pc_closure_panel"
+                    android:textAppearance="@style/TextAppearance.Pc.Section" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="@dimen/spacing_large">
+                    android:layout_marginTop="14dp"
+                    android:orientation="horizontal">
 
                     <TextView
-                        android:layout_width="wrap_content"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:text="@string/audit_period_label"
+                        android:layout_weight="1"
+                        android:text="@string/pc_pending_records"
+                        android:textAppearance="@style/TextAppearance.Pc.Mono"
                         android:textColor="?attr/textSecondaryCustom"
-                        android:textSize="@dimen/text_size_overline"
-                        android:textStyle="bold"
-                        android:letterSpacing="0.05" />
+                        android:textSize="14sp" />
 
                     <TextView
-                        android:id="@+id/tv_period_range"
+                        android:id="@+id/tv_pending_count"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/spacing_xsmall"
-                        android:textColor="?attr/textPrimaryCustom"
-                        android:textSize="@dimen/text_size_body" />
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:layout_marginVertical="@dimen/spacing_medium"
-                        android:background="?attr/dividerColorCustom" />
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal">
-
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@string/audit_pending_entries"
-                                android:textColor="?attr/textSecondaryCustom"
-                                android:textSize="@dimen/text_size_caption" />
-
-                            <TextView
-                                android:id="@+id/tv_pending_count"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:textColor="?attr/textPrimaryCustom"
-                                android:textSize="20sp"
-                                android:textStyle="bold" />
-
-                        </LinearLayout>
-
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@string/audit_period_revenue"
-                                android:textColor="?attr/textSecondaryCustom"
-                                android:textSize="@dimen/text_size_caption" />
-
-                            <TextView
-                                android:id="@+id/tv_period_revenue"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:textColor="?attr/semanticSuccessCustom"
-                                android:textSize="20sp"
-                                android:textStyle="bold" />
-
-                        </LinearLayout>
-
-                    </LinearLayout>
-
+                        android:textAppearance="@style/TextAppearance.Pc.Mono"
+                        android:textColor="?attr/textSecondaryCustom"
+                        android:textSize="14sp"
+                        tools:text="46" />
                 </LinearLayout>
 
-            </com.google.android.material.card.MaterialCardView>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:orientation="horizontal">
 
-            <TextView
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/pc_vehicle_revenue"
+                        android:textAppearance="@style/TextAppearance.Pc.Mono"
+                        android:textColor="?attr/textSecondaryCustom"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:id="@+id/tv_vehicle_revenue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="@style/TextAppearance.Pc.Mono"
+                        android:textColor="?attr/textSecondaryCustom"
+                        android:textSize="14sp"
+                        tools:text="$184.50" />
+                </LinearLayout>
+
+                <View
+                    style="@style/Widget.Pc.Hairline"
+                    android:layout_marginTop="10dp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:paddingTop="10dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/pc_to_close"
+                        android:textAppearance="@style/TextAppearance.Pc.Mono"
+                        android:textColor="?attr/textPrimaryCustom"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:id="@+id/tv_to_close"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="@style/TextAppearance.Pc.Mono"
+                        android:textColor="?attr/textPrimaryCustom"
+                        android:textSize="14sp"
+                        tools:text="$184.50" />
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    android:text="@string/pc_closure_hint"
+                    android:textAppearance="@style/TextAppearance.Pc.Hint" />
+            </LinearLayout>
+
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_execute_closure"
-                android:layout_width="wrap_content"
-                android:layout_height="40dp"
-                android:layout_marginTop="@dimen/spacing_large"
-                android:background="@drawable/bg_blue_pill"
-                android:clickable="true"
-                android:focusable="true"
-                android:fontFamily="sans-serif-black"
-                android:gravity="center"
-                android:letterSpacing="0.05"
-                android:paddingHorizontal="28dp"
-                android:text="@string/audit_execute_closure"
-                android:textColor="#1A1A1C"
-                android:textSize="12sp"
-                android:textStyle="bold"
-                app:layout_constraintTop_toBottomOf="@id/card_period"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent" />
+                style="@style/Widget.Pc.Button.Primary"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="28dp"
+                android:text="@string/pc_close_cash" />
 
+            <com.google.android.material.progressindicator.LinearProgressIndicator
+                android:id="@+id/loading_overlay"
+                style="@style/Widget.Pc.Progress"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:indeterminate="true"
+                android:visibility="gone" />
+
+            <!-- Movements -->
             <TextView
-                android:id="@+id/tv_history_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/spacing_large"
-                android:text="@string/audit_closure_history"
-                android:textColor="?attr/textPrimaryCustom"
-                android:textSize="@dimen/text_size_title"
-                android:textStyle="bold"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/btn_execute_closure" />
+                android:layout_marginTop="28dp"
+                android:accessibilityHeading="true"
+                android:paddingBottom="10dp"
+                android:text="@string/pc_movements"
+                android:textAppearance="@style/TextAppearance.Pc.Section" />
+
+            <LinearLayout
+                android:id="@+id/ll_movements"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
 
             <TextView
-                android:id="@+id/tv_empty_history"
-                android:layout_width="0dp"
+                android:id="@+id/tv_no_movements"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/spacing_medium"
-                android:text="@string/audit_no_closures"
-                android:textColor="?attr/textSecondaryCustom"
-                android:textSize="@dimen/text_size_body"
-                android:gravity="center"
-                app:layout_constraintTop_toBottomOf="@id/tv_history_title"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent" />
+                android:paddingVertical="14dp"
+                android:text="@string/pc_no_movements"
+                android:textAppearance="@style/TextAppearance.Pc.Hint"
+                android:textSize="14sp"
+                android:visibility="gone" />
+
+            <!-- History -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="28dp"
+                android:accessibilityHeading="true"
+                android:paddingBottom="10dp"
+                android:text="@string/pc_closure_history"
+                android:textAppearance="@style/TextAppearance.Pc.Section" />
 
             <LinearLayout
                 android:id="@+id/closure_history_container"
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/spacing_small"
-                android:orientation="vertical"
-                app:layout_constraintTop_toBottomOf="@id/tv_history_title"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent" />
+                android:orientation="vertical" />
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
+            <TextView
+                android:id="@+id/tv_empty_history"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingVertical="14dp"
+                android:text="@string/audit_no_closures"
+                android:textAppearance="@style/TextAppearance.Pc.Hint"
+                android:textSize="14sp"
+                android:visibility="gone" />
+        </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
-    <FrameLayout
-        android:id="@+id/loading_overlay"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="#99000000"
-        android:clickable="true"
-        android:focusable="true"
-        android:visibility="gone">
+    <include
+        android:id="@+id/tab_bar"
+        layout="@layout/view_pc_tab_bar" />
 
-        <com.google.android.material.progressindicator.CircularProgressIndicator
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:indeterminate="true"
-            app:indicatorColor="?attr/colorPrimary"
-            app:indicatorSize="48dp"
-            app:trackThickness="4dp" />
-
-    </FrameLayout>
-
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+</LinearLayout>

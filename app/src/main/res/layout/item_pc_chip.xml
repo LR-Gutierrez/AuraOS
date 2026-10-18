@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Toggle chip (branch, vehicle type, payment method). -->
+<com.google.android.material.button.MaterialButton xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/Widget.Pc.Chip"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content" />
