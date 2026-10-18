@@ -8,6 +8,11 @@
 /.idea/navEditor.xml
 /.idea/assetWizardSettings.xml
 /.idea/planningMode.xml
+# Per-machine IDE state: JDK name, selected device, device table, Gemini settings.
+/.idea/misc.xml
+/.idea/deploymentTargetSelector.xml
+/.idea/deviceManager.xml
+/.idea/studiobot.xml
 .DS_Store
 /build
 /build/*
