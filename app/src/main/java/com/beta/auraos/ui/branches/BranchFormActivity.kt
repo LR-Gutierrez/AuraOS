@@ -4,10 +4,12 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import com.beta.auraos.AuraApplication
 import com.beta.auraos.BaseActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -54,6 +56,11 @@ class BranchFormActivity : BaseActivity() {
 
         branchId = intent.getStringExtra(EXTRA_BRANCH_ID)
         isEditMode = branchId != null
+        val canEdit = AuraApplication.instance.sessionManager.isAdmin()
+        if (!canEdit && !isEditMode) {
+            finish()
+            return
+        }
 
         val db = com.beta.auraos.data.local.room.AppDatabase.getInstance(this)
         viewModel = ViewModelProvider(this, BranchViewModelFactory(db))[BranchViewModel::class.java]
@@ -66,6 +73,23 @@ class BranchFormActivity : BaseActivity() {
             binding.tvAppTitle.text = getString(R.string.branch_edit_title)
             binding.btnSave.text = getString(R.string.branch_update_action)
             viewModel.loadBranch(branchId!!)
+        }
+        if (!canEdit) showReadOnly()
+    }
+
+    /** An operator can look up a branch's capacity, rates and hours but not change them. */
+    private fun showReadOnly() {
+        binding.tvAppTitle.text = getString(R.string.branch_view_title)
+        binding.btnSave.visibility = View.GONE
+        disableInputs(binding.scrollView)
+    }
+
+    private fun disableInputs(view: View) {
+        if (view === binding.btnSave) return
+        if (view is ViewGroup) {
+            for (i in 0 until view.childCount) disableInputs(view.getChildAt(i))
+        } else {
+            view.isEnabled = false
         }
     }
 

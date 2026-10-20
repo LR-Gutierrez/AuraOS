@@ -107,6 +107,7 @@
     <string name="branch_list_title">Branches</string>
     <string name="branch_new_title">New branch</string>
     <string name="branch_edit_title">Edit branch</string>
+    <string name="branch_view_title">Branch</string>
     <string name="branch_new_action">New branch</string>
     <string name="branch_save_action">Save branch</string>
     <string name="branch_update_action">Update branch</string>

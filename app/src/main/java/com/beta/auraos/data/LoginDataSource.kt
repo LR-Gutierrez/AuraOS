@@ -60,6 +60,7 @@ class LoginDataSource(
                 avatarUrl = loginData.user.avatarUrl
             )
             sessionManager.saveToken(loginData.token)
+            sessionManager.saveRole(loginData.user.role)
 
             loginData.user.avatarUrl?.let { sessionManager.saveAvatarUrl(it) }
 
@@ -112,6 +113,7 @@ class LoginDataSource(
                 avatarUrl = loginData.user.avatarUrl
             )
             sessionManager.saveToken(loginData.token)
+            sessionManager.saveRole(loginData.user.role)
 
             loginData.user.avatarUrl?.let { sessionManager.saveAvatarUrl(it) }
 

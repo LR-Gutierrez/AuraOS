@@ -1,6 +1,8 @@
 package com.beta.auraos.data.local
 
 import android.util.Log
+import com.beta.auraos.data.BranchRepository
+import com.beta.auraos.data.MembershipRepository
 import com.beta.auraos.data.local.room.AppDatabase
 import com.beta.auraos.data.local.room.BranchEntity
 import com.beta.auraos.data.local.room.ChangeJournalEntity
@@ -9,6 +11,7 @@ import com.beta.auraos.data.local.room.VehicleEntryEntity
 import com.beta.auraos.data.model.ChangeDto
 import com.beta.auraos.data.model.ChangePayload
 import com.beta.auraos.data.model.PushChangesRequest
+import com.beta.auraos.data.model.RejectedChangeDto
 import com.beta.auraos.data.remote.ApiClient
 import com.beta.auraos.data.remote.ChangeJournalApi
 import com.google.gson.Gson
@@ -61,6 +64,7 @@ class ChangeJournalSyncManager(
                 val ids = unsynced.map { it.id }
                 changeJournal.markAsSynced(ids)
                 Log.d(TAG, "Successfully pushed ${ids.size} changes")
+                response.body()?.rejected.orEmpty().forEach { undoRejected(it) }
                 SyncResult.Success()
             } else {
                 SyncResult.Error("Push failed: ${response.code()} ${response.message()}")
@@ -71,6 +75,25 @@ class ChangeJournalSyncManager(
                 else -> "Push error: ${e.message}"
             }
             SyncResult.Error(msg)
+        }
+    }
+
+    /**
+     * The server refused this change for the user's role, so the device must not keep it:
+     * otherwise this phone would show branches or rates nobody else sees. Retrying is pointless,
+     * so the journal entry stays marked as synced.
+     */
+    private suspend fun undoRejected(rejected: RejectedChangeDto) {
+        Log.w(TAG, "Server rejected ${rejected.operation} ${rejected.entityType}/${rejected.entityId} (${rejected.reason}), restoring its copy")
+        try {
+            when (rejected.entityType) {
+                "branch" -> BranchRepository(ApiClient.createApi(), database, changeJournal)
+                    .restoreFromServer(rejected.entityId)
+                "membership" -> MembershipRepository(database, changeJournal)
+                    .restoreFromServer(rejected.entityId)
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "Could not restore ${rejected.entityType}/${rejected.entityId}: ${e.message}")
         }
     }
 

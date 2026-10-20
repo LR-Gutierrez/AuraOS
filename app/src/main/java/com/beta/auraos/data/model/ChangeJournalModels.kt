@@ -16,7 +16,16 @@ data class PushChangesRequest(
 
 data class PushChangesResponse(
     val success: Boolean,
-    val conflicts: List<ConflictDto> = emptyList()
+    val conflicts: List<ConflictDto> = emptyList(),
+    val rejected: List<RejectedChangeDto>? = null
+)
+
+/** A change the server refused for the user's role; it was not stored there. */
+data class RejectedChangeDto(
+    val entityType: String,
+    val entityId: String,
+    val operation: String,
+    val reason: String
 )
 
 data class ConflictDto(

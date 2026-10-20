@@ -184,7 +184,7 @@ class MembershipListActivity : BaseActivity() {
         } else {
             getString(R.string.membership_card_not_assigned)
         }
-        AlertDialog.Builder(this)
+        val dialog = AlertDialog.Builder(this)
             .setTitle(m.memberName)
             .setMessage("${getString(R.string.membership_hint_tier)}: ${m.tier}\n${getString(R.string.membership_hint_end_date)}: ${formatDate(m.endDate)}\n${getString(R.string.membership_status_active)}: ${if (m.isActive) getString(R.string.membership_status_active) else getString(R.string.membership_status_inactive)}\n$cardInfo")
             .setPositiveButton(getString(R.string.dialog_ok), null)
@@ -198,10 +198,13 @@ class MembershipListActivity : BaseActivity() {
                     startNfcCardRegistration(m)
                 }
             }
-            .setNegativeButton(getString(R.string.membership_delete_title)) { _, _ ->
+        // Deleting a membership is an admin action on the server.
+        if (sessionManager.isAdmin()) {
+            dialog.setNegativeButton(getString(R.string.membership_delete_title)) { _, _ ->
                 confirmDelete(m)
             }
-            .show()
+        }
+        dialog.show()
     }
 
     private fun confirmDelete(m: Membership) {

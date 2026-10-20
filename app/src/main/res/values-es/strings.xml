@@ -107,6 +107,7 @@
     <string name="branch_list_title">Sucursales</string>
     <string name="branch_new_title">Nueva sucursal</string>
     <string name="branch_edit_title">Editar sucursal</string>
+    <string name="branch_view_title">Sucursal</string>
     <string name="branch_new_action">Nueva sucursal</string>
     <string name="branch_save_action">Guardar sucursal</string>
     <string name="branch_update_action">Actualizar sucursal</string>

@@ -49,6 +49,8 @@ class BranchListActivity : BaseActivity() {
     private fun setupViews() {
         binding.btnBack.setOnClickListener { finish() }
 
+        // Creating, editing and deleting branches is an admin action on the server.
+        binding.fabNewBranch.visibility = if (sessionManager.isAdmin()) View.VISIBLE else View.GONE
         binding.fabNewBranch.setOnClickListener {
             BranchFormActivity.open(this, branchId = null)
         }
@@ -203,9 +205,11 @@ class BranchListActivity : BaseActivity() {
             }
         }
 
-        card.setOnLongClickListener {
-            confirmDeleteBranch(branch)
-            true
+        if (sessionManager.isAdmin()) {
+            card.setOnLongClickListener {
+                confirmDeleteBranch(branch)
+                true
+            }
         }
 
         card.setOnClickListener {

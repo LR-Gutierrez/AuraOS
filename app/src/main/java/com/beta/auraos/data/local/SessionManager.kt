@@ -137,6 +137,17 @@ class SessionManager(context: Context) {
 
     fun getAvatarUrl(): String? = prefs.getString(KEY_AVATAR_URL, null)
 
+    /** Role the backend gave at the last login. Kept for offline logins on the same account. */
+    fun saveRole(role: String) {
+        prefs.edit().putString(KEY_ROLE, role).apply()
+    }
+
+    /**
+     * Only a backend operator is restricted. A device-only account has no backend to answer to,
+     * so it administers its own branches.
+     */
+    fun isAdmin(): Boolean = prefs.getString(KEY_ROLE, null) != ROLE_OPERATOR
+
     fun clearSession() {
         clearToken()
         clearCredentials()
@@ -211,6 +222,7 @@ class SessionManager(context: Context) {
             .remove(KEY_LOCAL_USER_PROFILE)
             .remove(KEY_LOCAL_PASSWORD_HASH)
             .apply()
+        prefs.edit().remove(KEY_ROLE).apply()
     }
 
     companion object {
@@ -227,6 +239,8 @@ class SessionManager(context: Context) {
         private const val KEY_LAST_DISPLAY_NAME = "last_display_name"
         private const val KEY_DARK_MODE = "dark_mode"
         private const val KEY_AVATAR_URL = "avatar_url"
+        private const val KEY_ROLE = "role"
+        private const val ROLE_OPERATOR = "operator"
         private const val KEY_LOCAL_USER_PROFILE = "local_user_profile"
         private const val KEY_LOCAL_PASSWORD_HASH = "local_password_hash"
         private const val KEY_LOCAL_ONLY_ACCOUNT = "local_only_account"

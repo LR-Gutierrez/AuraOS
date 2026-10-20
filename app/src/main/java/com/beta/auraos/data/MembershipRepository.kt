@@ -294,6 +294,19 @@ class MembershipRepository(
         }
     }
 
+    /**
+     * Puts the server's copy back after the server refused a local change; a refused create
+     * never existed there, so it is dropped.
+     */
+    suspend fun restoreFromServer(id: String) {
+        val response = api.getMembership(id)
+        val membership = response.body()
+        when {
+            response.isSuccessful && membership != null -> database?.membershipDao()?.insert(membership.toEntity())
+            response.code() == 404 -> database?.membershipDao()?.deleteById(id)
+        }
+    }
+
     suspend fun replaceLocalWithServerMembership(localId: String, serverEntry: Membership) {
         database?.membershipDao()?.deleteById(localId)
         database?.membershipDao()?.insert(serverEntry.toEntity())

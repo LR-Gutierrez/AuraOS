@@ -284,6 +284,19 @@ class BranchRepository(
         return Result.Success(Unit)
     }
 
+    /**
+     * Puts the server's copy back after the server refused a local change; a refused create
+     * never existed there, so it is dropped.
+     */
+    suspend fun restoreFromServer(id: String) {
+        val response = api.getBranch(id)
+        val branch = response.body()
+        when {
+            response.isSuccessful && branch != null -> database?.branchDao()?.insert(branch.toEntity())
+            response.code() == 404 -> database?.branchDao()?.deleteById(id)
+        }
+    }
+
     suspend fun replaceLocalWithServerBranch(localId: String, serverEntry: Branch) {
         database?.branchDao()?.deleteById(localId)
         database?.branchDao()?.insert(serverEntry.toEntity())
