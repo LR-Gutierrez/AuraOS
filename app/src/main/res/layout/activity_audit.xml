@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Caja y auditoría (Parqueo·Control). Period revenue, breakdown by vehicle type and
-    memberships, the closure panel, pending movements and closure history.
+    Caja y auditoría (Parqueo·Control). Period revenue, breakdown by payment method, the cash
+    count that the closure records, pending movements and closure history.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -90,7 +90,7 @@
                 android:layout_marginTop="28dp"
                 android:orientation="vertical" />
 
-            <!-- Closure panel -->
+            <!-- Cash count: the drawer against what was charged in cash -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -102,32 +102,37 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/pc_closure_panel"
+                    android:layout_marginBottom="4dp"
+                    android:text="@string/pc_cash_count"
                     android:textAppearance="@style/TextAppearance.Pc.Section" />
 
                 <LinearLayout
+                    android:id="@+id/row_opening_float"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="14dp"
+                    android:layout_marginTop="10dp"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true"
                     android:orientation="horizontal">
 
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="@string/pc_pending_records"
+                        android:text="@string/pc_opening_float"
                         android:textAppearance="@style/TextAppearance.Pc.Mono"
                         android:textColor="?attr/textSecondaryCustom"
                         android:textSize="14sp" />
 
                     <TextView
-                        android:id="@+id/tv_pending_count"
+                        android:id="@+id/tv_opening_float"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textAppearance="@style/TextAppearance.Pc.Mono"
                         android:textColor="?attr/textSecondaryCustom"
                         android:textSize="14sp"
-                        tools:text="46" />
+                        tools:text="$20.00" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -140,19 +145,19 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="@string/pc_vehicle_revenue"
+                        android:text="@string/pc_cash_collected"
                         android:textAppearance="@style/TextAppearance.Pc.Mono"
                         android:textColor="?attr/textSecondaryCustom"
                         android:textSize="14sp" />
 
                     <TextView
-                        android:id="@+id/tv_vehicle_revenue"
+                        android:id="@+id/tv_cash_collected"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textAppearance="@style/TextAppearance.Pc.Mono"
                         android:textColor="?attr/textSecondaryCustom"
                         android:textSize="14sp"
-                        tools:text="$184.50" />
+                        tools:text="$20.00" />
                 </LinearLayout>
 
                 <View
@@ -162,26 +167,70 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:paddingTop="10dp">
+                    android:layout_marginTop="10dp"
+                    android:orientation="horizontal">
 
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="@string/pc_to_close"
+                        android:text="@string/pc_cash_expected"
                         android:textAppearance="@style/TextAppearance.Pc.Mono"
                         android:textColor="?attr/textPrimaryCustom"
                         android:textSize="14sp" />
 
                     <TextView
-                        android:id="@+id/tv_to_close"
+                        android:id="@+id/tv_cash_expected"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textAppearance="@style/TextAppearance.Pc.Mono"
                         android:textColor="?attr/textPrimaryCustom"
                         android:textSize="14sp"
-                        tools:text="$184.50" />
+                        tools:text="$20.00" />
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:labelFor="@id/et_cash_counted"
+                    android:text="@string/pc_cash_counted"
+                    android:textAppearance="@style/TextAppearance.Lrg.Label" />
+
+                <EditText
+                    android:id="@+id/et_cash_counted"
+                    style="@style/Widget.Pc.Field"
+                    android:layout_width="match_parent"
+                    android:layout_height="52dp"
+                    android:layout_marginTop="8dp"
+                    android:hint="@string/pc_amount_hint"
+                    android:importantForAutofill="no"
+                    android:inputType="numberDecimal"
+                    android:textSize="20sp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    android:baselineAligned="true"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/tv_diff_label"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/pc_difference"
+                        android:textAppearance="@style/TextAppearance.Pc.Body"
+                        android:textColor="?attr/textSecondaryCustom" />
+
+                    <TextView
+                        android:id="@+id/tv_diff_value"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/pc_dash"
+                        android:textAppearance="@style/TextAppearance.Pc.MonoValue"
+                        android:textSize="20sp" />
                 </LinearLayout>
 
                 <TextView

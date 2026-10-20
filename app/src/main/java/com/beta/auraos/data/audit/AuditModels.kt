@@ -17,6 +17,8 @@ data class AuditRecord(
     val isVip: Boolean,
     val membershipId: String? = null,
     val membershipTier: String? = null,
+    /** [PaymentMethod.key]; null for members and for exits logged before methods existed. */
+    val paymentMethod: String? = null,
     val closedInBatch: String? = null,
     val createdAt: Long = System.currentTimeMillis()
 )
@@ -38,8 +40,21 @@ data class ClosureBatch(
     val revenueByType: Map<String, Double>,
     val isVerified: Boolean = false,
     val notes: String? = null,
-    val createdAt: Long = System.currentTimeMillis()
-)
+    val createdAt: Long = System.currentTimeMillis(),
+    // Cash count; null on closures made before it existed.
+    val revenueByMethod: Map<String, Double>? = null,
+    val openingFloat: Double? = null,
+    val cashExpected: Double? = null,
+    val cashCounted: Double? = null,
+) {
+    /** Counted minus expected, rounded to cents: positive is over, negative is short. */
+    val cashDifference: Double?
+        get() {
+            val counted = cashCounted ?: return null
+            val expected = cashExpected ?: return null
+            return Math.round((counted - expected) * 100) / 100.0
+        }
+}
 
 data class MembershipPayment(
     val id: String,

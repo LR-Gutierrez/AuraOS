@@ -10,6 +10,7 @@ import com.beta.auraos.data.Result
 import com.beta.auraos.data.VehicleEntryRepository
 import com.beta.auraos.data.audit.AuditEngine
 import com.beta.auraos.data.audit.FeeCalculator
+import com.beta.auraos.data.audit.PaymentMethod
 import com.beta.auraos.data.local.ExitSyncManager
 import com.beta.auraos.data.model.Branch
 import com.beta.auraos.data.model.VehicleEntry
@@ -90,7 +91,8 @@ class ExitViewModel(
         }
     }
 
-    fun registerExit(entryId: String) {
+    /** [paymentMethod] is null when nothing is charged (members, free stays). */
+    fun registerExit(entryId: String, paymentMethod: PaymentMethod?) {
         val current = _uiState.value
         if (current is ExitUiState.Success) {
             _uiState.value = current.copy(exitingId = entryId)
@@ -121,7 +123,8 @@ class ExitViewModel(
                     entry = entry,
                     branch = branch,
                     feePaid = fee,
-                    exitTime = exitTime
+                    exitTime = exitTime,
+                    paymentMethod = paymentMethod
                 )
             }
 

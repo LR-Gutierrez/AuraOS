@@ -13,7 +13,8 @@ class AuditEngine(private val context: Context) {
         entry: VehicleEntry,
         branch: Branch?,
         feePaid: Double?,
-        exitTime: String
+        exitTime: String,
+        paymentMethod: PaymentMethod? = null,
     ) {
         // Members pay monthly: their exit carries no daily or overnight charge.
         val isMember = entry.membershipId != null
@@ -51,7 +52,8 @@ class AuditEngine(private val context: Context) {
             totalFee = feePaid ?: baseFee,
             isVip = entry.isVip,
             membershipId = entry.membershipId,
-            membershipTier = null
+            membershipTier = null,
+            paymentMethod = if (isMember) null else paymentMethod?.key
         )
 
         repository.recordVehicleExit(record)
@@ -60,7 +62,8 @@ class AuditEngine(private val context: Context) {
     suspend fun executeClosure(
         branchId: String,
         userId: String,
-        memberships: List<com.beta.auraos.data.model.Membership>
+        memberships: List<com.beta.auraos.data.model.Membership>,
+        cashCount: CashCount? = null,
     ): ClosureReport {
         val records = repository.getUnclosedRecords(branchId)
         val latestClosure = repository.getLatestClosure(branchId)
@@ -102,8 +105,13 @@ class AuditEngine(private val context: Context) {
             vipEntryCount = vipCount,
             regularEntryCount = regularCount,
             revenueByType = revenueByType,
-            isVerified = false
+            isVerified = false,
+            revenueByMethod = revenueByMethod(records),
+            openingFloat = cashCount?.openingFloat,
+            cashExpected = cashCount?.let { it.openingFloat + cashCollected(records) },
+            cashCounted = cashCount?.counted,
         )
+        cashCount?.let { repository.setOpeningFloat(branchId, it.openingFloat) }
 
         repository.saveClosureBatch(batch)
         repository.markRecordsAsClosed(branchId, batch.id)
@@ -134,6 +142,10 @@ class AuditEngine(private val context: Context) {
             discrepancies = discrepancies
         )
     }
+
+    fun getOpeningFloat(branchId: String): Double = repository.getOpeningFloat(branchId)
+
+    fun setOpeningFloat(branchId: String, amount: Double) = repository.setOpeningFloat(branchId, amount)
 
     fun getLatestClosure(branchId: String): ClosureBatch? {
         return repository.getLatestClosure(branchId)
@@ -177,5 +189,19 @@ class AuditEngine(private val context: Context) {
         } catch (e: Exception) {
             false
         }
+    }
+
+    companion object {
+        const val UNSPECIFIED_METHOD = "unspecified"
+
+        /** Revenue per [PaymentMethod.key]; [UNSPECIFIED_METHOD] holds paid exits without one. */
+        fun revenueByMethod(records: List<AuditRecord>): Map<String, Double> =
+            records.filter { it.membershipId == null && it.totalFee > 0 }
+                .groupBy { it.paymentMethod ?: UNSPECIFIED_METHOD }
+                .mapValues { it.value.sumOf { r -> r.totalFee } }
+
+        /** Cash that went into the drawer. Exits without a method predate the count, so they are left out. */
+        fun cashCollected(records: List<AuditRecord>): Double =
+            records.filter { it.paymentMethod == PaymentMethod.CASH.key }.sumOf { it.totalFee }
     }
 }

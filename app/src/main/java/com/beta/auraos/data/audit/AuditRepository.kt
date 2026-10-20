@@ -9,6 +9,7 @@ import java.util.UUID
 class AuditRepository(private val context: Context) {
 
     private val gson = Gson()
+    private val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
     private val dir: File
         get() = File(context.filesDir, "audit").also { it.mkdirs() }
 
@@ -96,6 +97,14 @@ class AuditRepository(private val context: Context) {
         }
     }
 
+    /** Cash the drawer starts each shift with; the last closure's value carries over. */
+    fun getOpeningFloat(branchId: String): Double =
+        prefs.getFloat(KEY_OPENING_FLOAT + sanitize(branchId), 0f).toDouble()
+
+    fun setOpeningFloat(branchId: String, amount: Double) {
+        prefs.edit().putFloat(KEY_OPENING_FLOAT + sanitize(branchId), amount.toFloat()).apply()
+    }
+
     private fun writeUnclosedRecords(branchId: String, records: MutableList<AuditRecord>) {
         unclosedFile(branchId).writeText(gson.toJson(records))
     }
@@ -108,6 +117,9 @@ class AuditRepository(private val context: Context) {
     private fun sanitize(id: String) = id.replace(Regex("[^a-zA-Z0-9_-]"), "_")
 
     companion object {
+        private const val PREFS_NAME = "aura_audit_prefs"
+        private const val KEY_OPENING_FLOAT = "opening_float_"
+
         fun generateId() = UUID.randomUUID().toString()
     }
 }

@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.InputFilter
 import android.text.TextWatcher
+import android.view.Gravity
 import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -26,6 +27,7 @@ import com.beta.auraos.data.MembershipRepository
 import com.beta.auraos.data.VehicleEntryRepository
 import com.beta.auraos.data.audit.AuditEngine
 import com.beta.auraos.data.audit.FeeCalculator
+import com.beta.auraos.data.audit.PaymentMethod
 import com.beta.auraos.data.local.ExitSyncManager
 import com.beta.auraos.data.local.SessionManager
 import com.beta.auraos.data.local.room.AppDatabase
@@ -53,6 +55,7 @@ class ExitActivity : BaseActivity() {
     private var membershipNameMap: Map<String, String> = emptyMap()
     private var selectedId: String? = null
     private var exitingId: String? = null
+    private var paymentMethod = PaymentMethod.CASH
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -91,9 +94,10 @@ class ExitActivity : BaseActivity() {
         binding.btnClearSelection.setOnClickListener { select(null) }
         binding.btnCheckout.setOnClickListener {
             val id = selectedId ?: return@setOnClickListener
+            val entry = allEntries.find { it.id == id } ?: return@setOnClickListener
             exitingId = id
             render()
-            viewModel.registerExit(id)
+            viewModel.registerExit(id, paymentMethod.takeIf { needsPayment(entry) })
         }
         binding.done.btnDoneAgain.text = getString(R.string.pc_pick_another)
         binding.done.btnDoneAgain.setOnClickListener {
@@ -153,6 +157,7 @@ class ExitActivity : BaseActivity() {
     }
 
     private fun select(id: String?) {
+        if (id != selectedId) paymentMethod = PaymentMethod.CASH
         selectedId = id
         binding.done.root.visibility = View.GONE
         render()
@@ -221,16 +226,37 @@ class ExitActivity : BaseActivity() {
             }
         )
         binding.tvCoAmountNote.visibility = if (isMember) View.VISIBLE else View.GONE
+        binding.paymentSection.visibility = if (needsPayment(entry)) View.VISIBLE else View.GONE
+        renderPaymentMethods()
         binding.btnCheckout.isEnabled = !busy
         binding.btnViewPhotos.visibility = if (photoCount(entry) > 0) View.VISIBLE else View.GONE
         binding.btnViewPhotos.setOnClickListener { showPhotosDialog(entry) }
     }
+
+    private fun renderPaymentMethods() {
+        val list = binding.llPaymentMethods
+        list.removeAllViews()
+        PaymentMethod.entries.forEach { method ->
+            PcUi.addChip(list, getString(method.labelRes), checked = paymentMethod == method) {
+                paymentMethod = method
+                renderPaymentMethods()
+            }.apply {
+                gravity = Gravity.START or Gravity.CENTER_VERTICAL
+                layoutParams.width = LinearLayout.LayoutParams.MATCH_PARENT
+            }
+        }
+    }
+
+    private fun needsPayment(entry: VehicleEntry): Boolean =
+        entry.membershipId == null && (feeFor(entry) ?: 0.0) > 0
 
     private fun showDone(exited: VehicleEntry) {
         binding.done.tvDoneTitle.setText(R.string.pc_exit_done)
         binding.done.tvDonePlate.text = resolvePlateDisplayName(exited)
         val charge = if (exited.membershipId != null) {
             getString(R.string.pc_member_no_charge)
+        } else if ((exited.fee ?: 0.0) > 0) {
+            getString(R.string.pc_meta, ParkingFormat.money(exited.fee, currentBranch?.currency), getString(paymentMethod.labelRes))
         } else {
             ParkingFormat.money(exited.fee, currentBranch?.currency)
         }

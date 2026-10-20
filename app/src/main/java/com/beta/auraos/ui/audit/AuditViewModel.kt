@@ -10,6 +10,7 @@ import com.beta.auraos.data.Result
 import com.beta.auraos.data.audit.AuditEngine
 import com.beta.auraos.data.audit.AuditPeriodSummary
 import com.beta.auraos.data.audit.AuditRecord
+import com.beta.auraos.data.audit.CashCount
 import com.beta.auraos.data.audit.ClosureBatch
 import com.beta.auraos.data.audit.ClosureReport
 import com.beta.auraos.data.model.Branch
@@ -23,6 +24,7 @@ sealed class AuditUiState {
         val periodSummary: AuditPeriodSummary,
         val closureHistory: List<ClosureBatch>,
         val pendingRecords: List<AuditRecord> = emptyList(),
+        val openingFloat: Double = 0.0,
     ) : AuditUiState()
     data class ClosureResult(val report: ClosureReport) : AuditUiState()
     data class Error(val message: String) : AuditUiState()
@@ -66,11 +68,17 @@ class AuditViewModel(
                 periodSummary = summary,
                 closureHistory = history,
                 pendingRecords = pending,
+                openingFloat = auditEngine.getOpeningFloat(branchId),
             )
         }
     }
 
-    fun executeClosure(branchId: String) {
+    fun setOpeningFloat(branchId: String, amount: Double) {
+        auditEngine.setOpeningFloat(branchId, amount)
+        loadSummary(branchId)
+    }
+
+    fun executeClosure(branchId: String, cashCount: CashCount) {
         viewModelScope.launch {
             _uiState.value = AuditUiState.Loading
             val membershipsResult = withContext(Dispatchers.IO) {
@@ -81,7 +89,7 @@ class AuditViewModel(
                 is Result.Error -> emptyList()
             }
             val report = withContext(Dispatchers.IO) {
-                auditEngine.executeClosure(branchId, userId, memberships)
+                auditEngine.executeClosure(branchId, userId, memberships, cashCount)
             }
             _uiState.value = AuditUiState.ClosureResult(report)
             loadSummary(branchId)

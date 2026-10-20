@@ -6,6 +6,8 @@
     <string name="pc_back_arrow">← Back</string>
     <string name="pc_zero" translatable="false">00</string>
     <string name="pc_money_zero" translatable="false">$0.00</string>
+    <string name="pc_amount_hint" translatable="false">0.00</string>
+    <string name="pc_dash" translatable="false">\u2014</string>
     <string name="nav_cash">Cash</string>
 
     <!-- Inicio -->
@@ -278,4 +280,24 @@
     <string name="pc_role_operator">Operator</string>
     <string name="pc_rates">Rates</string>
     <string name="pc_rates_meta">Light %1$s · Heavy %2$s · Moto %3$s</string>
+    <!-- Payment method and cash count -->
+    <string name="pc_payment_method">Payment method</string>
+    <string name="pc_pay_cash">Cash</string>
+    <string name="pc_pay_mobile">Mobile payment</string>
+    <string name="pc_pay_card">Card terminal</string>
+    <string name="pc_pay_unknown">No method recorded</string>
+    <string name="pc_cash_count">Cash count</string>
+    <string name="pc_opening_float">Opening float</string>
+    <string name="pc_opening_float_hint">Cash in the drawer when the shift starts</string>
+    <string name="pc_cash_collected">Cash collected</string>
+    <string name="pc_cash_expected">Expected in drawer</string>
+    <string name="pc_cash_counted">Cash counted</string>
+    <string name="pc_difference">Difference</string>
+    <string name="pc_balanced">Balanced</string>
+    <string name="pc_over">Over</string>
+    <string name="pc_short">Short</string>
+    <string name="pc_over_amount">Over %1$s</string>
+    <string name="pc_short_amount">Short %1$s</string>
+    <string name="pc_count_required">Enter the cash counted to close</string>
+    <string name="pc_closure_count_line">Cash counted %1$s · %2$s</string>
 </resources>

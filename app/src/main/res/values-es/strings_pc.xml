@@ -271,4 +271,24 @@
     <string name="pc_role_operator">Operador</string>
     <string name="pc_rates">Tarifas</string>
     <string name="pc_rates_meta">Liviano %1$s · Pesado %2$s · Moto %3$s</string>
+    <!-- Método de pago y arqueo -->
+    <string name="pc_payment_method">Método de pago</string>
+    <string name="pc_pay_cash">Efectivo</string>
+    <string name="pc_pay_mobile">Pago móvil</string>
+    <string name="pc_pay_card">Punto de venta</string>
+    <string name="pc_pay_unknown">Sin método registrado</string>
+    <string name="pc_cash_count">Arqueo de efectivo</string>
+    <string name="pc_opening_float">Fondo inicial</string>
+    <string name="pc_opening_float_hint">Efectivo en la caja al empezar el turno</string>
+    <string name="pc_cash_collected">Efectivo cobrado</string>
+    <string name="pc_cash_expected">Esperado en caja</string>
+    <string name="pc_cash_counted">Efectivo contado</string>
+    <string name="pc_difference">Diferencia</string>
+    <string name="pc_balanced">Cuadra</string>
+    <string name="pc_over">Sobrante</string>
+    <string name="pc_short">Faltante</string>
+    <string name="pc_over_amount">Sobrante %1$s</string>
+    <string name="pc_short_amount">Faltante %1$s</string>
+    <string name="pc_count_required">Escribe el efectivo contado para cerrar</string>
+    <string name="pc_closure_count_line">Efectivo contado %1$s · %2$s</string>
 </resources>

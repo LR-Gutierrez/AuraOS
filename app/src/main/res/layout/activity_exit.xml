@@ -207,6 +207,28 @@
                         android:visibility="gone" />
                 </LinearLayout>
 
+                <!-- Payment method: only when there is something to charge -->
+                <LinearLayout
+                    android:id="@+id/payment_section"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/pc_payment_method"
+                        android:textAppearance="@style/TextAppearance.Lrg.Label" />
+
+                    <LinearLayout
+                        android:id="@+id/ll_payment_methods"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:orientation="vertical" />
+                </LinearLayout>
+
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_checkout"
                     style="@style/Widget.Pc.Button.Primary"

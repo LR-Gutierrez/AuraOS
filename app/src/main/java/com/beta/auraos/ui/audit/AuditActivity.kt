@@ -2,7 +2,11 @@ package com.beta.auraos.ui.audit
 
 import android.content.Intent
 import android.os.Bundle
+import android.text.Editable
+import android.text.InputType
+import android.text.TextWatcher
 import android.view.View
+import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -18,7 +22,9 @@ import com.beta.auraos.data.MembershipRepository
 import com.beta.auraos.data.audit.AuditEngine
 import com.beta.auraos.data.audit.AuditPeriodSummary
 import com.beta.auraos.data.audit.AuditRecord
+import com.beta.auraos.data.audit.CashCount
 import com.beta.auraos.data.audit.ClosureBatch
+import com.beta.auraos.data.audit.PaymentMethod
 import com.beta.auraos.data.local.SessionManager
 import com.beta.auraos.data.local.room.AppDatabase
 import com.beta.auraos.data.model.Branch
@@ -43,6 +49,9 @@ class AuditActivity : BaseActivity() {
 
     private var branches: List<Branch> = emptyList()
     private var pendingCount = 0
+    private var openingFloat = 0.0
+    private var cashCollected = 0.0
+    private var currency: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -70,12 +79,25 @@ class AuditActivity : BaseActivity() {
         }
 
         binding.btnExecuteClosure.setOnClickListener {
-            if (pendingCount == 0) {
-                Snackbar.make(binding.root, R.string.audit_no_pending_message, Snackbar.LENGTH_SHORT).show()
-            } else {
-                showClosureConfirmDialog()
+            when {
+                pendingCount == 0 ->
+                    Snackbar.make(binding.root, R.string.audit_no_pending_message, Snackbar.LENGTH_SHORT).show()
+                countedCash() == null -> {
+                    binding.etCashCounted.error = getString(R.string.pc_count_required)
+                    binding.etCashCounted.requestFocus()
+                }
+                else -> showClosureConfirmDialog()
             }
         }
+        binding.rowOpeningFloat.setOnClickListener { showOpeningFloatDialog() }
+        binding.etCashCounted.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: Editable?) {
+                binding.etCashCounted.error = null
+                renderCashCount()
+            }
+        })
 
         observeViewModel()
         viewModel.loadBranches()
@@ -100,8 +122,10 @@ class AuditActivity : BaseActivity() {
         viewModel.uiState.observe(this) { state ->
             binding.loadingOverlay.visibility = if (state is AuditUiState.Loading) View.VISIBLE else View.GONE
             when (state) {
-                is AuditUiState.Summary ->
+                is AuditUiState.Summary -> {
+                    openingFloat = state.openingFloat
                     bindSummary(state.periodSummary, state.closureHistory, state.pendingRecords)
+                }
                 is AuditUiState.ClosureResult -> showClosureResultDialog(state.report)
                 is AuditUiState.Error -> Toast.makeText(this, state.message, Toast.LENGTH_LONG).show()
                 is AuditUiState.Loading -> Unit
@@ -120,6 +144,7 @@ class AuditActivity : BaseActivity() {
             PcUi.addChip(row, branch.name, checked = branch.id == selectedId) {
                 if (branch.id != sessionManager.getSelectedBranchId()) {
                     sessionManager.saveSelectedBranchId(branch.id)
+                    binding.etCashCounted.setText("")
                     renderBranchChips()
                     loadSummary()
                 }
@@ -131,13 +156,76 @@ class AuditActivity : BaseActivity() {
         binding.btnExecuteClosure.alpha = if (enabled) 1f else 0.4f
     }
 
+    private fun countedCash(): Double? =
+        binding.etCashCounted.text?.toString()?.trim()?.replace(',', '.')?.toDoubleOrNull()
+
+    /** Expected drawer, and how the counted cash compares, as the operator types. */
+    private fun renderCashCount() {
+        val expected = openingFloat + cashCollected
+        binding.tvOpeningFloat.text = ParkingFormat.money(openingFloat, currency)
+        binding.tvCashCollected.text = ParkingFormat.money(cashCollected, currency)
+        binding.tvCashExpected.text = ParkingFormat.money(expected, currency)
+
+        val counted = countedCash()
+        if (counted == null) {
+            binding.tvDiffLabel.setText(R.string.pc_difference)
+            binding.tvDiffValue.setText(R.string.pc_dash)
+        } else {
+            val diff = Math.round((counted - expected) * 100) / 100.0
+            binding.tvDiffLabel.setText(
+                when {
+                    diff == 0.0 -> R.string.pc_balanced
+                    diff > 0 -> R.string.pc_over
+                    else -> R.string.pc_short
+                }
+            )
+            val sign = when {
+                diff > 0 -> "+"
+                diff < 0 -> "\u2212"
+                else -> ""
+            }
+            binding.tvDiffValue.text = sign + ParkingFormat.money(Math.abs(diff), currency)
+        }
+        setClosureEnabled(pendingCount > 0 && counted != null)
+    }
+
+    private fun differenceText(diff: Double): String = when {
+        diff == 0.0 -> getString(R.string.pc_balanced)
+        diff > 0 -> getString(R.string.pc_over_amount, ParkingFormat.money(diff, currency))
+        else -> getString(R.string.pc_short_amount, ParkingFormat.money(-diff, currency))
+    }
+
+    private fun showOpeningFloatDialog() {
+        val branchId = sessionManager.getSelectedBranchId() ?: return
+        val input = EditText(this).apply {
+            inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
+            hint = getString(R.string.pc_amount_hint)
+            if (openingFloat > 0) setText(String.format(Locale.US, "%.2f", openingFloat))
+        }
+        val padding = (20 * resources.displayMetrics.density).toInt()
+        val container = android.widget.FrameLayout(this).apply {
+            setPadding(padding, padding / 2, padding, 0)
+            addView(input)
+        }
+        AlertDialog.Builder(this)
+            .setTitle(R.string.pc_opening_float)
+            .setMessage(R.string.pc_opening_float_hint)
+            .setView(container)
+            .setPositiveButton(R.string.dialog_ok) { _, _ ->
+                val amount = input.text.toString().trim().replace(',', '.').toDoubleOrNull() ?: return@setPositiveButton
+                viewModel.setOpeningFloat(branchId, amount)
+            }
+            .setNegativeButton(R.string.action_cancel, null)
+            .show()
+    }
+
     private fun bindSummary(
         summary: AuditPeriodSummary,
         history: List<ClosureBatch>,
         pending: List<AuditRecord>,
     ) {
         val branchName = currentBranch()?.name ?: getString(R.string.audit_branch_default)
-        val currency = currentBranch()?.currency
+        currency = currentBranch()?.currency
         val operator = sessionManager.getLastDisplayName().orEmpty()
         binding.tvPeriodRange.text = if (summary.lastClosureDate != null) {
             getString(R.string.pc_period_since, ParkingFormat.dateTime(Date(summary.lastClosureDate)), operator)
@@ -150,12 +238,20 @@ class AuditActivity : BaseActivity() {
         binding.tvPeriodMeta.text =
             resources.getQuantityString(R.plurals.pc_charges, summary.exitCount, ParkingFormat.pad2(summary.exitCount), branchName)
 
-        // Breakdown: vehicle revenue by type, memberships kept apart.
+        // Breakdown: paid exits by payment method, memberships kept apart.
         val breakdown = binding.llBreakdown
         breakdown.removeAllViews()
-        pending.groupBy { it.vehicleType }.toSortedMap().forEach { (type, records) ->
+        val paid = pending.filter { it.membershipId == null && it.totalFee > 0 }
+        val byMethod = paid.groupBy { it.paymentMethod ?: AuditEngine.UNSPECIFIED_METHOD }
+        val rows = PaymentMethod.entries.map { it.key to getString(it.labelRes) } +
+            listOfNotNull(
+                (AuditEngine.UNSPECIFIED_METHOD to getString(R.string.pc_pay_unknown))
+                    .takeIf { byMethod.containsKey(AuditEngine.UNSPECIFIED_METHOD) }
+            )
+        rows.forEach { (key, label) ->
+            val records = byMethod[key].orEmpty()
             val row = ItemPcAmountRowBinding.inflate(layoutInflater, breakdown, true)
-            row.tvLabel.text = ParkingFormat.vehicleType(this, type)
+            row.tvLabel.text = label
             row.tvSub.text = resources.getQuantityString(R.plurals.pc_charges_short, records.size, ParkingFormat.pad2(records.size))
             row.tvAmount.text = ParkingFormat.money(records.sumOf { it.totalFee }, currency)
         }
@@ -167,10 +263,8 @@ class AuditActivity : BaseActivity() {
         }
         breakdown.visibility = if (breakdown.childCount == 0) View.GONE else View.VISIBLE
 
-        binding.tvPendingCount.text = ParkingFormat.pad2(summary.pendingClosureRecords)
-        binding.tvVehicleRevenue.text = ParkingFormat.money(summary.vehicleRevenue, currency)
-        binding.tvToClose.text = ParkingFormat.money(summary.totalRevenue, currency)
-        setClosureEnabled(summary.pendingClosureRecords > 0)
+        cashCollected = AuditEngine.cashCollected(pending)
+        renderCashCount()
 
         // Movements
         val movements = binding.llMovements
@@ -179,7 +273,11 @@ class AuditActivity : BaseActivity() {
             val row = ItemPcMovementBinding.inflate(layoutInflater, movements, true)
             row.tvTime.text = ParkingFormat.hhmm(record.exitTime)
             row.tvPlate.text = record.plate
-            val kind = ParkingFormat.vehicleType(this, record.vehicleType)
+            val kind = when {
+                record.membershipId != null -> getString(R.string.pc_member)
+                else -> PaymentMethod.fromKey(record.paymentMethod)?.let { getString(it.labelRes) }
+                    ?: ParkingFormat.vehicleType(this, record.vehicleType)
+            }
             row.tvKind.text = record.durationMinutes?.let {
                 getString(R.string.pc_meta, kind, ParkingFormat.durationMinutes(it))
             } ?: kind
@@ -198,9 +296,8 @@ class AuditActivity : BaseActivity() {
                 ParkingFormat.money(batch.totalRevenue, currency)
             card.findViewById<TextView>(R.id.tv_closure_count).text =
                 resources.getQuantityString(R.plurals.pc_closure_meta, batch.exitCount, ParkingFormat.hhmm(Date(batch.closedAt)), batch.exitCount)
-            card.findViewById<TextView>(R.id.tv_closure_verified).setText(
-                if (batch.isVerified) R.string.audit_verified else R.string.audit_pending_verify
-            )
+            card.findViewById<TextView>(R.id.tv_closure_verified).text = batch.cashDifference?.let { differenceText(it) }
+                ?: getString(if (batch.isVerified) R.string.audit_verified else R.string.audit_pending_verify)
             card.setOnClickListener { showClosureDetailDialog(batch) }
             binding.closureHistoryContainer.addView(card)
         }
@@ -208,13 +305,18 @@ class AuditActivity : BaseActivity() {
 
     private fun showClosureConfirmDialog() {
         val branchId = sessionManager.getSelectedBranchId() ?: return
+        val counted = countedCash() ?: return
         val pending = pendingCount.toString()
+        val diff = Math.round((counted - (openingFloat + cashCollected)) * 100) / 100.0
+        val message = getString(R.string.audit_closure_confirm_message, pending) + "\n\n" +
+            getString(R.string.pc_closure_count_line, ParkingFormat.money(counted, currency), differenceText(diff))
 
         AlertDialog.Builder(this)
             .setTitle(R.string.audit_closure_confirm_title)
-            .setMessage(getString(R.string.audit_closure_confirm_message, pending))
+            .setMessage(message)
             .setPositiveButton(R.string.audit_closure_confirm_action) { _, _ ->
-                viewModel.executeClosure(branchId)
+                viewModel.executeClosure(branchId, CashCount(openingFloat, counted))
+                binding.etCashCounted.setText("")
             }
             .setNegativeButton(R.string.action_cancel, null)
             .show()
@@ -253,6 +355,7 @@ class AuditActivity : BaseActivity() {
             }
             append("\n\n")
             append(getString(R.string.audit_result_total, report.closure.totalRevenue))
+            appendCashCount(report.closure)
             if (report.discrepancies.isNotEmpty()) {
                 append("\n\n")
                 append(getString(R.string.audit_result_discrepancies, report.discrepancies.size))
@@ -297,9 +400,17 @@ class AuditActivity : BaseActivity() {
             }
             append("\n\n")
             append(getString(R.string.audit_result_total, batch.totalRevenue))
+            appendCashCount(batch)
             append("\n")
             append(if (batch.isVerified) getString(R.string.audit_verified) else getString(R.string.audit_pending_verify))
         }
+    }
+
+    private fun StringBuilder.appendCashCount(batch: ClosureBatch) {
+        val counted = batch.cashCounted ?: return
+        val diff = batch.cashDifference ?: return
+        append("\n")
+        append(getString(R.string.pc_closure_count_line, ParkingFormat.money(counted, currency), differenceText(diff)))
     }
 
     companion object {
