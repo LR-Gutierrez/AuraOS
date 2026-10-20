@@ -255,4 +255,27 @@
     <string name="server_removed">Server removed. The app works on this device only.</string>
     <string name="server_confirm_title">Change server</string>
     <string name="server_confirm_body">Pending changes on this device will be sent to the new server.</string>
+    <!-- Registro · Entrada method -->
+    <string name="pc_entry_method">Entry method</string>
+    <string name="pc_entry_manual">Manual</string>
+    <string name="pc_entry_nfc">Membership NFC</string>
+    <string name="pc_nfc_prompt">Hold the card to the phone</string>
+    <string name="pc_nfc_waiting">Waiting for a card</string>
+    <string name="pc_nfc_reading">Reading card\u2026</string>
+    <string name="pc_nfc_keep">Keep the card still</string>
+    <string name="pc_nfc_off">NFC is turned off</string>
+    <string name="pc_nfc_off_sub">Tap to turn it on</string>
+    <string name="pc_nfc_unavailable">This phone cannot read cards</string>
+    <string name="pc_nfc_unavailable_sub">Use manual entry</string>
+    <string name="pc_nfc_hint">Members enter free of charge and without required photos.</string>
+    <string name="pc_nfc_card">NFC \u00b7\u00b7 %1$s</string>
+    <string name="pc_nfc_valid_until">Valid until</string>
+    <string name="pc_nfc_uses">Uses this month</string>
+    <string name="pc_nfc_no_charge">No charge \u00b7 included in the plan</string>
+    <string name="pc_nfc_read_another">Read another card</string>
+    <!-- Perfil -->
+    <string name="pc_role_admin">Administrator</string>
+    <string name="pc_role_operator">Operator</string>
+    <string name="pc_rates">Rates</string>
+    <string name="pc_rates_meta">Light %1$s · Heavy %2$s · Moto %3$s</string>
 </resources>

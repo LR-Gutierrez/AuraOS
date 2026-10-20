@@ -1,9 +1,7 @@
 package com.beta.auraos
 
-import android.app.PendingIntent
 import android.content.Intent
 import android.nfc.NfcAdapter
-import android.nfc.Tag
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
@@ -16,21 +14,19 @@ import androidx.core.view.updatePadding
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import com.beta.auraos.data.BranchRepository
+import com.beta.auraos.data.MembershipEntryRegistrar
 import com.beta.auraos.data.MembershipRepository
 import com.beta.auraos.data.Result
 import com.beta.auraos.data.VehicleEntryRepository
 import com.beta.auraos.data.local.NfcSyncManager
 import com.beta.auraos.data.local.SessionManager
-import com.beta.auraos.data.local.SyncCoordinator
 import com.beta.auraos.data.local.room.AppDatabase
 import com.beta.auraos.data.model.Branch
 import com.beta.auraos.data.model.Membership
-import com.beta.auraos.data.model.VehicleEntry
 import com.beta.auraos.data.remote.ApiClient
 import com.beta.auraos.data.remote.BranchApi
-import com.beta.auraos.data.remote.NfcEntryRequest
-import com.beta.auraos.data.remote.ParkingApi
 import com.beta.auraos.databinding.ActivityKioskBinding
+import com.beta.auraos.util.NfcReader
 import com.beta.auraos.util.ParkingFormat
 import com.beta.auraos.util.formatDate
 import com.beta.auraos.ui.branches.BranchListActivity
@@ -40,11 +36,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
-import java.util.TimeZone
-import java.util.UUID
 
 class KioskActivity : BaseActivity() {
 
@@ -68,8 +59,8 @@ class KioskActivity : BaseActivity() {
         MembershipRepository(AppDatabase.getInstance(this@KioskActivity))
     }
 
-    private val parkingApi: ParkingApi by lazy {
-        ApiClient.createApi<ParkingApi>()
+    private val membershipEntryRegistrar: MembershipEntryRegistrar by lazy {
+        MembershipEntryRegistrar(AppDatabase.getInstance(this@KioskActivity))
     }
 
     private val nfcSyncManager: NfcSyncManager by lazy {
@@ -320,42 +311,17 @@ class KioskActivity : BaseActivity() {
     }
 
     private fun enableNfcForegroundDispatch() {
-        val intent = Intent(this, javaClass).apply {
-            addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
-        }
-        val pendingIntent = PendingIntent.getActivity(
-            this, 0, intent,
-            PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-        )
-        val techLists = arrayOf(
-            arrayOf("android.nfc.tech.NfcA"),
-            arrayOf("android.nfc.tech.NfcB"),
-            arrayOf("android.nfc.tech.NfcF"),
-            arrayOf("android.nfc.tech.NfcV"),
-            arrayOf("android.nfc.tech.IsoDep"),
-            arrayOf("android.nfc.tech.MifareClassic"),
-            arrayOf("android.nfc.tech.MifareUltralight"),
-            arrayOf("android.nfc.tech.Ndef")
-        )
-        nfcAdapter?.enableForegroundDispatch(this, pendingIntent, null, techLists)
+        NfcReader.enable(this, nfcAdapter)
     }
 
     private fun disableNfcForegroundDispatch() {
-        nfcAdapter?.disableForegroundDispatch(this)
+        NfcReader.disable(this, nfcAdapter)
     }
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         if (!isNfcScanning) return
-        if (NfcAdapter.ACTION_TECH_DISCOVERED == intent.action ||
-            NfcAdapter.ACTION_TAG_DISCOVERED == intent.action
-        ) {
-            val tag: Tag? = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG)
-            if (tag != null) {
-                val cardUuid = bytesToHex(tag.id)
-                onNfcTagDetected(cardUuid)
-            }
-        }
+        NfcReader.cardUuid(intent)?.let { onNfcTagDetected(it) }
     }
 
     private fun onNfcTagDetected(cardUuid: String) {
@@ -400,67 +366,20 @@ class KioskActivity : BaseActivity() {
     }
 
     private fun registerMembershipEntry(membership: Membership, cardUuid: String) {
+        val branchId = selectedBranch?.id ?: ""
         lifecycleScope.launch(Dispatchers.IO) {
-            val activeEntry = vehicleEntryRepository.getActiveEntryByMembership(membership.id)
-            if (activeEntry != null) {
-                withContext(Dispatchers.Main) {
-                    showEntryError(getString(R.string.kiosk_nfc_error_active_entry), membership)
-                }
-                return@launch
-            }
-
-            val localEntryId = UUID.randomUUID().toString()
-            val now = nowUtcString()
-            val branchId = selectedBranch?.id ?: ""
-
-            val localEntry = VehicleEntry(
-                id = localEntryId,
-                plate = "NFC",
-                vehicleType = DEFAULT_NFC_VEHICLE_TYPE,
-                isVip = true,
-                membershipId = membership.id,
-                branchId = branchId,
-                platePhotoUrl = null,
-                frontPhotoUrl = null,
-                rearPhotoUrl = null,
-                leftPhotoUrl = null,
-                rightPhotoUrl = null,
-                createdAt = now,
-                exitedAt = null,
-                duration = null,
-                fee = null,
-                branch = null
-            )
-
-            vehicleEntryRepository.updateCachedEntry(localEntry)
-
-            SyncCoordinator.isApiInProgress = true
-            try {
-                val response = parkingApi.registerNfcEntry(NfcEntryRequest(cardUuid = cardUuid))
-                if (response.isSuccessful) {
-                    val serverEntry = response.body()?.data
-                    if (serverEntry != null) {
-                        vehicleEntryRepository.replaceLocalWithServerEntry(localEntryId, serverEntry)
-                    }
-                } else {
-                    nfcSyncManager.enqueue(cardUuid, branchId, membership.memberName, membership.id, localEntryId)
-                }
-                withContext(Dispatchers.Main) {
-                    if (response.isSuccessful) {
-                        showEntrySuccess(membership)
-                    } else {
-                        showEntryQueued(membership)
-                    }
-                }
-            } catch (e: Exception) {
-                android.util.Log.e("KioskActivity", "registerNfcEntry exception: ${e.message}", e)
-                nfcSyncManager.enqueue(cardUuid, branchId, membership.memberName, membership.id, localEntryId)
-                withContext(Dispatchers.Main) {
-                    showEntryQueued(membership)
-                }
+            val outcome = try {
+                membershipEntryRegistrar.register(membership, cardUuid, branchId)
             } finally {
-                SyncCoordinator.isApiInProgress = false
                 syncCoordinator.onMutation()
+            }
+            withContext(Dispatchers.Main) {
+                when (outcome) {
+                    MembershipEntryRegistrar.Outcome.Registered -> showEntrySuccess(membership)
+                    MembershipEntryRegistrar.Outcome.Queued -> showEntryQueued(membership)
+                    MembershipEntryRegistrar.Outcome.AlreadyInside ->
+                        showEntryError(getString(R.string.kiosk_nfc_error_active_entry), membership)
+                }
             }
         }
     }
@@ -524,22 +443,6 @@ class KioskActivity : BaseActivity() {
         }
     }
 
-    private fun bytesToHex(bytes: ByteArray): String {
-        val hexChars = CharArray(bytes.size * 2)
-        for (i in bytes.indices) {
-            val v = bytes[i].toInt() and 0xFF
-            hexChars[i * 2] = "0123456789ABCDEF"[v ushr 4]
-            hexChars[i * 2 + 1] = "0123456789ABCDEF"[v and 0x0F]
-        }
-        return String(hexChars)
-    }
-
-    private fun nowUtcString(): String {
-        val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US)
-        sdf.timeZone = TimeZone.getTimeZone("UTC")
-        return sdf.format(Date())
-    }
-
     private fun setupWindowInsets() {
         val basePadding = binding.kioskRoot.paddingBottom
         ViewCompat.setOnApplyWindowInsetsListener(binding.kioskRoot) { view, insets ->
@@ -550,7 +453,6 @@ class KioskActivity : BaseActivity() {
     }
 
     companion object {
-        private const val DEFAULT_NFC_VEHICLE_TYPE = "light"
         private const val RESULT_TIMEOUT_MS = 6000L
     }
 }

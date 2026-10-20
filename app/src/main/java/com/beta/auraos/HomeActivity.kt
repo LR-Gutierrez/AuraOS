@@ -3,7 +3,9 @@ package com.beta.auraos
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.nfc.NfcAdapter
 import android.os.Bundle
+import android.provider.Settings
 import android.text.Editable
 import android.text.InputFilter
 import android.text.TextWatcher
@@ -19,6 +21,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
 import androidx.lifecycle.lifecycleScope
 import com.beta.auraos.data.BranchRepository
+import com.beta.auraos.data.MembershipEntryRegistrar
 import com.beta.auraos.data.MembershipRepository
 import com.beta.auraos.data.Result
 import com.beta.auraos.data.VehicleEntryRepository
@@ -35,6 +38,7 @@ import com.beta.auraos.databinding.ActivityHomeBinding
 import com.beta.auraos.databinding.ItemPcPhotoSlotBinding
 import com.beta.auraos.ui.branches.BranchListActivity
 import com.beta.auraos.ui.exit.ExitActivity
+import com.beta.auraos.util.NfcReader
 import com.beta.auraos.util.ParkingFormat
 import com.beta.auraos.util.PcUi
 import com.beta.auraos.util.TabNavigator
@@ -47,7 +51,11 @@ import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.File
 import java.io.IOException
+import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
+import java.util.Locale
+import java.util.TimeZone
 import java.util.UUID
 
 /** Registro · Entrada. The Salida half of the tab lives in [ExitActivity]. */
@@ -64,6 +72,15 @@ class HomeActivity : BaseActivity() {
     private var selectedMembership: Membership? = null
     private var memberships: List<Membership> = emptyList()
 
+    private enum class EntryMethod { NFC, MANUAL }
+
+    private var entryMethod = EntryMethod.MANUAL
+    private var nfcAdapter: NfcAdapter? = null
+    private var isReadingCard = false
+    private var nfcError: String? = null
+    private var cardMembership: Membership? = null
+    private var cardUuid: String? = null
+
     private val membershipRepository: MembershipRepository by lazy {
         MembershipRepository(AppDatabase.getInstance(this@HomeActivity))
     }
@@ -78,6 +95,10 @@ class HomeActivity : BaseActivity() {
 
     private val parkingApi: ParkingApi by lazy {
         ApiClient.createApi<ParkingApi>()
+    }
+
+    private val membershipEntryRegistrar: MembershipEntryRegistrar by lazy {
+        MembershipEntryRegistrar(AppDatabase.getInstance(this@HomeActivity))
     }
 
     /** One capture slot: where the file goes, its view and when it was taken. */
@@ -127,6 +148,7 @@ class HomeActivity : BaseActivity() {
         }
 
         setupSegment()
+        setupEntryMethod()
         initPhotoSlots()
         setupPlateField()
         renderTypeChips()
@@ -136,6 +158,8 @@ class HomeActivity : BaseActivity() {
         binding.done.btnDoneAgain.setOnClickListener {
             binding.done.root.visibility = View.GONE
             binding.form.visibility = View.VISIBLE
+            clearCard()
+            updateNfcReader()
         }
         binding.header.tvBranchMeta.setOnClickListener { showBranchSelector() }
 
@@ -148,6 +172,20 @@ class HomeActivity : BaseActivity() {
         super.onResume()
         updateEntryTime()
         selectedBranch?.let { refreshBranchMeta(it) }
+        // NFC may have been switched on in Settings while away.
+        renderNfcPanel()
+        updateNfcReader()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        NfcReader.disable(this, nfcAdapter)
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        if (!isWaitingForCard()) return
+        NfcReader.cardUuid(intent)?.let { onCardRead(it) }
     }
 
     private fun setupSegment() {
@@ -156,6 +194,186 @@ class HomeActivity : BaseActivity() {
             TabNavigator.open(this, Intent(this, ExitActivity::class.java), R.id.nav_register, R.id.nav_register)
         }
     }
+
+    // region Entry method
+
+    private fun setupEntryMethod() {
+        nfcAdapter = NfcAdapter.getDefaultAdapter(this)
+        // Members are the quick path where the phone can read their card.
+        entryMethod = if (nfcAdapter != null) EntryMethod.NFC else EntryMethod.MANUAL
+        binding.nfcBox.setOnClickListener { onNfcBoxTapped() }
+        binding.btnNfcRegister.setOnClickListener { registerCardEntry() }
+        binding.btnNfcAgain.setOnClickListener {
+            clearCard()
+            updateNfcReader()
+        }
+        renderEntryMethod()
+    }
+
+    private fun renderEntryMethod() {
+        val row = binding.llEntryMethod
+        row.removeAllViews()
+        listOf(
+            EntryMethod.MANUAL to R.string.pc_entry_manual,
+            EntryMethod.NFC to R.string.pc_entry_nfc,
+        ).forEach { (method, label) ->
+            PcUi.addChip(row, getString(label), checked = entryMethod == method, fill = true) {
+                entryMethod = method
+                renderEntryMethod()
+                updateNfcReader()
+            }
+        }
+        binding.nfcPanel.visibility = if (entryMethod == EntryMethod.NFC) View.VISIBLE else View.GONE
+        binding.manualPanel.visibility = if (entryMethod == EntryMethod.MANUAL) View.VISIBLE else View.GONE
+        renderNfcPanel()
+    }
+
+    private fun isWaitingForCard(): Boolean =
+        entryMethod == EntryMethod.NFC && cardMembership == null && !isReadingCard &&
+            binding.form.visibility == View.VISIBLE
+
+    /** Listens for cards only while the NFC panel is waiting for one. */
+    private fun updateNfcReader() {
+        if (isWaitingForCard() && nfcAdapter?.isEnabled == true) NfcReader.enable(this, nfcAdapter)
+        else NfcReader.disable(this, nfcAdapter)
+    }
+
+    private fun renderNfcPanel() {
+        val member = cardMembership
+        binding.nfcBox.visibility = if (member == null) View.VISIBLE else View.GONE
+        binding.tvNfcHint.visibility = if (member == null) View.VISIBLE else View.GONE
+        binding.nfcMember.visibility = if (member == null) View.GONE else View.VISIBLE
+        if (member != null) return
+
+        val adapter = nfcAdapter
+        binding.nfcBox.setBackgroundResource(
+            if (isReadingCard) R.drawable.bg_pc_reader_active else R.drawable.bg_pc_dashed
+        )
+        val (title, sub) = when {
+            adapter == null -> getString(R.string.pc_nfc_unavailable) to getString(R.string.pc_nfc_unavailable_sub)
+            !adapter.isEnabled -> getString(R.string.pc_nfc_off) to getString(R.string.pc_nfc_off_sub)
+            isReadingCard -> getString(R.string.pc_nfc_reading) to getString(R.string.pc_nfc_keep)
+            nfcError != null -> nfcError!! to getString(R.string.pc_nfc_waiting)
+            else -> getString(R.string.pc_nfc_prompt) to getString(R.string.pc_nfc_waiting)
+        }
+        binding.tvNfcTitle.text = title
+        binding.tvNfcSub.text = sub
+        binding.nfcBox.contentDescription = "$title. $sub"
+    }
+
+    private fun onNfcBoxTapped() {
+        val adapter = nfcAdapter
+        when {
+            adapter == null -> {
+                entryMethod = EntryMethod.MANUAL
+                renderEntryMethod()
+            }
+            !adapter.isEnabled -> startActivity(Intent(Settings.ACTION_NFC_SETTINGS))
+        }
+    }
+
+    private fun onCardRead(uuid: String) {
+        isReadingCard = true
+        nfcError = null
+        updateNfcReader()
+        renderNfcPanel()
+        lifecycleScope.launch(Dispatchers.IO) {
+            val result = membershipRepository.getMembershipByCardUuid(uuid)
+            val membership = (result as? Result.Success)?.data
+            val uses = membership?.let {
+                vehicleEntryRepository.countMembershipEntriesSince(it.id, startOfMonthUtc())
+            } ?: 0
+            withContext(Dispatchers.Main) {
+                isReadingCard = false
+                when {
+                    membership == null -> nfcError = getString(R.string.kiosk_nfc_error_card_not_found)
+                    !membership.isActive -> nfcError = getString(R.string.kiosk_nfc_error_inactive)
+                    else -> showCard(membership, uuid, uses)
+                }
+                renderNfcPanel()
+                updateNfcReader()
+            }
+        }
+    }
+
+    private fun showCard(membership: Membership, uuid: String, uses: Int) {
+        cardMembership = membership
+        cardUuid = uuid
+        binding.tvNfcTier.text = getString(R.string.pc_member_label, membership.tier)
+        binding.tvNfcCard.text = getString(R.string.pc_nfc_card, uuid.takeLast(4))
+        binding.tvNfcMemberName.text = membership.memberName
+        binding.tvNfcUntil.text = formatDate(membership.endDate.take(10))
+        binding.tvNfcUses.text = ParkingFormat.pad2(uses)
+        binding.tvNfcEntryTime.text = getString(R.string.pc_entry_time, ParkingFormat.hhmm())
+    }
+
+    private fun clearCard() {
+        cardMembership = null
+        cardUuid = null
+        nfcError = null
+        renderNfcPanel()
+    }
+
+    private fun registerCardEntry() {
+        val membership = cardMembership ?: return
+        val uuid = cardUuid ?: return
+        val branchId = selectedBranch?.id
+        if (branchId == null) {
+            Toast.makeText(this, getString(R.string.branch_required_for_entry), Toast.LENGTH_LONG).show()
+            showBranchSelector()
+            return
+        }
+        if (isSending) return
+        isSending = true
+        binding.btnNfcRegister.isEnabled = false
+        lifecycleScope.launch(Dispatchers.IO) {
+            val outcome = try {
+                membershipEntryRegistrar.register(membership, uuid, branchId)
+            } finally {
+                syncCoordinator.onMutation()
+            }
+            withContext(Dispatchers.Main) {
+                isSending = false
+                binding.btnNfcRegister.isEnabled = true
+                when (outcome) {
+                    MembershipEntryRegistrar.Outcome.Registered -> showCardDone(R.string.pc_entry_done, membership)
+                    MembershipEntryRegistrar.Outcome.Queued -> showCardDone(R.string.pc_entry_queued, membership)
+                    MembershipEntryRegistrar.Outcome.AlreadyInside -> Toast.makeText(
+                        this@HomeActivity, R.string.kiosk_nfc_error_active_entry, Toast.LENGTH_LONG
+                    ).show()
+                }
+            }
+        }
+    }
+
+    private fun showCardDone(titleRes: Int, membership: Membership) {
+        binding.done.tvDoneTitle.setText(titleRes)
+        binding.done.tvDonePlate.text = membership.memberName
+        binding.done.tvDoneMeta.text = getString(
+            R.string.pc_meta, getString(R.string.pc_member_label, membership.tier), ParkingFormat.hhmm()
+        )
+        binding.form.visibility = View.GONE
+        binding.done.root.visibility = View.VISIBLE
+        binding.homeScrollView.smoothScrollTo(0, 0)
+        updateNfcReader()
+        selectedBranch?.let { refreshBranchMeta(it) }
+    }
+
+    /** Local midnight on the 1st of this month, as the UTC timestamps entries are stored with. */
+    private fun startOfMonthUtc(): String {
+        val start = Calendar.getInstance().apply {
+            set(Calendar.DAY_OF_MONTH, 1)
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }
+        return SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US).apply {
+            timeZone = TimeZone.getTimeZone("UTC")
+        }.format(start.time)
+    }
+
+    // endregion
 
     // region Photos
 

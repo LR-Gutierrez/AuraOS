@@ -17,7 +17,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:clipToPadding="false"
+        android:clipToPadding="true"
         android:scrollbars="none">
 
         <LinearLayout
@@ -105,6 +105,10 @@
 
             <include
                 android:id="@+id/row_branches"
+                layout="@layout/item_pc_nav_row" />
+
+            <include
+                android:id="@+id/row_rates"
                 layout="@layout/item_pc_nav_row" />
 
             <include

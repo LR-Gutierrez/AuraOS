@@ -23,6 +23,9 @@ interface VehicleEntryDao {
     @Query("SELECT * FROM vehicle_entries WHERE membershipId = :membershipId AND exitedAt IS NULL LIMIT 1")
     suspend fun getActiveByMembershipId(membershipId: String): VehicleEntryEntity?
 
+    @Query("SELECT COUNT(*) FROM vehicle_entries WHERE membershipId = :membershipId AND createdAt >= :fromDate")
+    suspend fun countByMembershipSince(membershipId: String, fromDate: String): Int
+
     @Query("SELECT * FROM vehicle_entries WHERE id = :id")
     suspend fun getById(id: String): VehicleEntryEntity?
 

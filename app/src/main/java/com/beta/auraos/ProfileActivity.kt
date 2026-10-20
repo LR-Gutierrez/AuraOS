@@ -7,6 +7,7 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.net.Uri
 import android.os.Bundle
+import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.EditText
@@ -32,6 +33,7 @@ import com.beta.auraos.data.local.SessionManager
 import com.beta.auraos.databinding.ActivityProfileBinding
 import com.beta.auraos.ui.login.LoginActivity
 import com.beta.auraos.data.local.room.AppDatabase
+import com.beta.auraos.ui.branches.BranchFormActivity
 import com.beta.auraos.ui.branches.BranchListActivity
 import com.beta.auraos.ui.memberships.MembershipListActivity
 import com.beta.auraos.util.ParkingFormat
@@ -251,6 +253,7 @@ class ProfileActivity : BaseActivity() {
         binding.rowBranches.root.setOnClickListener {
             startActivity(Intent(this, BranchListActivity::class.java))
         }
+        binding.rowRates.tvTitle.setText(R.string.pc_rates)
         binding.rowMemberships.tvTitle.setText(R.string.membership_list_title)
         binding.rowMemberships.tvMeta.setText(R.string.pc_memberships_meta)
         binding.rowMemberships.root.setOnClickListener {
@@ -265,14 +268,22 @@ class ProfileActivity : BaseActivity() {
         lifecycleScope.launch {
             val branches = withContext(Dispatchers.IO) { db.branchDao().getAll() }
             binding.rowBranches.tvMeta.text = branches.joinToString(" · ") { it.name }
-            val email = sessionManager.getLastEmail().orEmpty()
-            binding.tvProfileEmail.text = if (email.isEmpty()) {
-                ""
-            } else {
-                resources.getQuantityString(R.plurals.pc_profile_meta, branches.size, email, ParkingFormat.pad2(branches.size))
-            }
-            val current = branches.find { it.id == sessionManager.getSelectedBranchId() }
+            val role = getString(if (sessionManager.isAdmin()) R.string.pc_role_admin else R.string.pc_role_operator)
+            binding.tvProfileEmail.text =
+                resources.getQuantityString(R.plurals.pc_profile_meta, branches.size, role, ParkingFormat.pad2(branches.size))
+            val current = branches.find { it.id == sessionManager.getSelectedBranchId() } ?: branches.firstOrNull()
             binding.rowKiosk.tvMeta.text = getString(R.string.pc_kiosk_meta, current?.name ?: "")
+            // Rates belong to a branch: show and open the one in use (read-only for operators).
+            binding.rowRates.root.visibility = if (current == null) View.GONE else View.VISIBLE
+            if (current != null) {
+                binding.rowRates.tvMeta.text = getString(
+                    R.string.pc_rates_meta,
+                    ParkingFormat.money(current.lightVehicleRate, current.currency),
+                    ParkingFormat.money(current.heavyVehicleRate, current.currency),
+                    ParkingFormat.money(current.motorcycleRate, current.currency),
+                )
+                binding.rowRates.root.setOnClickListener { BranchFormActivity.open(this@ProfileActivity, current.id) }
+            }
         }
     }
 

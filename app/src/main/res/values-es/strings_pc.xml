@@ -248,4 +248,27 @@
     <string name="server_removed">Servidor quitado. La app funciona solo en este dispositivo.</string>
     <string name="server_confirm_title">Cambiar servidor</string>
     <string name="server_confirm_body">Los cambios pendientes de este dispositivo se enviarán al nuevo servidor.</string>
+    <!-- Registro · método de ingreso -->
+    <string name="pc_entry_method">Método de ingreso</string>
+    <string name="pc_entry_manual">Manual</string>
+    <string name="pc_entry_nfc">Membresía NFC</string>
+    <string name="pc_nfc_prompt">Acerca la tarjeta al teléfono</string>
+    <string name="pc_nfc_waiting">Esperando tarjeta</string>
+    <string name="pc_nfc_reading">Leyendo tarjeta\u2026</string>
+    <string name="pc_nfc_keep">No retires la tarjeta</string>
+    <string name="pc_nfc_off">NFC desactivado</string>
+    <string name="pc_nfc_off_sub">Toca para activarlo</string>
+    <string name="pc_nfc_unavailable">Este teléfono no lee tarjetas</string>
+    <string name="pc_nfc_unavailable_sub">Usa el ingreso manual</string>
+    <string name="pc_nfc_hint">Los miembros entran sin cobro y sin fotos obligatorias.</string>
+    <string name="pc_nfc_card">NFC \u00b7\u00b7 %1$s</string>
+    <string name="pc_nfc_valid_until">Vigente hasta</string>
+    <string name="pc_nfc_uses">Usos este mes</string>
+    <string name="pc_nfc_no_charge">Sin cargo \u00b7 incluido en el plan</string>
+    <string name="pc_nfc_read_another">Leer otra tarjeta</string>
+    <!-- Perfil -->
+    <string name="pc_role_admin">Administrador</string>
+    <string name="pc_role_operator">Operador</string>
+    <string name="pc_rates">Tarifas</string>
+    <string name="pc_rates_meta">Liviano %1$s · Pesado %2$s · Moto %3$s</string>
 </resources>

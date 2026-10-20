@@ -110,6 +110,10 @@ class VehicleEntryRepository(
         return database?.vehicleEntryDao()?.getActiveByMembershipId(membershipId)?.toModel()
     }
 
+    /** Entries of [membershipId] recorded on this device since [fromDate] (UTC ISO). */
+    suspend fun countMembershipEntriesSince(membershipId: String, fromDate: String): Int =
+        database?.vehicleEntryDao()?.countByMembershipSince(membershipId, fromDate) ?: 0
+
     suspend fun getHistoryEntries(
         branchId: String,
         from: String? = null,

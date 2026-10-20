@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Registro · Entrada (Parqueo·Control). Plate field, vehicle type chips, optional membership,
-    five capture slots (plate required), rate footer and the primary action, which stays
-    disabled until the plate and its photo are in.
+    Registro · Entrada (Parqueo·Control). The entry method picks the panel: a member's NFC card
+    (read, confirm, no charge) or manual (plate, vehicle type, optional membership, five capture
+    slots with the plate required, rate footer and the primary action, which stays disabled
+    until the plate and its photo are in).
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -18,7 +19,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:clipToPadding="false"
+        android:clipToPadding="true"
         android:scrollbars="none">
 
         <LinearLayout
@@ -47,245 +48,476 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <!-- Plate -->
+                <!-- Entry method: a member's NFC card, or the manual plate and photos -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="24dp"
-                    android:labelFor="@id/et_plate_number"
-                    android:text="@string/pc_plate"
-                    android:textAppearance="@style/TextAppearance.Lrg.Label" />
-
-                <EditText
-                    android:id="@+id/et_plate_number"
-                    style="@style/Widget.Pc.Field"
-                    android:layout_width="match_parent"
-                    android:layout_height="64dp"
-                    android:layout_marginTop="8dp"
-                    android:hint="@string/pc_plate_hint"
-                    android:importantForAutofill="no"
-                    android:inputType="textCapCharacters|textNoSuggestions"
-                    android:letterSpacing="0.1"
-                    android:maxLength="15"
-                    android:textSize="28sp" />
-
-                <TextView
-                    android:id="@+id/tv_db_status"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
-                    android:textAppearance="@style/TextAppearance.Pc.Mono"
-                    android:visibility="gone" />
-
-                <!-- Vehicle type -->
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="24dp"
-                    android:text="@string/pc_type"
+                    android:text="@string/pc_entry_method"
                     android:textAppearance="@style/TextAppearance.Lrg.Label" />
 
                 <LinearLayout
-                    android:id="@+id/ll_type_chips"
+                    android:id="@+id/ll_entry_method"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
                     android:orientation="horizontal" />
 
-                <!-- Membership (optional) -->
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="24dp"
-                    android:text="@string/pc_membership_optional"
-                    android:textAppearance="@style/TextAppearance.Lrg.Label" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_select_member"
-                    style="@style/Widget.Pc.Button.Outlined"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:gravity="start|center_vertical"
-                    android:paddingHorizontal="16dp"
-                    android:text="@string/pc_link_membership" />
-
                 <LinearLayout
-                    android:id="@+id/layout_member_info"
+                    android:id="@+id/nfc_panel"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:background="@drawable/bg_lrg_card"
                     android:orientation="vertical"
-                    android:padding="20dp"
                     android:visibility="gone"
                     tools:visibility="visible">
 
-                    <TextView
-                        android:id="@+id/tv_member_tier"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textAppearance="@style/TextAppearance.Lrg.Label"
-                        tools:text="Membresía · Mensual" />
+                    <LinearLayout
+                        android:id="@+id/nfc_box"
+                        android:layout_width="match_parent"
+                        android:layout_height="240dp"
+                        android:layout_marginTop="24dp"
+                        android:background="@drawable/bg_pc_dashed"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:foreground="?attr/selectableItemBackground"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:padding="20dp">
+
+                        <FrameLayout
+                            android:layout_width="80dp"
+                            android:layout_height="80dp"
+                            android:background="@drawable/bg_pc_circle_outline">
+
+                            <ImageView
+                                android:layout_width="34dp"
+                                android:layout_height="34dp"
+                                android:layout_gravity="center"
+                                android:importantForAccessibility="no"
+                                android:src="@drawable/ic_pc_nfc"
+                                app:tint="?attr/accentTextCustom" />
+                        </FrameLayout>
+
+                        <TextView
+                            android:id="@+id/tv_nfc_title"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="14dp"
+                            android:gravity="center"
+                            android:text="@string/pc_nfc_prompt"
+                            android:textAppearance="@style/TextAppearance.Pc.Section" />
+
+                        <TextView
+                            android:id="@+id/tv_nfc_sub"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="6dp"
+                            android:gravity="center"
+                            android:text="@string/pc_nfc_waiting"
+                            android:textAppearance="@style/TextAppearance.Lrg.Label" />
+                    </LinearLayout>
 
                     <TextView
-                        android:id="@+id/tv_member_name"
+                        android:id="@+id/tv_nfc_hint"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="20dp"
+                        android:text="@string/pc_nfc_hint"
+                        android:textAppearance="@style/TextAppearance.Pc.Hint" />
+
+                    <!-- Card read: the member it belongs to -->
+                    <LinearLayout
+                        android:id="@+id/nfc_member"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:visibility="gone"
+                        tools:visibility="visible">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="24dp"
+                            android:background="@drawable/bg_lrg_card"
+                            android:orientation="vertical"
+                            android:padding="20dp">
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal">
+
+                                <TextView
+                                    android:id="@+id/tv_nfc_tier"
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:textAppearance="@style/TextAppearance.Lrg.Label"
+                                    tools:text="Membresía · Mensual" />
+
+                                <TextView
+                                    android:id="@+id/tv_nfc_card"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:textAppearance="@style/TextAppearance.Lrg.Label"
+                                    tools:text="NFC ·· 4F2A" />
+                            </LinearLayout>
+
+                            <TextView
+                                android:id="@+id/tv_nfc_member_name"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="14dp"
+                                android:textAppearance="@style/TextAppearance.Pc.Stat"
+                                tools:text="Carlos Méndez" />
+
+                            <View
+                                style="@style/Widget.Pc.Hairline"
+                                android:layout_marginTop="14dp" />
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:paddingTop="14dp">
+
+                                <LinearLayout
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:orientation="vertical">
+
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="@string/pc_nfc_valid_until"
+                                        android:textAppearance="@style/TextAppearance.Lrg.Label" />
+
+                                    <TextView
+                                        android:id="@+id/tv_nfc_until"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:layout_marginTop="4dp"
+                                        android:textAppearance="@style/TextAppearance.Pc.MonoValue"
+                                        tools:text="30/11/2026" />
+                                </LinearLayout>
+
+                                <LinearLayout
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginStart="16dp"
+                                    android:layout_weight="1"
+                                    android:orientation="vertical">
+
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="@string/pc_nfc_uses"
+                                        android:textAppearance="@style/TextAppearance.Lrg.Label" />
+
+                                    <TextView
+                                        android:id="@+id/tv_nfc_uses"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:layout_marginTop="4dp"
+                                        android:textAppearance="@style/TextAppearance.Pc.MonoValue"
+                                        tools:text="14" />
+                                </LinearLayout>
+                            </LinearLayout>
+
+                            <View
+                                style="@style/Widget.Pc.Hairline"
+                                android:layout_marginTop="14dp" />
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:paddingTop="14dp">
+
+                                <TextView
+                                    android:id="@+id/tv_nfc_entry_time"
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:textAppearance="@style/TextAppearance.Pc.Mono"
+                                    android:textColor="?attr/textSecondaryCustom"
+                                    tools:text="Entrada 07:42" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/pc_nfc_no_charge"
+                                    android:textAppearance="@style/TextAppearance.Pc.Mono"
+                                    android:textColor="?attr/textSecondaryCustom" />
+                            </LinearLayout>
+                        </LinearLayout>
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btn_nfc_register"
+                            style="@style/Widget.Pc.Button.Primary"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="20dp"
+                            android:text="@string/pc_register_entry" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btn_nfc_again"
+                            style="@style/Widget.Pc.TextLink"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_horizontal"
+                            android:layout_marginTop="8dp"
+                            android:text="@string/pc_nfc_read_another" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/manual_panel"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <!-- Plate -->
+                    <TextView
                         android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="24dp"
+                        android:labelFor="@id/et_plate_number"
+                        android:text="@string/pc_plate"
+                        android:textAppearance="@style/TextAppearance.Lrg.Label" />
+
+                    <EditText
+                        android:id="@+id/et_plate_number"
+                        style="@style/Widget.Pc.Field"
+                        android:layout_width="match_parent"
+                        android:layout_height="64dp"
+                        android:layout_marginTop="8dp"
+                        android:hint="@string/pc_plate_hint"
+                        android:importantForAutofill="no"
+                        android:inputType="textCapCharacters|textNoSuggestions"
+                        android:letterSpacing="0.1"
+                        android:maxLength="15"
+                        android:textSize="28sp" />
+
+                    <TextView
+                        android:id="@+id/tv_db_status"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:textAppearance="@style/TextAppearance.Pc.Mono"
+                        android:visibility="gone" />
+
+                    <!-- Vehicle type -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="24dp"
+                        android:text="@string/pc_type"
+                        android:textAppearance="@style/TextAppearance.Lrg.Label" />
+
+                    <LinearLayout
+                        android:id="@+id/ll_type_chips"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
-                        android:textAppearance="@style/TextAppearance.Pc.Stat"
-                        tools:text="Carlos Méndez" />
+                        android:orientation="horizontal" />
 
-                    <View
-                        style="@style/Widget.Pc.Hairline"
-                        android:layout_marginTop="14dp" />
+                    <!-- Membership (optional) -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="24dp"
+                        android:text="@string/pc_membership_optional"
+                        android:textAppearance="@style/TextAppearance.Lrg.Label" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_select_member"
+                        style="@style/Widget.Pc.Button.Outlined"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:gravity="start|center_vertical"
+                        android:paddingHorizontal="16dp"
+                        android:text="@string/pc_link_membership" />
+
+                    <LinearLayout
+                        android:id="@+id/layout_member_info"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:background="@drawable/bg_lrg_card"
+                        android:orientation="vertical"
+                        android:padding="20dp"
+                        android:visibility="gone"
+                        tools:visibility="visible">
+
+                        <TextView
+                            android:id="@+id/tv_member_tier"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textAppearance="@style/TextAppearance.Lrg.Label"
+                            tools:text="Membresía · Mensual" />
+
+                        <TextView
+                            android:id="@+id/tv_member_name"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:textAppearance="@style/TextAppearance.Pc.Stat"
+                            tools:text="Carlos Méndez" />
+
+                        <View
+                            style="@style/Widget.Pc.Hairline"
+                            android:layout_marginTop="14dp" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:paddingTop="6dp">
+
+                            <TextView
+                                android:id="@+id/tv_member_until"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:textAppearance="@style/TextAppearance.Pc.Mono"
+                                android:textColor="?attr/textSecondaryCustom"
+                                tools:text="Vigente hasta 30/11/2026" />
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btn_clear_member"
+                                style="@style/Widget.Pc.TextLink"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/pc_remove" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <!-- Photos -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="24dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/pc_photos"
+                            android:textAppearance="@style/TextAppearance.Lrg.Label" />
+
+                        <TextView
+                            android:id="@+id/tv_photo_count"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textAppearance="@style/TextAppearance.Pc.Mono"
+                            tools:text="1 de 5" />
+                    </LinearLayout>
+
+                    <include
+                        android:id="@+id/slot_plate"
+                        layout="@layout/item_pc_photo_slot"
+                        android:layout_width="match_parent"
+                        android:layout_height="150dp"
+                        android:layout_marginTop="10dp" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:gravity="center_vertical"
+                        android:layout_marginTop="10dp"
+                        android:orientation="horizontal">
+
+                        <include
+                            android:id="@+id/slot_front"
+                            layout="@layout/item_pc_photo_slot"
+                            android:layout_width="0dp"
+                            android:layout_height="104dp"
+                            android:layout_marginEnd="5dp"
+                            android:layout_weight="1" />
+
+                        <include
+                            android:id="@+id/slot_rear"
+                            layout="@layout/item_pc_photo_slot"
+                            android:layout_width="0dp"
+                            android:layout_height="104dp"
+                            android:layout_marginStart="5dp"
+                            android:layout_weight="1" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:orientation="horizontal">
+
+                        <include
+                            android:id="@+id/slot_left"
+                            layout="@layout/item_pc_photo_slot"
+                            android:layout_width="0dp"
+                            android:layout_height="104dp"
+                            android:layout_marginEnd="5dp"
+                            android:layout_weight="1" />
+
+                        <include
+                            android:id="@+id/slot_right"
+                            layout="@layout/item_pc_photo_slot"
+                            android:layout_width="0dp"
+                            android:layout_height="104dp"
+                            android:layout_marginStart="5dp"
+                            android:layout_weight="1" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/tv_photo_hint"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:text="@string/pc_photos_hint"
+                        android:textAppearance="@style/TextAppearance.Pc.Hint" />
+
+                    <!-- Entry time + rate -->
+                    <View
+                        style="@style/Widget.Pc.Hairline"
+                        android:layout_marginTop="24dp" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
                         android:orientation="horizontal"
-                        android:paddingTop="6dp">
+                        android:paddingVertical="14dp">
 
                         <TextView
-                            android:id="@+id/tv_member_until"
+                            android:id="@+id/tv_entry_time"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:textAppearance="@style/TextAppearance.Pc.Mono"
                             android:textColor="?attr/textSecondaryCustom"
-                            tools:text="Vigente hasta 30/11/2026" />
+                            tools:text="Entrada 07:42" />
 
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/btn_clear_member"
-                            style="@style/Widget.Pc.TextLink"
+                        <TextView
+                            android:id="@+id/tv_rate"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/pc_remove" />
+                            android:textAppearance="@style/TextAppearance.Pc.Mono"
+                            android:textColor="?attr/textSecondaryCustom"
+                            tools:text="Tarifa $2.00 / día" />
                     </LinearLayout>
-                </LinearLayout>
 
-                <!-- Photos -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="24dp"
-                    android:orientation="horizontal">
+                    <View style="@style/Widget.Pc.Hairline" />
 
-                    <TextView
-                        android:layout_width="0dp"
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_confirm_entry"
+                        style="@style/Widget.Pc.Button.Primary"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="@string/pc_photos"
-                        android:textAppearance="@style/TextAppearance.Lrg.Label" />
-
-                    <TextView
-                        android:id="@+id/tv_photo_count"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textAppearance="@style/TextAppearance.Pc.Mono"
-                        tools:text="1 de 5" />
+                        android:layout_marginTop="24dp"
+                        android:text="@string/pc_register_entry" />
                 </LinearLayout>
-
-                <include
-                    android:id="@+id/slot_plate"
-                    layout="@layout/item_pc_photo_slot"
-                    android:layout_width="match_parent"
-                    android:layout_height="150dp"
-                    android:layout_marginTop="10dp" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:orientation="horizontal">
-
-                    <include
-                        android:id="@+id/slot_front"
-                        layout="@layout/item_pc_photo_slot"
-                        android:layout_width="0dp"
-                        android:layout_height="104dp"
-                        android:layout_marginEnd="5dp"
-                        android:layout_weight="1" />
-
-                    <include
-                        android:id="@+id/slot_rear"
-                        layout="@layout/item_pc_photo_slot"
-                        android:layout_width="0dp"
-                        android:layout_height="104dp"
-                        android:layout_marginStart="5dp"
-                        android:layout_weight="1" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:orientation="horizontal">
-
-                    <include
-                        android:id="@+id/slot_left"
-                        layout="@layout/item_pc_photo_slot"
-                        android:layout_width="0dp"
-                        android:layout_height="104dp"
-                        android:layout_marginEnd="5dp"
-                        android:layout_weight="1" />
-
-                    <include
-                        android:id="@+id/slot_right"
-                        layout="@layout/item_pc_photo_slot"
-                        android:layout_width="0dp"
-                        android:layout_height="104dp"
-                        android:layout_marginStart="5dp"
-                        android:layout_weight="1" />
-                </LinearLayout>
-
-                <TextView
-                    android:id="@+id/tv_photo_hint"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:text="@string/pc_photos_hint"
-                    android:textAppearance="@style/TextAppearance.Pc.Hint" />
-
-                <!-- Entry time + rate -->
-                <View
-                    style="@style/Widget.Pc.Hairline"
-                    android:layout_marginTop="24dp" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:paddingVertical="14dp">
-
-                    <TextView
-                        android:id="@+id/tv_entry_time"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:textAppearance="@style/TextAppearance.Pc.Mono"
-                        android:textColor="?attr/textSecondaryCustom"
-                        tools:text="Entrada 07:42" />
-
-                    <TextView
-                        android:id="@+id/tv_rate"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textAppearance="@style/TextAppearance.Pc.Mono"
-                        android:textColor="?attr/textSecondaryCustom"
-                        tools:text="Tarifa $2.00 / día" />
-                </LinearLayout>
-
-                <View style="@style/Widget.Pc.Hairline" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_confirm_entry"
-                    style="@style/Widget.Pc.Button.Primary"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="24dp"
-                    android:text="@string/pc_register_entry" />
             </LinearLayout>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
