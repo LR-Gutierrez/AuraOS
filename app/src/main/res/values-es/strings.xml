@@ -481,6 +481,7 @@
     <string name="branch_status_inactive">INACTIVO</string>
     <string name="branch_occupancy_format">Ocupación %1$d / %2$d</string>
     <string name="branch_action_manage">GESTIONAR</string>
+    <string name="branch_action_view">VER</string>
     <string name="branch_action_activate">ACTIVAR</string>
     <string name="branch_action_manage_desc">Gestionar sucursal</string>
 

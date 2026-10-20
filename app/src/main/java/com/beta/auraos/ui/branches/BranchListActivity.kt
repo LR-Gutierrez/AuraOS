@@ -186,7 +186,9 @@ class BranchListActivity : BaseActivity() {
             if (isActive) {
                 setColor(ContextCompat.getColor(this@BranchListActivity, R.color.branch_blue_manage))
                 btnManage.setTextColor(ContextCompat.getColor(this@BranchListActivity, R.color.branch_dark_card))
-                btnManage.text = getString(R.string.branch_action_manage)
+                btnManage.text = getString(
+                    if (sessionManager.isAdmin()) R.string.branch_action_manage else R.string.branch_action_view
+                )
             } else {
                 setColor(MaterialColors.getColor(this@BranchListActivity, R.attr.dividerColorCustom, Color.GRAY))
                 btnManage.setTextColor(MaterialColors.getColor(this@BranchListActivity, R.attr.textSecondaryCustom, Color.GRAY))

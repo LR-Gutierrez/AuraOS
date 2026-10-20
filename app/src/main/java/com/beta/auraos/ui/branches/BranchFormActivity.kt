@@ -81,6 +81,11 @@ class BranchFormActivity : BaseActivity() {
     private fun showReadOnly() {
         binding.tvAppTitle.text = getString(R.string.branch_view_title)
         binding.btnSave.visibility = View.GONE
+        listOf(
+            binding.btnDecrementMoto, binding.btnIncrementMoto,
+            binding.btnDecrementLight, binding.btnIncrementLight,
+            binding.btnDecrementHeavy, binding.btnIncrementHeavy,
+        ).forEach { it.visibility = View.INVISIBLE }
         disableInputs(binding.scrollView)
     }
 

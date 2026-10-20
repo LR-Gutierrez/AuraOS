@@ -323,6 +323,7 @@
     <string name="branch_status_inactive">INACTIVE</string>
     <string name="branch_occupancy_format">Occupancy %1$d / %2$d</string>
     <string name="branch_action_manage">MANAGE</string>
+    <string name="branch_action_view">VIEW</string>
     <string name="branch_action_activate">ACTIVATE</string>
     <string name="branch_action_manage_desc">Manage branch</string>
 
