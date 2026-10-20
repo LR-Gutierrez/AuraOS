@@ -392,7 +392,7 @@ AuraOS funciona completo sin backend. En un dispositivo sin cuentas, la pantalla
 
 ### Configuración de Backend
 
-El backend (Node.js con *endpoints* REST bajo `/api/v1/`) es opcional y no forma parte de este repositorio. Los contratos que espera la app están en las interfaces Retrofit de `data/remote/`.
+El backend es opcional y vive en su propio repositorio: [AuraOS-backend](https://github.com/LR-Gutierrez/AuraOS-backend) (NestJS, PostgreSQL y Prisma, con *endpoints* REST bajo `/api/v1/`). Los contratos que espera la app están en las interfaces Retrofit de `data/remote/`. Todas sus rutas, salvo el inicio de sesión, exigen el token de sesión, que la app envía automáticamente.
 
 La dirección del servidor se resuelve en este orden:
 

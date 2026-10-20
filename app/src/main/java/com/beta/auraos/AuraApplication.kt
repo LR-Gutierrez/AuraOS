@@ -2,11 +2,14 @@ package com.beta.auraos
 
 import android.app.Application
 import androidx.appcompat.app.AppCompatDelegate
+import coil.ImageLoader
+import coil.ImageLoaderFactory
 import com.beta.auraos.data.local.ChangeJournal
 import com.beta.auraos.data.local.ConnectivityObserver
 import com.beta.auraos.data.local.SeedDataInitializer
 import com.beta.auraos.data.local.SessionManager
 import com.beta.auraos.data.local.room.AppDatabase
+import com.beta.auraos.data.remote.ApiClient
 import com.beta.auraos.data.remote.fcm.AuraFcmTokenHolder
 import com.beta.auraos.data.remote.sse.SyncNotificationManager
 import com.beta.auraos.data.remote.sse.SyncRealtimeCoordinator
@@ -15,7 +18,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 
-class AuraApplication : Application() {
+class AuraApplication : Application(), ImageLoaderFactory {
 
     val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
@@ -69,4 +72,8 @@ class AuraApplication : Application() {
         lateinit var instance: AuraApplication
             private set
     }
+
+    /** Photos live behind the backend's session check, so Coil uses the API client and its token. */
+    override fun newImageLoader(): ImageLoader =
+        ImageLoader.Builder(this).okHttpClient { ApiClient.okHttpClient }.build()
 }

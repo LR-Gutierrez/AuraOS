@@ -95,6 +95,9 @@ class SyncCoordinator(
                 result is SyncManager.SyncResult.Success -> {
                     pendingSync = false
                     Log.d(TAG, "Journal sync completed successfully")
+                    // Entries created offline now exist on the server: send their photos.
+                    val photos = PendingPhotoUploader(context, db).uploadPending()
+                    if (photos > 0) Log.d(TAG, "Uploaded pending photos for $photos entries")
                 }
                 isAuthError(result) -> {
                     pendingSync = false

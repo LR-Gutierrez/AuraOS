@@ -85,6 +85,14 @@ interface ParkingApi {
         @Part right: MultipartBody.Part?,
     ): Response<ApiResponse<VehicleEntry>>
 
+    /** Attaches photos to an entry the server already has (e.g. one registered offline). */
+    @Multipart
+    @POST("api/v1/vehicle-entries/{id}/photos")
+    suspend fun attachPhotos(
+        @Path("id") id: String,
+        @Part photos: List<MultipartBody.Part>,
+    ): Response<ApiResponse<VehicleEntry>>
+
     @Multipart
     @POST("ocr/plate")
     suspend fun recognizePlate(

@@ -37,6 +37,7 @@ object ApiClient {
             .writeTimeout(60, TimeUnit.SECONDS)
             .addInterceptor(localOnlyGuard)
             .addInterceptor(serverRouter)
+            c.addInterceptor(sessionAuth)
             .addInterceptor(logging)
             .build()
     }
@@ -74,6 +75,23 @@ object ApiClient {
         val server = ServerConfig.baseUrl() ?: throw IOException("No server configured")
         val target = (server.toString() + request.url.toString().removePrefix(BASE_URL)).toHttpUrl()
         chain.proceed(request.newBuilder().url(target).build())
+    }
+
+    /**
+     * Attaches the session token to calls bound for the configured server (the backend
+     * requires it on everything but login and health). Calls that set their own header keep
+     * it, and a 401 passes through so the sync coordinator can refresh the session.
+     */
+    private val sessionAuth = Interceptor { chain ->
+        val request = chain.request()
+        val server = ServerConfig.baseUrl()?.toString()
+        val token = runCatching { AuraApplication.instance.sessionManager.getToken() }.getOrNull()
+        if (server == null || token.isNullOrBlank() || request.header("Authorization") != null ||
+            !request.url.toString().startsWith(server)
+        ) {
+            return@Interceptor chain.proceed(request)
+        }
+        chain.proceed(request.newBuilder().header("Authorization", "Bearer $token").build())
     }
 
     inline fun <reified T> createApi(): T = retrofit.create(T::class.java)

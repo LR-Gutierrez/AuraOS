@@ -7,8 +7,7 @@ import java.io.File
  * Keeps the photos of an entry the server has not confirmed yet (offline, or a rejected
  * request): the entry itself syncs later as data through the change journal, but that channel
  * carries no images, so the evidence is parked here under the entry id instead of being
- * deleted with the form. Uploading them needs a backend endpoint that attaches photos to an
- * existing entry; until then they stay on the device, one folder per entry.
+ * deleted with the form. [PendingPhotoUploader] sends them once the server knows the entry.
  */
 object PendingPhotoStore {
 
@@ -29,6 +28,18 @@ object PendingPhotoStore {
         }
         if (kept == 0) target.delete()
         return kept
+    }
+
+    /** Slot name → file for one entry's waiting photos. */
+    fun photos(context: Context, entryId: String): Map<String, File> =
+        dir(context, entryId).listFiles()
+            ?.filter { it.isFile && it.length() > 0 }
+            ?.associateBy { it.nameWithoutExtension }
+            .orEmpty()
+
+    /** Drops an entry's folder once the server has its photos. */
+    fun clear(context: Context, entryId: String) {
+        dir(context, entryId).deleteRecursively()
     }
 
     /** Entry ids that still have photos waiting for upload. */
