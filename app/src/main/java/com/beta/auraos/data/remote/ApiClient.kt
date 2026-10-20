@@ -37,7 +37,7 @@ object ApiClient {
             .writeTimeout(60, TimeUnit.SECONDS)
             .addInterceptor(localOnlyGuard)
             .addInterceptor(serverRouter)
-            c.addInterceptor(sessionAuth)
+            .addInterceptor(sessionAuth)
             .addInterceptor(logging)
             .build()
     }
