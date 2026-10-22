@@ -74,7 +74,8 @@ class HomeActivity : BaseActivity() {
 
     private enum class EntryMethod { NFC, MANUAL }
 
-    private var entryMethod = EntryMethod.MANUAL
+    // NFC is the default; without a reader its panel says so and a tap falls back to manual.
+    private var entryMethod = EntryMethod.NFC
     private var nfcAdapter: NfcAdapter? = null
     private var isReadingCard = false
     private var nfcError: String? = null
@@ -199,8 +200,6 @@ class HomeActivity : BaseActivity() {
 
     private fun setupEntryMethod() {
         nfcAdapter = NfcAdapter.getDefaultAdapter(this)
-        // Members are the quick path where the phone can read their card.
-        entryMethod = if (nfcAdapter != null) EntryMethod.NFC else EntryMethod.MANUAL
         binding.nfcBox.setOnClickListener { onNfcBoxTapped() }
         binding.btnNfcRegister.setOnClickListener { registerCardEntry() }
         binding.btnNfcAgain.setOnClickListener {
