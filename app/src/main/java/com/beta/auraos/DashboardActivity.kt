@@ -72,7 +72,6 @@ class DashboardActivity : BaseActivity() {
         setContentView(binding.root)
 
         TabNavigator.setup(this, binding.tabBar, R.id.nav_dashboard)
-        PcUi.applyWordmark(binding.tvWordmark)
         PcUi.underline(binding.btnSeeAll)
         binding.tvToday.text = ParkingFormat.todayLabel()
 

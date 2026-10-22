@@ -1,9 +1,6 @@
 package com.beta.auraos.util
 
 import android.graphics.Paint
-import android.text.SpannableString
-import android.text.Spanned
-import android.text.style.ForegroundColorSpan
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.LinearLayout
@@ -18,19 +15,6 @@ object PcUi {
 
     fun color(view: android.view.View, @AttrRes attr: Int): Int =
         MaterialColors.getColor(view, attr)
-
-    /** Wordmark ("Aura·OS") with the middle dot in amber, as BCV Tracker's BrandMark. */
-    fun applyWordmark(textView: TextView) {
-        val text = textView.text.toString()
-        val dot = text.indexOf('·')
-        if (dot < 0) return
-        textView.text = SpannableString(text).apply {
-            setSpan(
-                ForegroundColorSpan(color(textView, R.attr.accentCustom)),
-                dot, dot + 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE,
-            )
-        }
-    }
 
     fun underline(textView: TextView) {
         textView.paintFlags = textView.paintFlags or Paint.UNDERLINE_TEXT_FLAG

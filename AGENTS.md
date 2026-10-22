@@ -92,10 +92,11 @@ res/
 │   ├── bg_hollow_input.xml       # Input field shape hueco
 │   ├── bg_primary_button.xml     # Botón primario sólido negro
 │   ├── baseline_fingerprint_24.xml  # Icono biometrico
-│   ├── ic_crystal_foreground.xml # Foreground del adaptive icon
+│   ├── ic_crystal_foreground.xml # Foreground del adaptive icon (fondo negro)
 │   ├── ic_launcher_*.xml         # Default launcher assets
-│   ├── ic_logo_crystal_light.xml # Logo light (white bg, black lambda)
-│   ├── ic_logo_midnight_dark.xml # Logo dark (black bg, white lambda)
+│   ├── ic_logo_aura.xml          # AuraOS mark: black disc, white bay arch, amber dot (both themes)
+│   ├── ic_crystal_monochrome.xml # Themed launcher icon (bay + dot)
+│   ├── ic_notification_logo.xml  # Status-bar glyph
 │   └── login_background_*.jpg    # Backgrounds day/night
 ├── layout/                       # Layouts base (phone)
 │   ├── activity_login.xml        # Login con glass card + formulario

@@ -129,7 +129,7 @@ class KioskActivity : BaseActivity() {
     }
 
     private fun setupBranchSelector() {
-        binding.tvBranchName.setOnClickListener { showBranchSelector() }
+        binding.brandBlock.setOnClickListener { showBranchSelector() }
     }
 
     /** Header, free spots and daily rates for the selected branch. */

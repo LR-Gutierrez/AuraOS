@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Themed (monochrome) launcher icon: bay and vehicle dot only, tinted by the launcher. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <group
+        android:scaleX="0.72"
+        android:scaleY="0.72"
+        android:translateX="18"
+        android:translateY="18">
+
+        <path
+            android:strokeColor="#FFFFFFFF"
+            android:strokeWidth="8"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round"
+            android:pathData="M34,70V44A16,16 0,0 1,66,44V70" />
+
+        <path
+            android:fillColor="#FFFFFFFF"
+            android:pathData="M50,53.5A6.5,6.5 0,1 1,50,66.5A6.5,6.5 0,1 1,50,53.5Z" />
+    </group>
+</vector>

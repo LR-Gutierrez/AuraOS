@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Status-bar glyph: the AuraOS bay + dot at its 24px weight (design "AuraOS Logo", 1c). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="72"
+    android:viewportHeight="72">
+
+    <group
+        android:translateX="-14"
+        android:translateY="-13">
+
+        <path
+            android:strokeColor="@android:color/white"
+            android:strokeWidth="9"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round"
+            android:pathData="M28,78V42A22,22 0,0 1,72,42V78" />
+
+        <path
+            android:fillColor="@android:color/white"
+            android:pathData="M50,54A8,8 0,1 1,50,70A8,8 0,1 1,50,54Z" />
+    </group>
+</vector>

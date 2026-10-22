@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Parqueo·Control screens (claude.ai/design "Parqueo App"). -->
 <resources>
-    <string name="pc_wordmark" translatable="false">Aura·OS</string>
+    <string name="pc_wordmark" translatable="false">AuraOS</string>
     <string name="pc_arrow" translatable="false">→</string>
     <string name="pc_back_arrow">← Back</string>
     <string name="pc_zero" translatable="false">00</string>

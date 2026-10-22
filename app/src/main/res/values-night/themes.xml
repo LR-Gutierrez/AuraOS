@@ -33,7 +33,7 @@
         <item name="android:navigationBarColor">@android:color/transparent</item>
 
         <!-- Custom attrs -->
-        <item name="appLogoCustom">@drawable/ic_logo_midnight_dark</item>
+        <item name="appLogoCustom">@drawable/ic_logo_aura</item>
         <item name="loginBackgroundCustom">@color/lrg_dark_bg</item>
         <item name="glassCardBackgroundCustom">@drawable/bg_lrg_card</item>
         <item name="status_info">@color/status_info</item>

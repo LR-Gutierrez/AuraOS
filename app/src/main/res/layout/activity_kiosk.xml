@@ -15,7 +15,7 @@
     android:paddingBottom="28dp"
     tools:context=".KioskActivity">
 
-    <!-- Header: branch + exit -->
+    <!-- Header: mark + wordmark over branch (tap to switch), exit -->
     <LinearLayout
         android:id="@+id/header_bar"
         android:layout_width="match_parent"
@@ -24,24 +24,53 @@
         android:orientation="horizontal"
         android:paddingTop="8dp">
 
-        <TextView
-            android:id="@+id/tv_branch_name"
+        <LinearLayout
+            android:id="@+id/brand_block"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:background="?attr/selectableItemBackground"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:minHeight="44dp"
             android:gravity="center_vertical"
-            android:textAppearance="@style/TextAppearance.Lrg.Label"
-            tools:text="Autoservicio · Sede Centro" />
+            android:minHeight="44dp"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:layout_marginEnd="10dp"
+                android:importantForAccessibility="no"
+                android:src="@drawable/ic_logo_aura" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/pc_wordmark"
+                    android:textAppearance="@style/TextAppearance.Pc.Wordmark" />
+
+                <TextView
+                    android:id="@+id/tv_branch_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:textAppearance="@style/TextAppearance.Lrg.Label"
+                    tools:text="Autoservicio · Sede Centro" />
+            </LinearLayout>
+        </LinearLayout>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_exit_kiosk"
             style="@style/Widget.Pc.Button.Outlined"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
             android:fontFamily="@font/aura_mono"
             android:paddingHorizontal="12dp"
             android:text="@string/pc_kiosk_exit"

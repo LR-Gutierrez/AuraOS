@@ -124,7 +124,7 @@
     <color name="branch_surface_light">#EEEEF0</color>
 
     <!-- Home screen specific -->
-    <color name="ic_crystal_background">#FFFFFFFF</color>
+    <color name="ic_crystal_background">#FF000000</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 

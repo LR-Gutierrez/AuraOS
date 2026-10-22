@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    AuraOS mark · "Puesto ocupado" (claude.ai/design "AuraOS Logo", concept 1c).
+    Black disc, hairline inner ring, one white 7% stroke drawing a bay (arch) with an
+    amber vehicle dot inside. Same artwork in Crystal and Midnight, as in the design.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="100dp"
+    android:height="100dp"
+    android:viewportWidth="100"
+    android:viewportHeight="100">
+
+    <path
+        android:fillColor="#FF000000"
+        android:pathData="M50,0A50,50 0,1 1,50,100A50,50 0,1 1,50,0Z" />
+
+    <path
+        android:strokeColor="#FF262B33"
+        android:strokeWidth="0.8"
+        android:pathData="M50,9A41,41 0,1 1,50,91A41,41 0,1 1,50,9Z" />
+
+    <path
+        android:strokeColor="#FFFFFFFF"
+        android:strokeWidth="7"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M34,70V44A16,16 0,0 1,66,44V70" />
+
+    <path
+        android:fillColor="#FFF5A524"
+        android:pathData="M50,54.5A5.5,5.5 0,1 1,50,65.5A5.5,5.5 0,1 1,50,54.5Z" />
+</vector>

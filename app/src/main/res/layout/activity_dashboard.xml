@@ -31,7 +31,7 @@
             android:paddingTop="8dp"
             android:paddingBottom="32dp">
 
-            <!-- Wordmark + date -->
+            <!-- Mark + wordmark + date -->
             <LinearLayout
                 android:id="@+id/header_bar"
                 android:layout_width="match_parent"
@@ -39,6 +39,13 @@
                 android:gravity="center_vertical"
                 android:minHeight="32dp"
                 android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:layout_marginEnd="10dp"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/ic_logo_aura" />
 
                 <TextView
                     android:id="@+id/tv_wordmark"

@@ -63,7 +63,7 @@ class SyncNotificationManager(context: Context) {
         )
 
         val notification = NotificationCompat.Builder(appContext, CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_notification_lambda)
+            .setSmallIcon(R.drawable.ic_notification_logo)
             .setColor(NOTIFICATION_COLOR)
             .setContentTitle(title)
             .setContentText(body)
